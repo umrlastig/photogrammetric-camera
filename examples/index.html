@@ -56,6 +56,8 @@
             var FetchSource = PhotogrammetricCamera.FetchSource;
             var FilesSource = PhotogrammetricCamera.FilesSource;
             var OrientedImageMaterial = PhotogrammetricCamera.OrientedImageMaterial;
+            var imageVS = PhotogrammetricCamera.imageVS;
+            var imageFS = PhotogrammetricCamera.imageFS;
             var PhotogrammetricCamera = PhotogrammetricCamera.PhotogrammetricCamera;
         </script>
         <script src="js/dat.gui.min.js"></script>
@@ -117,6 +119,8 @@
                     opacity: 1,
                     transparent: true,
                     blending: THREE.NormalBlending,
+                    vertexShader: imageVS,
+                    fragmentShader: imageFS
                 };
 
                 textureMaterial = new OrientedImageMaterial({
@@ -125,8 +129,9 @@
                     sizeAttenuation: false,
                     vertexColors: THREE.VertexColors,
                     blending: THREE.NormalBlending,
-                    color: 0xff0000,
                     transparent: true,
+                    vertexShader: imageVS,
+                    fragmentShader: imageFS
                 });
                 sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(-1, 32, 32), textureMaterial);
                 plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000, 100, 100), textureMaterial);
@@ -174,7 +179,7 @@
                         new THREE.Vector3(  1, -1, -1 ).applyMatrix4(m).toArray(vertices, 12);
                         var indices = [ 0, 1, 2,  0, 2, 3,  0, 3, 4,  0, 4, 1,  1, 3, 2,  1, 4, 3 ];
                         geometry.setIndex( indices );
-                        geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+                        geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
                         geometry.addGroup(0, 12, 0);
                         geometry.addGroup(12, 6, 1);
 
