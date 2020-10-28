@@ -15,8 +15,9 @@ var textureMaterialUniforms, viewMaterialUniforms;
 
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
+var textures = {};
 
-var cameraSize = 10000;
+var cameraScale = 10000;
 var environmentRadius = 15000;
 var epsilonRadius = 5000;
 
@@ -106,7 +107,7 @@ function cameraHelper(camera) {
         geometry.setIndex(indices);
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         var mesh = new THREE.Mesh(geometry, wireMaterial);
-        mesh.scale.set(cameraSize, cameraSize, cameraSize);
+        mesh.scale.set(cameraScale, cameraScale, cameraScale);
         group.add(mesh);
     }
     // place the image plane
@@ -122,7 +123,7 @@ function cameraHelper(camera) {
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute( uvs, 2 ));
         var mesh = new THREE.Mesh(geometry, viewMaterials[camera.name]);
-        mesh.scale.set(cameraSize, cameraSize, cameraSize);
+        mesh.scale.set(cameraScale, cameraScale, cameraScale);
         group.add(mesh);
     }
     // place a sphere at the camera center
@@ -145,10 +146,16 @@ function onWindowResize() {
 
 function onDocumentKeyDown(event) {
     switch(event.key){
+        case 's': setView(getCamera(nextCamera, -1));  break;
+        case 'z': setView(getCamera(nextCamera, +1));  break;
+        case 'q': setTexture(getCamera(textureCamera, -1));  break;
+        case 'd': setTexture(getCamera(textureCamera, +1));  break;
         case 'a': setCamera(getCamera(nextCamera, -1));  break;
         case 'e': setCamera(getCamera(nextCamera, +1));  break;
+        case 't': setTexture(getCamera(nextCamera));  break;
         case 'v': setView(getCamera(textureCamera));  break;
-        case 'c': console.log(textureCamera); break;
+        case 'c': console.log(nextCamera); break;
+        case 'p': console.log(viewCamera.position); break;
         default : console.log(event.key, 'is not supported');
     }
 }
@@ -164,6 +171,58 @@ function loadOrientation(url, source, name) {
         .then(handleOrientation(name));
 }
 
+function loadImage(url, source, name) {
+    if (!name){
+        const match = url.match(/([^\/]*)\.[\w\d]/i);
+        name = match ? match[1] : url;
+    }
+    return source.open(url, 'dataURL')
+    .then(parseImage(source))
+    .then(handleImage(name));
+}
+
+function loadOrientedImage(orientationUrl, imageUrl, source, name) {
+    loadImage(imageUrl, source).then(() => loadOrientation(orientationUrl, source, name));
+}
+
+function loadPlyMesh(url, source){
+    return source.open(url, 'arrayBuffer')
+    .then(parsePly(source))
+    .then(handleMesh(url));
+}
+
+function loadPlyPC(url, source){
+    return source.open(url, 'arrayBuffer')
+    .then(parsePly(source))
+    .then(handlePointCloud(url));
+}
+
+function loadJSON(path, file) {
+    file = file || 'index.json';
+    var source = new FetchSource(path);
+    source.open(file, 'text').then((json) => {
+        json = JSON.parse(json);
+
+        if(json.target && controls){
+            controls.target.copy(json.target);
+        } 
+
+        if(json.camera){
+            if(json.camera.scale) cameraScale = json.camera.scale;
+            if(json.camera.zoom) viewCamera.zoom = json.camera.zoom;
+        }
+        
+        if(json.up) viewCamera.up.copy(json.up);
+        if(json.pointSize) textureMaterial.size = json.pointSize;
+        
+        if(json.pc) json.pc.forEach((url) => loadPlyPC(url, source));
+        if(json.mesh) json.mesh.forEach((url) => loadPlyMesh(url, source));
+
+        if(json.ori && json.img) json.ori.forEach((orientationUrl, i) => 
+            loadOrientedImage(orientationUrl, json.img[i], source));
+    });
+}
+
 /* Parsing ------------------------------------------- */
 function parseOrientation(source) {
     var parsers = [MicmacOrientationParser, MatisOrientationParser];
@@ -175,6 +234,17 @@ function parseOrientation(source) {
         return undefined;
     }
 }
+
+function parseImage(source){
+    return (data) => {
+        return new Promise((resolve, reject) => {
+            textureLoader.load(data, resolve, undefined, reject)
+        }).finally(() => source.close(data, 'dataURL'));
+    }
+}
+
+var plyLoader = new PLYLoader();
+var parsePly = (source) => (data => plyLoader.parse(data));
 
 /* Handling ------------------------------------------ */
 function handleOrientation(name) {
@@ -209,6 +279,45 @@ function handleCamera(camera, name){
     cameras.children.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function handleImage(name) {
+    return function(texture) {
+        if (!texture) return;
+        texture.name = name;
+        textures[texture.name] = texture;
+        return texture;
+    };
+}
+
+function handlePointCloud(name){
+    return function(geometry){
+        console.log(name);
+        var points = new THREE.Points(geometry, textureMaterial);
+        environment.add(points);
+        // Find center of the geometry
+        geometry.computeBoundingBox();
+        var center = new THREE.Vector3();
+        geometry.boundingBox.getCenter(center);
+        points.updateMatrixWorld(true);
+
+        var opacity = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
+        geometry.setAttribute('meshOpacity', new THREE.BufferAttribute(opacity, 1));
+    }
+}
+
+function handleMesh(name){
+    return function(geometry){
+        console.log(name);
+        geometry.computeVertexNormals();
+        var mesh = new THREE.Mesh(geometry, textureMaterial);
+        environment.add(mesh);
+        // Find center of the geometry
+        geometry.computeBoundingBox();
+        var center = new THREE.Vector3();
+        geometry.boundingBox.getCenter(center);
+        mesh.updateMatrixWorld(true);
+    }
+}
+
 /* Gets ---------------------------------------------- */
 function getCamera(camera, delta = 0){
     const array = cameras.children;
@@ -218,7 +327,7 @@ function getCamera(camera, delta = 0){
 
 /* Sets ---------------------------------------------- */
 function setMaterial(material, camera) {
-    material.map =  uvTexture;
+    material.map =  textures[camera.name] || uvTexture;
     material.setCamera(camera);
 }
 
@@ -282,10 +391,10 @@ function interpolateCamera(timestamp) {
             textureMaterial.showImage = false;
         } else {
             viewCamera.set(nextCamera);
-            updateControls();
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
 
+            updateControls();
             textureMaterial.showImage = true;
         }
         viewCamera.updateProjectionMatrix(); 
@@ -302,7 +411,7 @@ function basicClean() {
     nextCamera.timestamp = undefined;
     textureCamera.copy(viewCamera);
 
-    viewCamera.zoom = 0.8;
+    viewCamera.zoom = 0.5;
     viewCamera.up.set(0, 0, 1);
     textureMaterial.map = null;
     while(cameras.children.length) cameras.remove(cameras.children[0]);

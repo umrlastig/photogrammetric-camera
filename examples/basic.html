@@ -31,12 +31,13 @@
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
 
-        <script src="../dist/controls.js"></script>
+        <script src="../dist/three-additional.js"></script>
         <script>
             // Three library
             var OrbitControls = photogrammetricCamera.OrbitControls;
             var MapControls = photogrammetricCamera.MapControls;
             var FirstPersonControls = photogrammetricCamera.FirstPersonControls;
+            var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
         <script src="js/helpers/photogrammetricHelper.js"></script>
@@ -106,7 +107,21 @@
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
                         loadOrientation('Orientation-1.xml', source);
-                    }
+                    },
+                    Abbey: function() {
+                        clean();
+                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/NEW-DATA/CompensOnLine/';
+                        var source = new FetchSource(path);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
+                    },
+                    Maurepas: function(){
+                        clean();
+                        collection = 'collections/maurepas/';
+                        loadJSON(server + collection);
+                    },
                 };
 
                 /* Clean --------------------------------------------- */

@@ -1,15 +1,25 @@
-import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
+import { default as PhotogrammetricDistortion } from '../cameras/PhotogrammetricDistortion';
 
 export default /* glsl */`
-${RadialDistortion.chunks.radial_pars_fragment}
+${PhotogrammetricDistortion.chunks.shaders}
 uniform vec3 diffuse;
 uniform float opacity;
 uniform bool diffuseColorGrey;
 uniform bool showImage;
 
+#if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
+    uniform float logDepthBufFC;
+    varying float vFragDepth;
+    varying float vIsPerspective;
+#endif
+
 #ifdef USE_MAP4
-    varying highp vec3 vPosition;
     #undef USE_MAP
+    varying highp vec3 vPosition;
+#endif
+
+#ifdef USE_COLOR
+    varying vec3 vColor;
 #endif
 
 #ifdef USE_MAP4
@@ -26,9 +36,17 @@ uniform bool showImage;
 void main(){
     vec4 diffuseColor = vec4(diffuse, opacity);
 
+    #ifdef USE_COLOR
+        diffuseColor.rgb *= vColor;
+    #endif
+
     if (diffuseColorGrey) {
         diffuseColor.rgb = vec3(dot(diffuseColor.rgb, vec3(0.333333)));
     }
+
+    #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
+        gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
+    #endif
 
     #ifdef USE_MAP4
         if(showImage) {
