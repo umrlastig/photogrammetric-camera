@@ -35,19 +35,17 @@ void main(){
         mat4 m = modelMatrix;
         m[3].xyz -= uvwPosition;
         vec4 uvw = uvwPreTransform * m * vec4(vPosition, 1.);
-        if( uvw.w > 0. && distort_radial(uvw, uvDistortion))
-        {
+        if( uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
             uvw = uvwPostTransform * uvw;
             uvw.xyz /= 2. * uvw.w;
             uvw.xyz += vec3(0.5);
             vec3 border = min(uvw.xyz, 1. - uvw.xyz);
-            if (all(greaterThan(border,vec3(0.))))
-            {
-            vec4 color = texture2D(map, uvw.xy);
-            color.a *= min(1., borderSharpness*min(border.x, border.y));
-            diffuseColor.rgb = mix(diffuseColor.rgb, color.rgb, color.a);
+            if (all(greaterThan(border,vec3(0.)))) {
+                vec4 color = texture2D(map, uvw.xy);
+                color.a *= min(1., borderSharpness*min(border.x, border.y));
+                diffuseColor.rgb = mix(diffuseColor.rgb, color.rgb, color.a);
             } else {
-            diffuseColor.rgb = mix(diffuseColor.rgb, fract(uvw.xyz), debugOpacity);
+                diffuseColor.rgb = mix(diffuseColor.rgb, fract(uvw.xyz), debugOpacity);
             }
         }
     #endif

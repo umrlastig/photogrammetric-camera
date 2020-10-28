@@ -176,6 +176,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			position.copy( scope.target ).add( offset );
 
+			// Removed to avoid camera changing look at position
 			scope.object.lookAt( scope.target );
 
 			if ( scope.enableDamping === true ) {
@@ -366,6 +367,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}();
 
+	// Dolly removed, only zoom is allowed.
 	function dollyIn( dollyScale ) {
 
 		if ( scope.object.isPerspectiveCamera ) {

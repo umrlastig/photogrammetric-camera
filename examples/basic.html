@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Photogrammetric Camera</title>
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="shortcut icon" href="https://histovis.s3.eu-west-3.amazonaws.com/icons/histovis.ico">
+        <style>
+            html { height: 100%; }
+            body { margin: 0; overflow: hidden; height: 100%; }
+        </style>
+    </head>
+    <body>
+        <script src="../dist/photogrammetric-camera.js"></script>
+        <script>
+            // Three library
+            var THREE = photogrammetricCamera.THREE;
+            // Files Management
+            var FetchSource = photogrammetricCamera.FetchSource;
+            var FilesSource = photogrammetricCamera.FilesSource;
+            // Parsers
+            var MatisOrientationParser = photogrammetricCamera.MatisOrientationParser;
+            var MicmacOrientationParser = photogrammetricCamera.MicmacOrientationParser;
+            // Materials
+            var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
+            var imageVS = photogrammetricCamera.imageVS;
+            var imageFS = photogrammetricCamera.imageFS;
+            // Photogrammetric camera
+            var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
+        </script>
+
+        <script src="js/helpers/photogrammetricHelper.js"></script>
+
+        <script src="js/rendering/OrbitControls.js"></script>
+        <script src="js/rendering/dat.gui.min.js"></script>
+        <script>
+            /* ------------------------- Main ------------------------ */
+            init();
+            var gui = initGUI();
+            animate();
+
+            /* ----------------------- Functions --------------------- */
+            function init() {
+                // HTML container for the rendering scene
+                var container = document.createElement('div');
+                document.body.appendChild(container);
+
+                // Sizes
+                width = window.innerWidth;
+                height = window.innerHeight;
+
+                // Renderer
+                renderer = new THREE.WebGLRenderer({antialias: true});
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(width, height);
+                container.appendChild(renderer.domElement);
+
+                // Scene
+                scene = new THREE.Scene();
+                //scene.background = new THREE.Color(0xf0f0f0);
+                scene.background = new THREE.Color(0x000000);
+
+                // Cameras 
+                cameras = new THREE.Group();
+                cameras.visible = false;
+                scene.add(viewCamera);
+                scene.add(cameras);
+
+                // Materials
+                basicMaterial = initBasicMaterial();
+                wireMaterial = initWireMaterial();
+                [textureMaterialUniforms, textureMaterial] = initTextureMaterial(imageVS, imageFS, uvTexture);
+                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
+
+                // Environment
+                environment = new THREE.Group();
+                backgroundSphere = initBackgroundSphere(environmentRadius, textureMaterial);
+
+                environment.add(backgroundSphere);
+                scene.add(environment);
+
+                // Controls
+                controls = new THREE.OrbitControls(viewCamera, renderer.domElement);
+                controls.enableDamping = false;
+                controls.screenSpacePanning = false;
+                controls.maxPolarAngle = 0.75*Math.PI;
+                controls.enableKeys = false;
+
+                // Event listeners
+                window.addEventListener('resize', onWindowResize, false);
+                document.addEventListener('keydown', onDocumentKeyDown, false);
+
+                // Available collections
+                collections = {
+                    Sample: function(){
+                        clean();
+                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
+                        var source = new FetchSource(path);
+                        loadOrientation('Orientation-00.xml', source);
+                        loadOrientation('Orientation-1.xml', source);
+                    }
+                };
+
+                /* Clean --------------------------------------------- */
+                function clean() {
+                    basicClean();
+                }
+            }
+
+            function initGUI() {
+                var gui = new dat.GUI();
+
+                // Collections options
+                function menuCollections(){
+                    for(const key in collections) collectionsGUI.add(collections, key);
+                    collectionsGUI.closed = false;
+                }
+
+                var collectionsGUI = gui.addFolder('Collections');
+                menuCollections();
+            };
+
+            function render() {
+                renderer.render(scene, viewCamera);
+            }
+
+            function animate(timestamp) {
+                requestAnimationFrame(animate);
+                interpolateCamera(timestamp);
+                render();
+            }
+        </script>
+    </body>
+</html>

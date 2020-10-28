@@ -50,19 +50,19 @@
         </div>
         <script src="../dist/photogrammetric-camera.js"></script>
         <script>
-            var THREE = PhotogrammetricCamera.THREE;
-            var MatisOrientationParser = PhotogrammetricCamera.MatisOrientationParser;
-            var MicmacOrientationParser = PhotogrammetricCamera.MicmacOrientationParser;
-            var FetchSource = PhotogrammetricCamera.FetchSource;
-            var FilesSource = PhotogrammetricCamera.FilesSource;
-            var OrientedImageMaterial = PhotogrammetricCamera.OrientedImageMaterial;
-            var imageVS = PhotogrammetricCamera.imageVS;
-            var imageFS = PhotogrammetricCamera.imageFS;
-            var PhotogrammetricCamera = PhotogrammetricCamera.PhotogrammetricCamera;
+            var THREE = photogrammetricCamera.THREE;
+            var MatisOrientationParser = photogrammetricCamera.MatisOrientationParser;
+            var MicmacOrientationParser = photogrammetricCamera.MicmacOrientationParser;
+            var FetchSource = photogrammetricCamera.FetchSource;
+            var FilesSource = photogrammetricCamera.FilesSource;
+            var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
+            var imageVS = photogrammetricCamera.imageVS;
+            var imageFS = photogrammetricCamera.imageFS;
+            var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
-        <script src="js/dat.gui.min.js"></script>
-        <script src="js/PLYLoader.js"></script>
-        <script src="js/OrbitControls.js"></script>
+        <script src="js/rendering/dat.gui.min.js"></script>
+        <script src="js/rendering/PLYLoader.js"></script>
+        <script src="js/rendering/OrbitControls.js"></script>
         <script>
             var orbitTarget, orbitControls;
             var scene, renderer, plyGroup, cameras;
