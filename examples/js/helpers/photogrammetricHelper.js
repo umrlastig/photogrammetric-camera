@@ -257,12 +257,14 @@ function setCamera(camera) {
 
 /* Update -------------------------------------------- */
 function updateControls() {
-    var distance = new THREE.Vector3().subVectors(textureCamera.position, controls.target).length();
+    var distance = new THREE.Vector3().subVectors(viewCamera.position, controls.target).length();
     // apply transformation - matrix, euler rotation, or quaternion?
-    var normal = new THREE.Vector3(0,0,-1).applyQuaternion(textureCamera.quaternion);
+    var normal = new THREE.Vector3(0,0,-1).applyQuaternion(viewCamera.quaternion);
     // instead of quaternion, you could also use .applyEuler(camera.rotation);
     // or if you used matrix, extract quaternion from matrix
-    controls.target = new THREE.Vector3().add(textureCamera.position).add(normal.setLength(distance));
+    controls.target = new THREE.Vector3().add(viewCamera.position).add(normal.setLength(distance));
+    //var vector = (new THREE.Vector3( 0, 0, -environmentRadius )).applyQuaternion( viewCamera.quaternion ).add( viewCamera.position );
+    //controls.target.copy(vector);
     controls.saveState();
 }
 
@@ -276,13 +278,17 @@ function interpolateCamera(timestamp) {
         if (timestamp < nextCamera.timestamp) {
             const t = 0.001 * (timestamp - prevCamera.timestamp) / duration;
             viewCamera.set(prevCamera).lerp(nextCamera, t);
+
+            textureMaterial.showImage = false;
         } else {
             viewCamera.set(nextCamera);
             updateControls();
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
+
+            textureMaterial.showImage = true;
         }
-        viewCamera.updateProjectionMatrix();
+        viewCamera.updateProjectionMatrix(); 
     }
     updateEnvironment();
 };

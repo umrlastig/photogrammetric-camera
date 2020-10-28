@@ -16,6 +16,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         const borderSharpness = pop(options, 'borderSharpness', 10000);
         const diffuseColorGrey = pop(options, 'diffuseColorGrey', true);
         const debugOpacity = pop(options, 'debugOpacity', 0);
+        const showImage = pop(options, 'showImage', true);
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -40,6 +41,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'borderSharpness', borderSharpness);
         definePropertyUniform(this, 'diffuseColorGrey', diffuseColorGrey);
         definePropertyUniform(this, 'debugOpacity', debugOpacity);
+        definePropertyUniform(this, 'showImage', showImage);
     }
 
     setCamera(camera) {

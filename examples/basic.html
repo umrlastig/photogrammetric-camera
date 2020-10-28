@@ -15,6 +15,8 @@
         <script>
             // Three library
             var THREE = photogrammetricCamera.THREE;
+            // Data GUI
+            var GUI = photogrammetricCamera.GUI;
             // Files Management
             var FetchSource = photogrammetricCamera.FetchSource;
             var FilesSource = photogrammetricCamera.FilesSource;
@@ -29,10 +31,15 @@
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
 
-        <script src="js/helpers/photogrammetricHelper.js"></script>
+        <script src="../dist/controls.js"></script>
+        <script>
+            // Three library
+            var OrbitControls = photogrammetricCamera.OrbitControls;
+            var MapControls = photogrammetricCamera.MapControls;
+            var FirstPersonControls = photogrammetricCamera.FirstPersonControls;
+        </script>
 
-        <script src="js/rendering/OrbitControls.js"></script>
-        <script src="js/rendering/dat.gui.min.js"></script>
+        <script src="js/helpers/photogrammetricHelper.js"></script>
         <script>
             /* ------------------------- Main ------------------------ */
             init();
@@ -80,9 +87,10 @@
                 scene.add(environment);
 
                 // Controls
-                controls = new THREE.OrbitControls(viewCamera, renderer.domElement);
-                controls.enableDamping = false;
-                controls.screenSpacePanning = false;
+                controls = new MapControls( viewCamera, renderer.domElement );
+				controls.enableDamping = false;
+				controls.screenSpacePanning = false;
+				controls.maxDistance = environmentRadius;
                 controls.maxPolarAngle = 0.75*Math.PI;
                 controls.enableKeys = false;
 
@@ -108,7 +116,7 @@
             }
 
             function initGUI() {
-                var gui = new dat.GUI();
+                var gui = new GUI();
 
                 // Collections options
                 function menuCollections(){
