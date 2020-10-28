@@ -1,6 +1,6 @@
 import { ShaderMaterial, ShaderLib, Matrix4, Vector3, Vector4, Color } from 'three';
 
-import {pop, definePropertyUniform} from './materialUtils';
+import {pop, definePropertyUniform, handleDistortion} from './materialUtils';
 
 class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
@@ -50,14 +50,8 @@ class OrientedImageMaterial extends ShaderMaterial {
         this.uvwPreTransform.setPosition(0,0,0);
         this.uvwPreTransform.premultiply(camera.preProjectionMatrix);
         this.uvwPostTransform.copy(camera.postProjectionMatrix);
-
-        // TODO: handle other distorsion types and arrays of distortions
-        if (camera.distos && camera.distos.length == 1 && camera.distos[0].type === 'ModRad') {
-            this.uvDistortion = camera.distos[0];
-        } else {
-            this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
-            this.uvDistortion.R.w = Infinity;
-        }
+        
+        this.uvDistortion = handleDistortion.apply(this, arguments);
     }
 }
 

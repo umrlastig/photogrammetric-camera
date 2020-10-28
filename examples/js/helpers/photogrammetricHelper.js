@@ -352,13 +352,6 @@ function setTexture(camera) {
     setMaterial(textureMaterial, textureCamera);
 }
 
-function setTexture(camera) {
-    if (!camera) return;
-    console.log('Texture:', camera.name);
-    textureCamera.copy(camera);
-    setMaterial(textureMaterial, camera);
-}
-
 function setCamera(camera) {
     setView(camera);
     setTexture(camera);
