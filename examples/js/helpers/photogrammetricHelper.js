@@ -8,7 +8,7 @@ var nextCamera = new PhotogrammetricCamera();
 var textureCamera = new PhotogrammetricCamera();
 
 var renderer, scene, cameras, controls;
-var environment, backgroundSphere;
+var environment, backgroundSphere, worldPlane;
 
 var basicMaterial, wireMaterial, textureMaterial, viewMaterials = {};
 var textureMaterialUniforms, viewMaterialUniforms;
@@ -17,11 +17,11 @@ var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
 var textures = {};
 
-var cameraScale = 10000;
-var environmentRadius = 15000;
-var epsilonRadius = 5000;
-
-var duration = 3.;
+var params = {
+    cameras: {size: 10000},
+    environment: {radius: 8000, epsilon: 5000, center: new THREE.Vector3(0.), elevation: -13.6},
+    interpolation: {duration: 3.}
+};
 
 /* ----------------------- Functions --------------------- */
 
@@ -72,12 +72,28 @@ function initCameraMaterialUniforms(vs, fs, map) {
 /* Environment --------------------------------------- */
 function initBackgroundSphere(scale, material) {
     var sphere = new THREE.SphereBufferGeometry(scale, 32, 32);
+    var visibility = new Float32Array(sphere.attributes.position.count); // invisible
+    sphere.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(sphere, material);
 }
 
+function initWorldPlane(scale, material) {
+    var plane = new THREE.PlaneBufferGeometry(scale, scale, 100, 100);
+    var visibility = new Float32Array(plane.attributes.position.count); // invisible
+    plane.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
+    return new THREE.Mesh(plane, material);
+}
+
 function updateEnvironment() {
-    backgroundSphere.position.copy(viewCamera.position);
+    backgroundSphere.position.copy(params.environment.center);
     backgroundSphere.updateWorldMatrix();
+
+    var position = params.environment.center.clone().add(
+        viewCamera.up.clone().multiplyScalar(params.environment.elevation));
+    var normal = viewCamera.up.clone().multiplyScalar(-1.);
+    worldPlane.position.copy(position);
+    worldPlane.lookAt(position.clone().add(normal));
+    worldPlane.updateWorldMatrix();
 }
 
 /* Cameras ------------------------------------------- */
@@ -107,7 +123,7 @@ function cameraHelper(camera) {
         geometry.setIndex(indices);
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         var mesh = new THREE.Mesh(geometry, wireMaterial);
-        mesh.scale.set(cameraScale, cameraScale, cameraScale);
+        mesh.scale.set(params.cameras.size, params.cameras.size, params.cameras.size);
         group.add(mesh);
     }
     // place the image plane
@@ -122,8 +138,9 @@ function cameraHelper(camera) {
         geometry.setIndex(indices);
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute( uvs, 2 ));
+        geometry.setAttribute('visibility', new Float32Array(Array(geometry.attributes.position.count).fill(1.)));
         var mesh = new THREE.Mesh(geometry, viewMaterials[camera.name]);
-        mesh.scale.set(cameraScale, cameraScale, cameraScale);
+        mesh.scale.set(params.cameras.size, params.cameras.size, params.cameras.size);
         group.add(mesh);
     }
     // place a sphere at the camera center
@@ -203,17 +220,20 @@ function loadJSON(path, file) {
     source.open(file, 'text').then((json) => {
         json = JSON.parse(json);
 
-        if(json.target && controls){
-            controls.target.copy(json.target);
+        if(json.target){
+            params.environment.center.copy(json.target);
+            if(controls) controls.target.copy(json.target);
         } 
 
         if(json.camera){
-            if(json.camera.scale) cameraScale = json.camera.scale;
+            if(json.camera.scale) params.cameras.size = json.camera.scale;
             if(json.camera.zoom) viewCamera.zoom = json.camera.zoom;
         }
         
         if(json.up) viewCamera.up.copy(json.up);
         if(json.pointSize) textureMaterial.size = json.pointSize;
+
+        updateEnvironment();
         
         if(json.pc) json.pc.forEach((url) => loadPlyPC(url, source));
         if(json.mesh) json.mesh.forEach((url) => loadPlyMesh(url, source));
@@ -267,7 +287,7 @@ function handleCamera(camera, name){
     if (camera.check) check = camera.check() ? '[Y]' : '[N]';
     console.log(check, name);
     
-    camera.far = environmentRadius+epsilonRadius;
+    camera.far = params.environment.radius+params.environment.epsilon;
     camera.near = 0.1;
     camera.updateProjectionMatrix();
     var helper = cameraHelper(camera);
@@ -299,8 +319,8 @@ function handlePointCloud(name){
         geometry.boundingBox.getCenter(center);
         points.updateMatrixWorld(true);
 
-        var opacity = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
-        geometry.setAttribute('meshOpacity', new THREE.BufferAttribute(opacity, 1));
+        var visibility = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
+        geometry.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     }
 }
 
@@ -315,6 +335,9 @@ function handleMesh(name){
         var center = new THREE.Vector3();
         geometry.boundingBox.getCenter(center);
         mesh.updateMatrixWorld(true);
+
+        var visibility = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
+        geometry.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     }
 }
 
@@ -341,7 +364,7 @@ function setView(camera) {
     prevCamera.timestamp = 0; // timestamp will be set in the update callback
     nextCamera.zoom = viewCamera.zoom; // keep the current zoom
     nextCamera.near = 0.1;
-    nextCamera.far = environmentRadius+epsilonRadius;;
+    nextCamera.far = params.environment.radius+params.environment.epsilon;
     nextCamera.updateProjectionMatrix();
 }
 
@@ -375,10 +398,10 @@ function interpolateCamera(timestamp) {
     if (prevCamera.timestamp !== undefined) {
         if (prevCamera.timestamp == 0) {
             prevCamera.timestamp = timestamp;
-            nextCamera.timestamp = prevCamera.timestamp + 1000 * duration;
+            nextCamera.timestamp = prevCamera.timestamp + 1000 * params.interpolation.duration;
         }
         if (timestamp < nextCamera.timestamp) {
-            const t = 0.001 * (timestamp - prevCamera.timestamp) / duration;
+            const t = 0.001 * (timestamp - prevCamera.timestamp) / params.interpolation.duration;
             viewCamera.set(prevCamera).lerp(nextCamera, t);
 
             textureMaterial.showImage = false;
@@ -387,12 +410,11 @@ function interpolateCamera(timestamp) {
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
 
-            updateControls();
+            controls.saveState();
             textureMaterial.showImage = true;
         }
         viewCamera.updateProjectionMatrix(); 
     }
-    updateEnvironment();
 };
 
 /* Clean --------------------------------------------- */

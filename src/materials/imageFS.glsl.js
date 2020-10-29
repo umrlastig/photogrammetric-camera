@@ -24,10 +24,8 @@ uniform bool showImage;
 
 #ifdef USE_MAP4
   uniform mat4 modelMatrix;
-  uniform vec3 uvwPosition;
-  uniform mat4 uvwPreTransform;
-  uniform mat4 uvwPostTransform;
-  uniform RadialDistortion uvDistortion;
+  uniform uwvCamera uvwTexture;
+  uniform distortionParams uvDistortion;
   uniform sampler2D map;
   uniform float borderSharpness;
   uniform float debugOpacity;
@@ -53,10 +51,10 @@ void main(){
             // "uvwPreTransform * m" is equal to "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
             // but more stable when both the texturing and viewing cameras have large coordinate values
             mat4 m = modelMatrix;
-            m[3].xyz -= uvwPosition;
-            vec4 uvw = uvwPreTransform * m * vec4(vPosition, 1.);
+            m[3].xyz -= uvwTexture.position;
+            vec4 uvw = uvwTexture.preTransform * m * vec4(vPosition, 1.);
             if( uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
-                uvw = uvwPostTransform * uvw;
+                uvw = uvwTexture.postTransform * uvw;
                 uvw.xyz /= 2. * uvw.w;
                 uvw.xyz += vec3(0.5);
                 vec3 border = min(uvw.xyz, 1. - uvw.xyz);

@@ -12,12 +12,18 @@ function polynom(c, x) {
 
 const chunks = {
     shaders: `
-struct RadialDistortion {
+struct uwvCamera {
+  vec3 position;
+  mat4 preTransform;
+  mat4 postTransform;
+};
+
+struct distortionParams {
   vec2 C;
   vec4 R;
 };
 
-bool distort_radial(inout vec4 p, RadialDistortion disto) {
+bool distort_radial(inout vec4 p, distortionParams disto) {
   p /= p.w;
   vec2 r = p.xy - disto.C;
   float r2 = dot(r, r);

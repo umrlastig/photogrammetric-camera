@@ -82,16 +82,18 @@
 
                 // Environment
                 environment = new THREE.Group();
-                backgroundSphere = initBackgroundSphere(environmentRadius, textureMaterial);
+                backgroundSphere = initBackgroundSphere(params.environment.radius, textureMaterial);
+                worldPlane = initWorldPlane(params.environment.radius, textureMaterial);
 
                 environment.add(backgroundSphere);
+                environment.add(worldPlane);
                 scene.add(environment);
 
                 // Controls
                 controls = new MapControls( viewCamera, renderer.domElement );
 				controls.enableDamping = false;
 				controls.screenSpacePanning = false;
-				controls.maxDistance = environmentRadius;
+				controls.maxDistance = params.environment.radius;
                 controls.maxPolarAngle = 0.75*Math.PI;
                 controls.enableKeys = false;
 
@@ -107,6 +109,7 @@
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
                         loadOrientation('Orientation-1.xml', source);
+                        updateEnvironment();
                     },
                     Abbey: function() {
                         clean();
@@ -122,6 +125,11 @@
                         collection = 'collections/maurepas/';
                         loadJSON(server + collection);
                     },
+                    Frejus: function(){
+                        clean();
+                        collection = 'collections/frejus/';
+                        loadJSON(server + collection);
+                    }
                 };
 
                 /* Clean --------------------------------------------- */

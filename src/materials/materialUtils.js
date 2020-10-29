@@ -1,4 +1,4 @@
-import { Uniform } from 'three';
+import { Uniform, Vector3, Matrix4 } from 'three';
 import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
 
 export function pop(options, property, defaultValue) {
@@ -28,7 +28,7 @@ export function definePropertyUniform(object, property, defaultValue) {
     });
 }
 
-export function handleDistortion(camera) {
+export function setDistortion(camera) {
     var distortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
     distortion.R.w = Infinity;
     // TODO: handle other distorsion types and arrays of distortions
@@ -43,4 +43,14 @@ export function handleDistortion(camera) {
         }
     } 
     return distortion;
+}
+
+export function setUvwCamera(camera) {
+    var uvw = {position: new Vector3(), preTransform: new Matrix4(), postTransform: new Matrix4()};
+    camera.getWorldPosition(uvw.position);
+    uvw.preTransform.copy(camera.matrixWorldInverse);
+    uvw.preTransform.setPosition(0,0,0);
+    uvw.preTransform.premultiply(camera.preProjectionMatrix);
+    uvw.postTransform.copy(camera.postProjectionMatrix);
+    return uvw;
 }

@@ -1,14 +1,15 @@
 import { ShaderMaterial, ShaderLib, Matrix4, Vector3, Vector4, Color } from 'three';
 
-import {pop, definePropertyUniform, handleDistortion} from './materialUtils';
+import {pop, definePropertyUniform, setUvwCamera, setDistortion} from './materialUtils';
 
 class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
         const size = pop(options, 'size', 1);
         const diffuse = pop(options, 'diffuse', new Color(0xeeeeee));
-        const uvwPosition = pop(options, 'uvwPosition', new Vector3());
-        const uvwPreTransform = pop(options, 'uvwPreTransform', new Matrix4());
-        const uvwPostTransform = pop(options, 'uvwPostTransform', new Matrix4());
+        const uvwTexture = pop(options, 'uvwTexture', {position: new Vector3(),
+            preTransform: new Matrix4(), postTransform: new Matrix4()});
+        const uvwView = pop(options, 'uvwView', {position: new Vector3(),
+            preTransform: new Matrix4(), postTransform: new Matrix4()});
         const uvDistortion = pop(options, 'uvDistortion', {R: new Vector4(), C: new Vector3()});
         const map = pop(options, 'map', null);
         const alphaMap = pop(options, 'alphaMap', null);
@@ -30,9 +31,8 @@ class OrientedImageMaterial extends ShaderMaterial {
         super(options);
         definePropertyUniform(this, 'size', size);
         definePropertyUniform(this, 'diffuse', diffuse);
-        definePropertyUniform(this, 'uvwPosition', uvwPosition);
-        definePropertyUniform(this, 'uvwPreTransform', uvwPreTransform);
-        definePropertyUniform(this, 'uvwPostTransform', uvwPostTransform);
+        definePropertyUniform(this, 'uvwTexture', uvwTexture);
+        definePropertyUniform(this, 'uvwView', uvwTexture);
         definePropertyUniform(this, 'uvDistortion', uvDistortion);
         definePropertyUniform(this, 'opacity', this.opacity);
         definePropertyUniform(this, 'map', map);
@@ -45,13 +45,8 @@ class OrientedImageMaterial extends ShaderMaterial {
     }
 
     setCamera(camera) {
-        camera.getWorldPosition(this.uvwPosition);
-        this.uvwPreTransform.copy(camera.matrixWorldInverse);
-        this.uvwPreTransform.setPosition(0,0,0);
-        this.uvwPreTransform.premultiply(camera.preProjectionMatrix);
-        this.uvwPostTransform.copy(camera.postProjectionMatrix);
-        
-        this.uvDistortion = handleDistortion.apply(this, arguments);
+        this.uvwTexture = setUvwCamera.apply(this, arguments);
+        this.uvDistortion = setDistortion.apply(this, arguments);
     }
 }
 
