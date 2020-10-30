@@ -14,10 +14,8 @@ class OrientedImageMaterial extends ShaderMaterial {
         const map = pop(options, 'map', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
-        const borderSharpness = pop(options, 'borderSharpness', 10000);
-        const diffuseColorGrey = pop(options, 'diffuseColorGrey', true);
-        const debugOpacity = pop(options, 'debugOpacity', 0);
-        const showImage = pop(options, 'showImage', true);
+        const debug = pop(options, 'debug', {borderSharpness: 500, diffuseColorGrey: true,
+            debugOpacity: 0, showImage: false});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -32,22 +30,31 @@ class OrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'size', size);
         definePropertyUniform(this, 'diffuse', diffuse);
         definePropertyUniform(this, 'uvwTexture', uvwTexture);
-        definePropertyUniform(this, 'uvwView', uvwTexture);
+        definePropertyUniform(this, 'uvwView', uvwView);
         definePropertyUniform(this, 'uvDistortion', uvDistortion);
         definePropertyUniform(this, 'opacity', this.opacity);
         definePropertyUniform(this, 'map', map);
         definePropertyUniform(this, 'alphaMap', alphaMap);
         definePropertyUniform(this, 'scale', scale);
-        definePropertyUniform(this, 'borderSharpness', borderSharpness);
-        definePropertyUniform(this, 'diffuseColorGrey', diffuseColorGrey);
-        definePropertyUniform(this, 'debugOpacity', debugOpacity);
-        definePropertyUniform(this, 'showImage', showImage);
+        definePropertyUniform(this, 'debug', debug);
     }
 
-    setCamera(camera) {
-        this.uvwTexture = setUvwCamera.apply(this, arguments);
-        this.uvDistortion = setDistortion.apply(this, arguments);
+    setCamera(texture, view) {
+        this.uvwTexture = setUvwCamera(texture);
+        this.uvwView = setUvwCamera(view);
+        this.uvDistortion = setDistortion(texture);
     }
 }
+
+export const chunks = {
+    shaders: `
+    struct Debug {
+        float borderSharpness;
+        bool diffuseColorGrey;
+        float debugOpacity;
+        bool showImage;
+    };
+`,
+};
 
 export default OrientedImageMaterial;

@@ -19,7 +19,7 @@ var textures = {};
 
 var params = {
     cameras: {size: 10000},
-    environment: {radius: 8000, epsilon: 5000, center: new THREE.Vector3(0.), elevation: -13.6},
+    environment: {radius: 8000, epsilon: 5000, center: new THREE.Vector3(0.), elevation: 0},
     interpolation: {duration: 3.}
 };
 
@@ -70,21 +70,22 @@ function initCameraMaterialUniforms(vs, fs, map) {
 }
 
 /* Environment --------------------------------------- */
-function initBackgroundSphere(scale, material) {
-    var sphere = new THREE.SphereBufferGeometry(scale, 32, 32);
+function initBackgroundSphere(material) {
+    var sphere = new THREE.SphereBufferGeometry(-1, 32, 32);
     var visibility = new Float32Array(sphere.attributes.position.count); // invisible
     sphere.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(sphere, material);
 }
 
-function initWorldPlane(scale, material) {
-    var plane = new THREE.PlaneBufferGeometry(scale, scale, 100, 100);
+function initWorldPlane(material) {
+    var plane = new THREE.PlaneBufferGeometry(-1, -1, 100, 100);
     var visibility = new Float32Array(plane.attributes.position.count); // invisible
     plane.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(plane, material);
 }
 
 function updateEnvironment() {
+    backgroundSphere.scale.set(params.environment.radius, params.environment.radius, params.environment.radius);
     backgroundSphere.position.copy(params.environment.center);
     backgroundSphere.updateWorldMatrix();
 
@@ -92,8 +93,12 @@ function updateEnvironment() {
         viewCamera.up.clone().multiplyScalar(params.environment.elevation));
     var normal = viewCamera.up.clone().multiplyScalar(-1.);
     worldPlane.position.copy(position);
+    worldPlane.scale.set(params.environment.radius, params.environment.radius, 1);
     worldPlane.lookAt(position.clone().add(normal));
     worldPlane.updateWorldMatrix();
+
+    controls.maxDistance = params.environment.radius;
+    environment.visible = true;
 }
 
 /* Cameras ------------------------------------------- */
@@ -129,16 +134,17 @@ function cameraHelper(camera) {
     // place the image plane
     {
         viewMaterials[camera.name] = new OrientedImageMaterial(viewMaterialUniforms);
-        setMaterial(viewMaterials[camera.name], camera, camera);
+        setMaterial(viewMaterials[camera.name], camera);
 
         var vertices = v.slice(3);
         var uvs = new Float32Array([ 0., 0.,  0., 1.,  1., 1.,  1., 0.]);
+        var visibility = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
         var indices = [0, 2, 1,  0, 3, 2];
         var geometry = new THREE.BufferGeometry();
         geometry.setIndex(indices);
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute( uvs, 2 ));
-        geometry.setAttribute('visibility', new Float32Array(Array(geometry.attributes.position.count).fill(1.)));
+        geometry.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
         var mesh = new THREE.Mesh(geometry, viewMaterials[camera.name]);
         mesh.scale.set(params.cameras.size, params.cameras.size, params.cameras.size);
         group.add(mesh);
@@ -220,14 +226,20 @@ function loadJSON(path, file) {
     source.open(file, 'text').then((json) => {
         json = JSON.parse(json);
 
-        if(json.target){
+        if(json.target) {
             params.environment.center.copy(json.target);
             if(controls) controls.target.copy(json.target);
         } 
 
-        if(json.camera){
+        if(json.camera) {
             if(json.camera.scale) params.cameras.size = json.camera.scale;
             if(json.camera.zoom) viewCamera.zoom = json.camera.zoom;
+        }
+
+        if(json.environment) {
+            if(json.environment.radius) params.environment.radius = json.environment.radius;
+            if(json.environment.epsilon) params.environment.epsilon = json.environment.epsilon;
+            if(json.environment.elevation) params.environment.elevation = json.environment.elevation;
         }
         
         if(json.up) viewCamera.up.copy(json.up);
@@ -271,7 +283,7 @@ function handleOrientation(name) {
     return function(camera) {
         if (!camera) return;
         handleCamera(camera, name);
-        setCamera(camera);
+        if(textureMaterial.map == null) setCamera(camera);
         return camera;
     };
 }
@@ -351,7 +363,7 @@ function getCamera(camera, delta = 0){
 /* Sets ---------------------------------------------- */
 function setMaterial(material, camera) {
     material.map =  textures[camera.name] || uvTexture;
-    material.setCamera(camera);
+    material.setCamera(camera, viewCamera);
 }
 
 function setView(camera) {
@@ -372,7 +384,7 @@ function setTexture(camera) {
     if (!camera) return;
     console.log('Texture:', camera.name);
     textureCamera.copy(camera);
-    setMaterial(textureMaterial, textureCamera);
+    setMaterial(textureMaterial, camera);
 }
 
 function setCamera(camera) {
@@ -404,14 +416,14 @@ function interpolateCamera(timestamp) {
             const t = 0.001 * (timestamp - prevCamera.timestamp) / params.interpolation.duration;
             viewCamera.set(prevCamera).lerp(nextCamera, t);
 
-            textureMaterial.showImage = false;
+            textureMaterial.debug.showImage = false;
         } else {
             viewCamera.set(nextCamera);
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
 
             controls.saveState();
-            textureMaterial.showImage = true;
+            textureMaterial.debug.showImage = true;
         }
         viewCamera.updateProjectionMatrix(); 
     }

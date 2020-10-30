@@ -213,7 +213,7 @@ var OrbitControls = function ( object, domElement ) {
 			position.copy( scope.target ).add( offset );
 
 			// Removed to avoid camera changing its position.
-			//scope.object.lookAt( scope.target );
+			scope.object.lookAt( scope.target );
 
 			if ( scope.enableDamping === true ) {
 
