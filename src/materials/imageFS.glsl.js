@@ -26,7 +26,7 @@ uniform Debug debug;
 #ifdef USE_MAP4
   uniform mat4 modelMatrix;
   uniform Camera uvwTexture;
-  uniform Distortion uvDistortion;
+  uniform DistortionParams uvDistortion;
   uniform sampler2D map;
 #endif
 
@@ -51,7 +51,7 @@ void main(){
         mat4 m = modelMatrix;
         m[3].xyz -= uvwTexture.position;
         vec4 uvw = uvwTexture.preTransform * m * vec4(vPosition, 1.);
-        if( uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
+        if( uvw.w > 0. && distortBasic(uvw, uvDistortion)) {
             uvw = uvwTexture.postTransform * uvw;
             uvw.xyz /= 2. * uvw.w;
             uvw.xyz += vec3(0.5);

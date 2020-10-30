@@ -66,6 +66,7 @@ class PhotogrammetricCamera extends PerspectiveCamera {
             fullWidth: size.x,
             fullHeight: size.y,
         };
+        this.radius = {r2img: 0, r2max: 0};
 
         // filmOffset is not supported
         // filmGauge is only used in compatibility PerspectiveCamera functions
@@ -180,6 +181,44 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         this.focal.x = focalLength;
         this.focal.y = focalLength;
         return this.updateProjectionMatrix();
+    }
+
+    setDistortionRadius() {
+        const w = this.view.fullWidth;
+        const h = this.view.fullHeight;
+
+        if(this.distos && this.distos.length == 1) {
+            const disto = this.distos[0];
+            const C = disto.C;
+            
+            var p1 = new Vector2(0, 0);
+            var p2 = new Vector2(w, 0);
+            var p3 = new Vector2(0, h);
+            var p4 = new Vector2(w, h);
+
+            var pimg = this.maxPoint(p4, this.maxPoint(p3, this.maxPoint(p2, p1, C), C), C);
+            var r2img = this.getRadius(pimg, C);
+            this.radius.r2img = r2img;
+            this.radius.r2max = disto.R.w;
+        } else {
+            const x = w/2.;
+            const y = h/2.;
+            this.radius.r2img = x*x + y*y;
+            this.radius.r2max = x*x + y*y;
+        }
+    }
+
+    maxPoint(p1, p2, Center) {
+        var r1 = this.getRadius(p1, Center);
+        var r2 = this.getRadius(p2, Center);
+        if(r1>r2) return p1;
+        else return p2;
+    }
+
+    getRadius(p, Center) {
+        var x = p.x - Center.x;
+        var y = p.y - Center.y;
+        return x*x + y*y;
     }
 
     lerp(camera, t) {

@@ -1,7 +1,7 @@
-import { chunks as disto } from '../cameras/PhotogrammetricDistortion';
+import { chunks as material } from '../materials/OrientedImageMaterial';
 
 export default /* glsl */`
-${disto.shaders}
+${material.shaders}
 #ifdef USE_LOGDEPTHBUF
     #ifdef USE_LOGDEPTHBUF_EXT
         varying float vFragDepth;
@@ -11,21 +11,20 @@ ${disto.shaders}
     #endif
 #endif
 
-#ifdef USE_MAP4
-    #undef USE_MAP
-    varying highp vec3 vPosition;
-#endif
-
 #ifdef USE_COLOR
     varying vec3 vColor;
 #endif
 
-uniform float size;
-
 #ifdef USE_MAP4
-  uniform Camera uvwView;
-  uniform Distortion uvDistortion;
+    #undef USE_MAP
+    uniform Camera uvwView;
+    attribute float visibility;
+
+    varying highp vec3 vPosition;
 #endif
+
+uniform float size;
+varying float vVisibility;
 
 bool isPerspectiveMatrix( mat4 m ) {
     return m[ 2 ][ 3 ] == - 1.0;
@@ -36,6 +35,8 @@ void main() {
         vColor.xyz = color.xyz;
     #endif
 
+    vVisibility = visibility;
+    
     #ifdef USE_MAP4
         vPosition = position;
         // "uvwPreTransform * m" is equal to :

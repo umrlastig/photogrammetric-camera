@@ -73,8 +73,9 @@ class RadialDistortion {
  **/
   constructor(C, R, R2max) {
     if(R.length > 3) {
-        console.warn('RadialDistortion is currently limited to degrees 3,5,7: Neglecting higher order coefficients.');
+        console.warn('RadialDistortion is currently limited to 3 coefficients: Neglecting higher order coefficients.');
     }
+    R[0] = R[0] || 0;
     R[1] = R[1] || 0;
     R[2] = R[2] || 0;
     R[3] = R2max || r2max(R);
@@ -86,10 +87,11 @@ class RadialDistortion {
 // https://github.com/micmacIGN/micmac/blob/e0008b7a084f850aa9db4dc50374bd7ec6984da6/src/photogram/phgr_ebner_brown_dist.cpp#L441-L475
 // WithFraser=false
  project(p) {
-    var x = p.x - this.C[0];
-    var y = p.y - this.C[1];
+    var x = p.x - this.C.x;
+    var y = p.y - this.C.y;
     var r2 = x * x + y * y;
-    var radial = r2 * PhotogrammetricDistortion.polynom(this.R, r2);
+    var R = this.R.toArray(); R.pop();
+    var radial = r2 * PhotogrammetricDistortion.polynom(R, r2);
     p.x += radial * x;
     p.y += radial * y;
     return p;

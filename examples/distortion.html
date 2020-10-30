@@ -67,8 +67,8 @@
 
                 // Scene
                 scene = new THREE.Scene();
-                //scene.background = new THREE.Color(0xf0f0f0);
-                scene.background = new THREE.Color(0x000000);
+                scene.background = new THREE.Color(0xf0f0f0);
+                //scene.background = new THREE.Color(0x000000);
 
                 // Cameras 
                 cameras = new THREE.Group();
@@ -113,23 +113,29 @@
                         loadOrientation('Orientation-1.xml', source);
                         updateEnvironment();
                     },
-                    Abbey: function() {
-                        clean();
-                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/NEW-DATA/CompensOnLine/';
-                        var source = new FetchSource(path);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
-                    },
-                    Maurepas: function(){
+                    Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
                         loadJSON(server + collection);
                     },
-                    Frejus: function(){
+                    Frejus: function() {
                         clean();
                         collection = 'collections/frejus/';
+                        loadJSON(server + collection);
+                    },
+                    Nanterre: function() {
+                        clean();
+                        collection = 'collections/nanterre/';
+                        loadJSON(server + collection);
+                    },
+                    Viabon: function() {
+                        clean();
+                        collection = 'collections/viabon/';
+                        loadJSON(server + collection);
+                    },
+                    SaintMartin: function() {
+                        clean();
+                        collection = 'collections/saint_martin/';
                         loadJSON(server + collection);
                     }
                 };
@@ -159,16 +165,25 @@
 
                 var viewGUI = gui.addFolder('View Camera'); // View
                 viewGUI.visible = viewGUI.add(cameras, 'visible');
+                viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
+                viewGUI.distort = viewGUI.add(textureMaterial.distortion, 'view').name('distort');
 
                 // Texture Camera
+                function updateRmaxFromGUI(value) {
+                    textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2max;
+                    //textureMaterial.setHomography(textureCamera);
+                };
+
                 var textureGUI = gui.addFolder('Historical Camera');
                 textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
+                textureGUI.distort = textureGUI.add(textureMaterial.distortion, 'texture').name('distort');
+                textureGUI.add(params.distortion, 'rmax', 0, 1).name('rmax ratio').onChange(updateRmaxFromGUI);
 
                 // Debug
                 var debugGUI = gui.addFolder('Debug');
                 debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
                 debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
-                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0, 1);
+                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
             };
 
             function render() {
@@ -178,8 +193,7 @@
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-
-                textureMaterial.setCamera(textureCamera, viewCamera);
+                updateMaterial(textureMaterial);
                 render();
             }
         </script>

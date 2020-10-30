@@ -12,24 +12,70 @@ function polynom(c, x) {
 
 export const chunks = {
     shaders: `
-    struct Camera {
-        vec3 position;
-        mat4 preTransform;
-        mat4 postTransform;
-    };
 
     struct Distortion {
-        vec2 C;
-        vec4 R;
+        int method;
+        bool texture;
+        bool view;
+        float r2img;
+        float r2max;
     };
 
-    bool distort_radial(inout vec4 p, Distortion disto) {
+    struct DistortionParams {
+        int type;
+        float F;
+        vec2 C;
+        vec4 R;
+        vec2 P;
+        vec2 b;
+    };
+
+    struct Extrapolation {
+        bool texture;
+        bool view;
+    };
+
+    float polynom(vec3 R, float x) {
+        float x2 = x*x;
+        return dot(R, vec3(x, x2, x*x2));
+    }
+
+    void radial(inout vec2 p, DistortionParams disto, vec2 r) {
+        float r2 = dot(r, r);
+        p.xy += r * polynom(disto.R.xyz, r2);
+    }
+
+    void tangentional(inout vec2 p, DistortionParams disto, vec2 r) {
+        float x2 = r.x*r.x;
+        float y2 = r.y*r.y;
+        float xy = r.x*r.y;
+        float r2 = dot(r, r);
+        p.x += disto.P.x*(2.*x2 + r2) + disto.P.y*2.*xy;
+        p.y += disto.P.y*(2.*y2 + r2) + disto.P.x*2.*xy;
+    }
+
+    void fraser(inout vec2 p, DistortionParams disto, vec2 r) {
+        // Radial
+        radial(p.xy, disto, r);
+        // Tangentional
+        tangentional(p, disto, r);
+        // Affine
+        p.x += disto.b.x*r.x + disto.b.y*r.y;
+    }
+
+    void distortPoint(inout vec2 p, DistortionParams disto) {
+        vec2 r = p.xy - disto.C;
+        if (disto.type == 1) radial(p, disto, r);
+        else if (disto.type == 2) fraser(p, disto, r);
+    }
+
+    bool distortBasic(inout vec4 p, DistortionParams disto) {
+        if(disto.type == 0) return true;
         p /= p.w;
         vec2 r = p.xy - disto.C;
         float r2 = dot(r, r);
         if (r2 > disto.R.w) return false; // to be culled
-        float r4 = r2*r2;
-        p.xy += dot(disto.R.xyz, vec3(r2, r4, r2*r4)) * r;
+        distortPoint(p.xy, disto);
         return true;
     }
 `,

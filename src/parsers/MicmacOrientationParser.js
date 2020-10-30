@@ -214,7 +214,7 @@ function parseCheck(xml) {
             var d = point.p2.distanceTo(pp);
             if (d > epsilon) {
                 ok = false;
-                console.warn(point.id, d, pp, point.p2, point.p3);
+                //console.warn(point.id, d, pp, point.p2, point.p3);
             }
             return ok;
         }, true);

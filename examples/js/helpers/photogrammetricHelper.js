@@ -20,6 +20,7 @@ var textures = {};
 var params = {
     cameras: {size: 10000},
     environment: {radius: 8000, epsilon: 5000, center: new THREE.Vector3(0.), elevation: 0},
+    distortion: {rmax: 1},
     interpolation: {duration: 3.}
 };
 
@@ -283,7 +284,7 @@ function handleOrientation(name) {
     return function(camera) {
         if (!camera) return;
         handleCamera(camera, name);
-        if(textureMaterial.map == null) setCamera(camera);
+        if(textureMaterial.map == undefined) setCamera(camera);
         return camera;
     };
 }
@@ -301,6 +302,7 @@ function handleCamera(camera, name){
     
     camera.far = params.environment.radius+params.environment.epsilon;
     camera.near = 0.1;
+    camera.setDistortionRadius();
     camera.updateProjectionMatrix();
     var helper = cameraHelper(camera);
     helper.name = "helper";
@@ -361,11 +363,6 @@ function getCamera(camera, delta = 0){
 }
 
 /* Sets ---------------------------------------------- */
-function setMaterial(material, camera) {
-    material.map =  textures[camera.name] || uvTexture;
-    material.setCamera(camera, viewCamera);
-}
-
 function setView(camera) {
     if (!camera) return;
     console.log('View:', camera.name);
@@ -385,6 +382,7 @@ function setTexture(camera) {
     console.log('Texture:', camera.name);
     textureCamera.copy(camera);
     setMaterial(textureMaterial, camera);
+    setRadius(textureMaterial, camera);
 }
 
 function setCamera(camera) {
@@ -392,7 +390,24 @@ function setCamera(camera) {
     setTexture(camera);
 }
 
+function setMaterial(material, camera) {
+    material.map =  textures[camera.name] || uvTexture;
+    material.setCamera(camera, viewCamera);
+}
+
+function setRadius(material, camera){
+    material.setRadius(camera);
+    material.setCenter(camera);
+    material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2max;
+}
+
 /* Update -------------------------------------------- */
+function updateMaterial(material) {
+    material.setCamera(textureCamera, viewCamera);
+    material.setCenter(textureCamera);
+    material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2max;
+}
+
 function updateControls() {
     var distance = new THREE.Vector3().subVectors(viewCamera.position, controls.target).length();
     // apply transformation - matrix, euler rotation, or quaternion?
