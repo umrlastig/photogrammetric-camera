@@ -15,6 +15,7 @@ export const chunks = {
 
     struct Distortion {
         int method;
+        int type;
         bool texture;
         bool view;
         float r2img;
@@ -33,6 +34,11 @@ export const chunks = {
     struct Extrapolation {
         bool texture;
         bool view;
+    };
+
+    struct Homography{
+        mat3 H;
+        mat3 invH;
     };
 
     float polynom(vec3 R, float x) {
@@ -63,10 +69,51 @@ export const chunks = {
         p.x += disto.b.x*r.x + disto.b.y*r.y;
     }
 
+    void fisheye(inout vec2 p, DistortionParams disto, vec2 r) {
+        vec2 AB = r/disto.F;
+        float R = sqrt(dot(AB, AB));
+        float theta = atan(R);
+        float lambda = theta/R;
+        vec2 P = lambda*AB;
+        float r2 = dot(P, P);
+        // Radial distortion and degree 1 polynomial
+        vec2 rad = P;
+        radial(rad, disto, rad);
+        p.x = P.y*disto.b.y + P.x*disto.b.x + rad.x;
+        p.y = P.x*disto.b.y + rad.y;
+        // Tangential distortion
+        tangentional(p, disto, P);
+        // Normalization
+        p = disto.C + disto.F*p;
+    }
+
+    void fisheyeRadial(inout vec2 p, DistortionParams disto, vec2 r) {
+        vec2 AB = r/disto.F;
+        float R = sqrt(dot(AB, AB));
+        float theta = atan(R);
+        float lambda = theta/R;
+        vec2 P = lambda*AB;
+        float r2 = dot(P, P);
+        // Radial distortion 
+        vec2 rad = P;
+        radial(rad, disto, rad);
+        p.x = rad.x;
+        p.y = rad.y;
+        // Normalization
+        p = disto.C + disto.F*p;
+    }
+
     void distortPoint(inout vec2 p, DistortionParams disto) {
         vec2 r = p.xy - disto.C;
         if (disto.type == 1) radial(p, disto, r);
         else if (disto.type == 2) fraser(p, disto, r);
+        else if (disto.type == 3) fisheye(p, disto, r);
+    }
+
+    void distortPointRadial(inout vec2 p, DistortionParams disto) {
+        vec2 r = p.xy - disto.C;
+        if (disto.type == 1 || disto.type == 2) radial(p, disto, r);
+        else if (disto.type == 3) fisheyeRadial(p, disto, r);
     }
 
     bool distortBasic(inout vec4 p, DistortionParams disto) {
@@ -78,6 +125,48 @@ export const chunks = {
         distortPoint(p.xy, disto);
         return true;
     }
+
+    bool distortRadial(inout vec4 p, DistortionParams disto) {
+        if(disto.R.w == 0.) return true;
+        p /= p.w;
+        vec2 r = p.xy - disto.C;
+        float r2 = dot(r, r);
+        vec2 point = p.xy;
+
+        if (r2 > disto.R.w) point = normalize(r)*sqrt(disto.R.w) + disto.C;
+
+        distortPointRadial(point, disto);
+
+        if (r2 > disto.R.w){
+            vec2 d = point - disto.C;
+            float d2 = dot(d, d);
+            p.xy = disto.C + (r*sqrt(d2))/sqrt(disto.R.w);
+            return false;
+        }else p.xy = point;
+        return true;
+    }
+
+    void extrapolateHomography(inout vec2 p, mat3 H){
+        vec3 point = vec3(p.x, p.y, 1.);
+        point = H * point;
+        p = point.xy/point.z;
+    }
+
+    bool distortHomography(inout vec4 p, DistortionParams disto, Homography h){
+        if(disto.R.w == 0.) return true;
+        p /= p.w;
+        vec2 r = p.xy - disto.C;
+        float r2 = dot(r, r);
+
+        if (r2 > disto.R.w){
+            extrapolateHomography(p.xy, h.H);
+            return false;
+        } 
+        
+        distortPoint(p.xy, disto);
+        return true;
+    }
+
 `,
 };
 

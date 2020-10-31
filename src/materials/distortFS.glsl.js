@@ -23,7 +23,9 @@ uniform Debug debug;
     uniform mat4 modelMatrix;
     uniform Camera uvwTexture;
     uniform Distortion distortion;
+    uniform Extrapolation extrapolation;
     uniform DistortionParams uvDistortion;
+    uniform Homography homography;
     uniform sampler2D map;
 
     varying highp vec3 vPosition;
@@ -56,7 +58,7 @@ void main(){
             m[3].xyz -= uvwTexture.position;
             vec4 uvw = uvwTexture.preTransform * m * vec4(vPosition, 1.);
 
-            bool validRegion = true;
+            bool extrapolatedRegion = true;
             vec4 debugColor = vec4(0.);
             if(distortion.method == 1){
                 vec2 v = uvw.xy/uvw.w - uvDistortion.C;
@@ -66,7 +68,11 @@ void main(){
             }
 
             if( uvw.w > 0.) {
-                if (distortion.texture) validRegion = distortBasic(uvw, uvDistortion);
+
+                if (distortion.texture) {
+                    if(distortion.type == 1) extrapolatedRegion = distortRadial(uvw, uvDistortion);
+                    else if(distortion.type == 2) extrapolatedRegion = distortHomography(uvw, uvDistortion, homography);
+                }
                 uvw = uvwTexture.postTransform * uvw;
                 uvw.xyz /= 2. * uvw.w;
                 uvw.xyz += vec3(0.5);
@@ -76,7 +82,7 @@ void main(){
                     color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
                     diffuseColor.rgb += color.rgb * color.a;
                     diffuseColor.a += color.a;
-                } else if (validRegion){
+                } else if (extrapolatedRegion || extrapolation.texture){
                     diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
                     diffuseColor.a += debug.debugOpacity;
                 }

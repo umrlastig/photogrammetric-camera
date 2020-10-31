@@ -171,12 +171,13 @@
                 // Texture Camera
                 function updateRmaxFromGUI(value) {
                     textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2max;
-                    //textureMaterial.setHomography(textureCamera);
+                    textureMaterial.setHomography(textureCamera);
                 };
 
                 var textureGUI = gui.addFolder('Historical Camera');
                 textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
                 textureGUI.distort = textureGUI.add(textureMaterial.distortion, 'texture').name('distort');
+                textureGUI.extrapol = textureGUI.add(textureMaterial.extrapolation, 'texture').name('extrapolate');
                 textureGUI.add(params.distortion, 'rmax', 0, 1).name('rmax ratio').onChange(updateRmaxFromGUI);
 
                 // Debug
@@ -184,6 +185,7 @@
                 debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
                 debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
+                debugGUI.distortion = debugGUI.add(textureMaterial.distortion, 'type', {radial: 1, complete: 2}).name('distortion');
             };
 
             function render() {

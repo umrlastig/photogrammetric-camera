@@ -17,21 +17,24 @@
     "deploy": "gh-pages-deploy -- 'gh-pages-deploy'",
     "clean-source": "rimraf webpack.config.js src package.json package-lock.json"
   },
-  "repository": "mbredif/photogrammetric-camera",
-  "bugs": "https://github.com/mbredif/photogrammetric-camera/issues",
-  "author": "Mathieu Brédif",
+  "repository": "epaizreyes/photogrammetric-camera",
+  "bugs": "https://github.com/epaizreyes/photogrammetric-camera/issues",
+  "author": "Mathieu Brédif & Evelyn Paiz",
   "license": "(CECILL-B OR MIT)",
   "devDependencies": {
-    "gh-pages-deploy": "git+https://github.com/mbredif/gh-pages-deploy",
-    "three": "^0.116.1",
+    "gh-pages-deploy": "^0.5.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "three": "^0.116.1"
+    "three": "^0.116.1",
+    "numeric": "^1.2.6"
   },
-  "dependencies": {},
+  "dependencies": {
+    "three": "^0.116.1",
+    "numeric": "^1.2.6"
+  },
   "directories": {
     "example": "examples"
   },

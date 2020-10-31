@@ -383,6 +383,7 @@ function setTexture(camera) {
     textureCamera.copy(camera);
     setMaterial(textureMaterial, camera);
     setRadius(textureMaterial, camera);
+    textureMaterial.setHomography(camera);
 }
 
 function setCamera(camera) {
