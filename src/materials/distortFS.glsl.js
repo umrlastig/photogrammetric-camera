@@ -29,6 +29,7 @@ uniform Debug debug;
     uniform sampler2D map;
 
     varying highp vec3 vPosition;
+    varying float vValid;
 #endif
 
 varying float vVisibility;
@@ -68,7 +69,6 @@ void main(){
             }
 
             if( uvw.w > 0.) {
-
                 if (distortion.texture) {
                     if(distortion.type == 1) extrapolatedRegion = distortRadial(uvw, uvDistortion);
                     else if(distortion.type == 2) extrapolatedRegion = distortHomography(uvw, uvDistortion, homography);
@@ -88,6 +88,8 @@ void main(){
                 }
             }
 
+            if(vValid < 0.99 && !extrapolation.view) discard;
+            
             diffuseColor.rgb += debugColor.rgb * debugColor.a;
             diffuseColor.a += debugColor.a;
         }
@@ -97,6 +99,6 @@ void main(){
     diffuseColor.a = min(1., diffuseColor.a);
 
     vec3 outgoingLight = diffuseColor.rgb;
-    gl_FragColor = vec4(outgoingLight, diffuseColor.a*opacity);
+    gl_FragColor = vec4(outgoingLight, diffuseColor.a * opacity);
 }
 `;

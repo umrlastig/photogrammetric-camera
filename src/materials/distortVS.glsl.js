@@ -1,6 +1,8 @@
+import { chunks as disto } from '../cameras/PhotogrammetricDistortion';
 import { chunks as material } from '../materials/OrientedImageMaterial';
 
 export default /* glsl */`
+${disto.shaders}
 ${material.shaders}
 #ifdef USE_LOGDEPTHBUF
     #ifdef USE_LOGDEPTHBUF_EXT
@@ -18,12 +20,17 @@ ${material.shaders}
 #ifdef USE_MAP4
     #undef USE_MAP
     uniform Camera uvwView;
-    attribute float visibility;
-
+    uniform Distortion distortion;
+    uniform Extrapolation extrapolation;
+    uniform DistortionParams uvDistortion;
+    uniform Homography homography;
+    
     varying highp vec3 vPosition;
+    varying float vValid;
 #endif
 
 uniform float size;
+attribute float visibility;
 varying float vVisibility;
 
 bool isPerspectiveMatrix( mat4 m ) {
@@ -46,7 +53,15 @@ void main() {
         mat4 m = modelMatrix;
         m[3].xyz -= uvwView.position;
         vec4 uvw = uvwView.preTransform * m * vec4(vPosition, 1.);
+
+        bool extrapolatedRegion = true;
+        if(distortion.view && distortion.method == 1){
+            if(distortion.type == 1) extrapolatedRegion = distortRadial(uvw, uvDistortion);
+            else if(distortion.type == 2) extrapolatedRegion = distortHomography(uvw, uvDistortion, homography);
+        } 
+
         gl_Position = uvwView.postTransform * uvw;
+        vValid = extrapolatedRegion ? 1. : 0.;
     #else 
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
     #endif

@@ -65,11 +65,12 @@ export function setDistortion(camera) {
 }
 
 export function setUvwCamera(camera) {
-    var uvw = {position: new Vector3(), preTransform: new Matrix4(), postTransform: new Matrix4()};
+    var uvw = {position: new Vector3(), preTransform: new Matrix4(), postTransform: new Matrix4(), postTransInv: new Matrix4()};
     camera.getWorldPosition(uvw.position);
     uvw.preTransform.copy(camera.matrixWorldInverse);
     uvw.preTransform.setPosition(0,0,0);
     uvw.preTransform.premultiply(camera.preProjectionMatrix);
     uvw.postTransform.copy(camera.postProjectionMatrix);
+    uvw.postTransInv = new Matrix4().getInverse(camera.postProjectionMatrix);
     return uvw;
 }

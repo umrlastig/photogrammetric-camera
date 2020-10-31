@@ -10,8 +10,10 @@ var textureCamera = new PhotogrammetricCamera();
 var renderer, scene, cameras, controls;
 var environment, backgroundSphere, worldPlane;
 
+var composer, scenePass;
+
 var basicMaterial, wireMaterial, textureMaterial, viewMaterials = {};
-var textureMaterialUniforms, viewMaterialUniforms;
+var textureMaterialUniforms, viewMaterialUniforms, sceneMaterialUniforms;
 
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
@@ -23,6 +25,8 @@ var params = {
     distortion: {rmax: 1},
     interpolation: {duration: 3.}
 };
+
+var clock = new THREE.Clock();
 
 /* ----------------------- Functions --------------------- */
 
@@ -70,6 +74,25 @@ function initCameraMaterialUniforms(vs, fs, map) {
     return uniforms;
 }
 
+function initSceneMaterialUniforms(vs, fs, material) {
+    var uniforms = {
+        uniforms: {
+            tDiffuse: { value: null },
+            diffuse:  { value: new THREE.Color(0xeeeeee) },
+            opacity:  { value: 1.},
+            debug: { value: material.debug },
+            uvwView: { value: material.uvwView },
+            uvDistortion: { value: material.uvDistortion },
+            distortion: { value: material.distortion },
+            extrapolation: { value: material.extrapolation },
+            homography: { value: material.homography }
+        },
+        vertexShader: vs,
+        fragmentShader: fs,
+    };
+    return uniforms;
+}
+
 /* Environment --------------------------------------- */
 function initBackgroundSphere(material) {
     var sphere = new THREE.SphereBufferGeometry(-1, 32, 32);
@@ -83,23 +106,6 @@ function initWorldPlane(material) {
     var visibility = new Float32Array(plane.attributes.position.count); // invisible
     plane.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(plane, material);
-}
-
-function updateEnvironment() {
-    backgroundSphere.scale.set(params.environment.radius, params.environment.radius, params.environment.radius);
-    backgroundSphere.position.copy(params.environment.center);
-    backgroundSphere.updateWorldMatrix();
-
-    var position = params.environment.center.clone().add(
-        viewCamera.up.clone().multiplyScalar(params.environment.elevation));
-    var normal = viewCamera.up.clone().multiplyScalar(-1.);
-    worldPlane.position.copy(position);
-    worldPlane.scale.set(params.environment.radius, params.environment.radius, 1);
-    worldPlane.lookAt(position.clone().add(normal));
-    worldPlane.updateWorldMatrix();
-
-    controls.maxDistance = params.environment.radius;
-    environment.visible = true;
 }
 
 /* Cameras ------------------------------------------- */
@@ -403,10 +409,28 @@ function setRadius(material, camera){
 }
 
 /* Update -------------------------------------------- */
+function updateEnvironment() {
+    backgroundSphere.scale.set(params.environment.radius, params.environment.radius, params.environment.radius);
+    backgroundSphere.position.copy(params.environment.center);
+    backgroundSphere.updateWorldMatrix();
+
+    var position = params.environment.center.clone().add(
+        viewCamera.up.clone().multiplyScalar(params.environment.elevation));
+    var normal = viewCamera.up.clone().multiplyScalar(-1.);
+    worldPlane.position.copy(position);
+    worldPlane.scale.set(params.environment.radius, params.environment.radius, 1);
+    worldPlane.lookAt(position.clone().add(normal));
+    worldPlane.updateWorldMatrix();
+
+    controls.maxDistance = params.environment.radius;
+    environment.visible = true;
+}
+
 function updateMaterial(material) {
     material.setCamera(textureCamera, viewCamera);
     material.setCenter(textureCamera);
     material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2max;
+    material.setUniforms(scenePass.uniforms);
 }
 
 function updateControls() {

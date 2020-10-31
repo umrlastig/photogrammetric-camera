@@ -29,6 +29,8 @@
             var imageFS = photogrammetricCamera.imageFS;
             var distortVS = photogrammetricCamera.distortVS;
             var distortFS = photogrammetricCamera.distortFS;
+            var sceneVS = photogrammetricCamera.sceneVS;
+            var sceneFS = photogrammetricCamera.sceneFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
@@ -36,9 +38,7 @@
         <script src="../dist/three-additional.js"></script>
         <script>
             // Three library
-            var OrbitControls = photogrammetricCamera.OrbitControls;
             var MapControls = photogrammetricCamera.MapControls;
-            var FirstPersonControls = photogrammetricCamera.FirstPersonControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
@@ -65,6 +65,9 @@
                 renderer.setSize(width, height);
                 container.appendChild(renderer.domElement);
 
+                // Post-processing
+                composer = new THREE.EffectComposer(renderer);
+
                 // Scene
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color(0xf0f0f0);
@@ -81,6 +84,7 @@
                 wireMaterial = initWireMaterial();
                 [textureMaterialUniforms, textureMaterial] = initTextureMaterial(distortVS, distortFS, uvTexture);
                 viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
+                sceneMaterialUniforms = initSceneMaterialUniforms(sceneVS, sceneFS, textureMaterial);
 
                 // Environment
                 environment = new THREE.Group();
@@ -98,6 +102,13 @@
 				controls.screenSpacePanning = false;
                 controls.maxPolarAngle = 0.75*Math.PI;
                 controls.enableKeys = false;
+
+                // Compose rendering passes
+                composer.addPass(new THREE.RenderPass(scene, viewCamera));
+
+                scenePass = new THREE.ShaderPass(sceneMaterialUniforms);
+                scenePass.renderToScreen = true;
+                composer.addPass(scenePass);
 
                 // Event listeners
                 window.addEventListener('resize', onWindowResize, false);
@@ -167,6 +178,7 @@
                 viewGUI.visible = viewGUI.add(cameras, 'visible');
                 viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
                 viewGUI.distort = viewGUI.add(textureMaterial.distortion, 'view').name('distort');
+                viewGUI.extrapol = viewGUI.add(textureMaterial.extrapolation, 'view').name('extrapolate');
 
                 // Texture Camera
                 function updateRmaxFromGUI(value) {
@@ -185,11 +197,14 @@
                 debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
                 debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
+                debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2}).name('rendering');
                 debugGUI.distortion = debugGUI.add(textureMaterial.distortion, 'type', {radial: 1, complete: 2}).name('distortion');
             };
 
             function render() {
-                renderer.render(scene, viewCamera);
+                if(textureMaterial.distortion.method == 2){
+                    composer.render(clock.getDelta());
+                }else renderer.render(scene, viewCamera);
             }
 
             function animate(timestamp) {

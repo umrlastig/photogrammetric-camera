@@ -167,6 +167,52 @@ export const chunks = {
         return true;
     }
 
+    const int N = 50;
+    const float m_err2_max = 0.5;
+
+    bool distortInverseRadial(inout vec4 p, DistortionParams disto) {
+        if(disto.R.w == 0.) return true;
+        p /= p.w;
+        vec2 v = p.xy - disto.C;
+        float v2 = dot(v, v);
+
+        float r2_max = disto.R.w;
+        float r_max = sqrt(r2_max);
+        vec2 point_rmax = normalize(v)*r_max + disto.C;
+        distortPointRadial(point_rmax, disto);
+        vec2 rd_max = point_rmax - disto.C;
+        float rd2_max = dot(rd_max, rd_max);
+        vec3 derivative = disto.R.xyz * vec3(3.,5.,7.);
+        float ratio = r_max/sqrt(rd2_max);
+
+        if(v2 < rd2_max) {
+            float rd = sqrt(v2), r0 = r_max, r1 = rd*ratio, r = r1;
+            vec2 point = normalize(v)*r + disto.C;
+            distortPointRadial(point, disto);
+            vec2 r_point = point - disto.C;
+            float r2_point = dot(r_point, r_point);
+            float d_r0 = sqrt(rd2_max), d_r1 = sqrt(r2_point);
+            float err = rd - sqrt(r2_point), err2 = err*err;
+            for (int i = 0; i < N; i++) { // iterate max N times
+                if (err2 < m_err2_max) break;
+                r = clamp(r + (err*(r1-r0)/(d_r1-d_r0)), 0., r_max);
+                r0 = r1; r1 = r;
+                point = normalize(v)*r + disto.C;
+                distortPointRadial(point, disto);
+                r_point = point - disto.C;
+                r2_point = dot(r_point, r_point);
+                d_r0 = d_r1; d_r1 = sqrt(r2_point);
+                err = rd - sqrt(r2_point), err2 = err*err;
+            }
+            if(err2 > m_err2_max) return false;
+            p.xy = disto.C + (r/rd)*v;
+        }else {
+            p.xy = disto.C + ratio*v;
+            return false;
+        }
+        return true;
+    }
+
 `,
 };
 

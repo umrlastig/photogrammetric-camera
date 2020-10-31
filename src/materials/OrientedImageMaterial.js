@@ -6,10 +6,10 @@ class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
         const size = pop(options, 'size', 1);
         const diffuse = pop(options, 'diffuse', new Color(0xeeeeee));
-        const uvwTexture = pop(options, 'uvwTexture', {position: new Vector3(),
-            preTransform: new Matrix4(), postTransform: new Matrix4()});
-        const uvwView = pop(options, 'uvwView', {position: new Vector3(),
-            preTransform: new Matrix4(), postTransform: new Matrix4()});
+        const uvwTexture = pop(options, 'uvwTexture', {position: new Vector3(), preTransform: new Matrix4(),
+            postTransform: new Matrix4(), postTransInv: new Matrix4()});
+        const uvwView = pop(options, 'uvwView', {position: new Vector3(), preTransform: new Matrix4(),
+            postTransform: new Matrix4(), postTransInv: new Matrix4()});
         const distortion = pop(options, 'distortion', {method: 1, type: 1, texture: true, view: false,
             r2img: 0., r2max: 0.});
         const extrapolation = pop(options, 'extrapolation', {texture: false, view: false});
@@ -118,6 +118,15 @@ class OrientedImageMaterial extends ShaderMaterial {
         var H = new Matrix3().fromArray(matX).transpose();
         return H;
     }
+
+    setUniforms(pass){
+        pass.debug.value = this.debug;
+        pass.uvwView.value = this.uvwView;
+        pass.uvDistortion.value = this.uvDistortion;
+        pass.distortion.value = this.distortion;
+        pass.extrapolation.value = this.extrapolation;
+        pass.homography.value = this.homography;
+    }
 }
 
 export const chunks = {
@@ -126,6 +135,7 @@ export const chunks = {
         vec3 position;
         mat4 preTransform;
         mat4 postTransform;
+        mat4 postTransInv;
     };
 
     struct Debug {
