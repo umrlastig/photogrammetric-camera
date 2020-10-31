@@ -56,8 +56,10 @@ void main() {
 
         bool extrapolatedRegion = true;
         if(distortion.view && distortion.method == 1){
-            if(distortion.type == 1) extrapolatedRegion = distortRadial(uvw, uvDistortion);
-            else if(distortion.type == 2) extrapolatedRegion = distortHomography(uvw, uvDistortion, homography);
+            vec4 distorted = uvw;
+            if(distortion.type == 1) extrapolatedRegion = distortRadial(distorted, uvDistortion);
+            else if(distortion.type == 2) extrapolatedRegion = distortHomography(distorted, uvDistortion, homography);
+            uvw.xy = distorted.xy*uvw.w;
         } 
 
         gl_Position = uvwView.postTransform * uvw;

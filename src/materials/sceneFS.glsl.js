@@ -29,6 +29,9 @@ void main(){
     #endif
     
     vec4 uvw = uvwView.postTransInv * vUvw;
+
+    bool extrapolatedRegion = true;
+    if(distortion.view && distortion.method == 2) extrapolatedRegion = distortInverseRadial(uvw, uvDistortion);
     
     vec4 debugColor = vec4(0.);
     if(distortion.method == 2) {
@@ -37,10 +40,6 @@ void main(){
         debugColor = vec4(vec3(0.), fract(clamp(r*r*r*r*r, 0., 1.)));
         debugColor.a *= debug.debugOpacity;
     }
-
-    bool extrapolatedRegion = true;
-
-    if(distortion.view && distortion.method == 2) extrapolatedRegion = distortInverseRadial(uvw, uvDistortion);
 
     uvw = uvwView.postTransform * uvw;
     uvw.xyz /= 2.*uvw.w;

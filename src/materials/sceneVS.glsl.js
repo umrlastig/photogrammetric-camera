@@ -1,4 +1,9 @@
+import { chunks as disto } from '../cameras/PhotogrammetricDistortion';
+import { chunks as material } from '../materials/OrientedImageMaterial';
+
 export default /* glsl */`
+${disto.shaders}
+${material.shaders}
 #ifdef USE_LOGDEPTHBUF
     #ifdef USE_LOGDEPTHBUF_EXT
         varying float vFragDepth;
@@ -8,6 +13,9 @@ export default /* glsl */`
     #endif
 #endif
 
+uniform Camera uvwView;
+uniform Distortion distortion;
+uniform DistortionParams uvDistortion;
 varying highp vec4 vUvw;
 
 bool isPerspectiveMatrix( mat4 m ) {
@@ -19,7 +27,15 @@ void main () {
     vec2 vUv = (uv*2.) - 1.;
     vUvw = vec4(vUv, 0., 1.);
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+    vec4 uvw = uvwView.postTransInv * vUvw;
+
+    if(distortion.view && distortion.method == 2){
+        vec4 distorted = uvw;
+        distortInverseRadial(distorted, uvDistortion);
+        uvw.xy = distorted.xy*uvw.w;
+    }
+
+    gl_Position = uvwView.postTransform * uvw;
 
     #ifdef USE_LOGDEPTHBUF
         #ifdef USE_LOGDEPTHBUF_EXT

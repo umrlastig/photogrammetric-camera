@@ -186,6 +186,7 @@ export const chunks = {
         float ratio = r_max/sqrt(rd2_max);
 
         if(v2 < rd2_max) {
+            if (disto.type < 1 || disto.type > 3) return true;
             float rd = sqrt(v2), r0 = r_max, r1 = rd*ratio, r = r1;
             vec2 point = normalize(v)*r + disto.C;
             distortPointRadial(point, disto);
@@ -207,6 +208,7 @@ export const chunks = {
             if(err2 > m_err2_max) return false;
             p.xy = disto.C + (r/rd)*v;
         }else {
+            if (disto.type < 1 || disto.type > 3) return false;
             p.xy = disto.C + ratio*v;
             return false;
         }
