@@ -1,5 +1,7 @@
-import { Vector2, Vector4 } from 'three';
+import { Vector2 } from 'three';
 import { default as PhotogrammetricDistortion } from '../PhotogrammetricDistortion';
+import { default as RadialDistortion } from './RadialDistortion';
+import { default as TangentialDistortion } from './TangentialDistortion';
 
 class FishEyeDistortion {
 

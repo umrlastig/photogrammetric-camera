@@ -32,7 +32,7 @@ void main () {
     if(distortion.view && distortion.method == 2){
         vec4 distorted = uvw;
         distortInverseRadial(distorted, uvDistortion);
-        uvw.xy = distorted.xy*uvw.w;
+        if (uvDistortion.type > 0 && uvDistortion.type < 4) uvw.xy = distorted.xy*uvw.w;
     }
 
     gl_Position = uvwView.postTransform * uvw;

@@ -34,6 +34,7 @@ var clock = new THREE.Clock();
 function initBasicMaterial(){
     return new THREE.MeshBasicMaterial({
         color: 0xffcc66,
+        side: THREE.DoubleSide
     });
 }
 
@@ -128,7 +129,7 @@ function cameraHelper(camera) {
     new THREE.Vector3(  1, -1, -1 ).applyMatrix4(m).toArray(v, 12);
 
     // place a frustum
-    {   
+    {
         var vertices = v;
         var indices = [0, 1, 2,  0, 2, 3,  0, 3, 4,  0, 4, 1];
         var geometry = new THREE.BufferGeometry();
@@ -176,13 +177,13 @@ function onWindowResize() {
 
 function onDocumentKeyDown(event) {
     switch(event.key){
-        case 's': setView(getCamera(nextCamera, -1));  break;
-        case 'z': setView(getCamera(nextCamera, +1));  break;
+        case 's': setView(getCamera(textureCamera, -1));  break;
+        case 'z': setView(getCamera(textureCamera, +1));  break;
         case 'q': setTexture(getCamera(textureCamera, -1));  break;
         case 'd': setTexture(getCamera(textureCamera, +1));  break;
-        case 'a': setCamera(getCamera(nextCamera, -1));  break;
-        case 'e': setCamera(getCamera(nextCamera, +1));  break;
-        case 't': setTexture(getCamera(nextCamera));  break;
+        case 'a': setCamera(getCamera(textureCamera, -1));  break;
+        case 'e': setCamera(getCamera(textureCamera, +1));  break;
+        case 't': setTexture(getCamera(textureCamera));  break;
         case 'v': setView(getCamera(textureCamera));  break;
         case 'c': console.log(nextCamera); break;
         case 'p': console.log(viewCamera.position); break;
@@ -405,7 +406,7 @@ function setMaterial(material, camera) {
 function setRadius(material, camera){
     material.setRadius(camera);
     material.setCenter(camera);
-    material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2max;
+    material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2img;
 }
 
 /* Update -------------------------------------------- */
@@ -428,9 +429,7 @@ function updateEnvironment() {
 
 function updateMaterial(material) {
     material.setCamera(textureCamera, viewCamera);
-    material.setCenter(textureCamera);
-    material.uvDistortion.R.w = params.distortion.rmax*params.distortion.rmax*material.distortion.r2max;
-    material.setUniforms(scenePass.uniforms);
+    setRadius(material, viewCamera);
 }
 
 function updateControls() {
@@ -455,7 +454,6 @@ function interpolateCamera(timestamp) {
         if (timestamp < nextCamera.timestamp) {
             const t = 0.001 * (timestamp - prevCamera.timestamp) / params.interpolation.duration;
             viewCamera.set(prevCamera).lerp(nextCamera, t);
-
             textureMaterial.debug.showImage = false;
         } else {
             viewCamera.set(nextCamera);

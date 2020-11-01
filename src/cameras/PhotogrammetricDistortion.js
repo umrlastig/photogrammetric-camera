@@ -117,7 +117,7 @@ export const chunks = {
     }
 
     bool distortBasic(inout vec4 p, DistortionParams disto) {
-        if(disto.type == 0) return true;
+        if(disto.R.w == 0. || disto.type < 1 || disto.type > 3) return true;
         p /= p.w;
         vec2 r = p.xy - disto.C;
         float r2 = dot(r, r);
@@ -127,7 +127,7 @@ export const chunks = {
     }
 
     bool distortRadial(inout vec4 p, DistortionParams disto) {
-        if(disto.R.w == 0.) return true;
+        if(disto.R.w == 0. || disto.type < 1 || disto.type > 3) return true;
         p /= p.w;
         vec2 r = p.xy - disto.C;
         float r2 = dot(r, r);
@@ -152,13 +152,13 @@ export const chunks = {
         p = point.xy/point.z;
     }
 
-    bool distortHomography(inout vec4 p, DistortionParams disto, Homography h){
-        if(disto.R.w == 0.) return true;
+    bool distortHomography(inout vec4 p, DistortionParams disto, Homography h) {
+        if(disto.R.w == 0. || disto.type < 1 || disto.type > 3) return true;
         p /= p.w;
         vec2 r = p.xy - disto.C;
         float r2 = dot(r, r);
 
-        if (r2 > disto.R.w){
+        if (r2 > disto.R.w) {
             extrapolateHomography(p.xy, h.H);
             return false;
         } 
@@ -171,7 +171,7 @@ export const chunks = {
     const float m_err2_max = 0.5;
 
     bool distortInverseRadial(inout vec4 p, DistortionParams disto) {
-        if(disto.R.w == 0.) return true;
+        if(disto.R.w == 0. || disto.type < 1 || disto.type > 3) return true;
         p /= p.w;
         vec2 v = p.xy - disto.C;
         float v2 = dot(v, v);
@@ -214,7 +214,6 @@ export const chunks = {
         }
         return true;
     }
-
 `,
 };
 

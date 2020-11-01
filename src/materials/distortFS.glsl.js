@@ -82,13 +82,13 @@ void main(){
                     color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
                     diffuseColor.rgb += color.rgb * color.a;
                     diffuseColor.a += color.a;
-                } else if (extrapolatedRegion || extrapolation.texture){
+                } else {
                     diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
                     diffuseColor.a += debug.debugOpacity;
                 }
             }
 
-            if(vValid < 0.99 && !extrapolation.view) discard;
+            if((vValid < 0.99 && !extrapolation.view) || (!extrapolatedRegion && !extrapolation.texture)) discard;
             
             diffuseColor.rgb += debugColor.rgb * debugColor.a;
             diffuseColor.a += debugColor.a;

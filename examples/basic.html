@@ -34,9 +34,7 @@
         <script src="../dist/three-additional.js"></script>
         <script>
             // Three library
-            var OrbitControls = photogrammetricCamera.OrbitControls;
             var MapControls = photogrammetricCamera.MapControls;
-            var FirstPersonControls = photogrammetricCamera.FirstPersonControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
@@ -65,8 +63,7 @@
 
                 // Scene
                 scene = new THREE.Scene();
-                //scene.background = new THREE.Color(0xf0f0f0);
-                scene.background = new THREE.Color(0x000000);
+                scene.background = new THREE.Color(0xf0f0f0);
 
                 // Cameras 
                 cameras = new THREE.Group();
@@ -105,29 +102,33 @@
                 collections = {
                     Sample: function(){
                         clean();
+                        worldPlane.visible = false;
                         var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
                         loadOrientation('Orientation-1.xml', source);
                         updateEnvironment();
                     },
-                    Abbey: function() {
-                        clean();
-                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/NEW-DATA/CompensOnLine/';
-                        var source = new FetchSource(path);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
-                    },
-                    Maurepas: function(){
+                    Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
                         loadJSON(server + collection);
                     },
-                    Frejus: function(){
+                    Frejus: function() {
                         clean();
+                        backgroundSphere.visible = false;
                         collection = 'collections/frejus/';
+                        loadJSON(server + collection);
+                    },
+                    Viabon: function() {
+                        clean();
+                        backgroundSphere.visible = false;
+                        collection = 'collections/viabon/';
+                        loadJSON(server + collection);
+                    },
+                    SaintMartin: function() {
+                        clean();
+                        collection = 'collections/saint_martin/';
                         loadJSON(server + collection);
                     }
                 };
@@ -149,6 +150,44 @@
 
                 var collectionsGUI = gui.addFolder('Collections');
                 menuCollections();
+
+                // View Camera
+                function updateViewCameraFromGUI() {
+                    viewCamera.updateProjectionMatrix();
+                };
+
+                var viewGUI = gui.addFolder('View Camera'); // View
+                viewGUI.visible = viewGUI.add(cameras, 'visible');
+                viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
+
+                // Texture Camera
+                var textureGUI = gui.addFolder('Historical Camera');
+                textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
+
+                // Background 
+                var backgroundGUI = gui.addFolder('Background');
+                backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
+                backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
+                backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
+
+                // Debug
+                var debugGUI = gui.addFolder('Debug');
+                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
+                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
+                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
+
+                // Update controls functions
+                gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {
+                    viewGUI.zoom.setValue(viewCamera.zoom);
+                    backgroundGUI.sphere.setValue(environment.children[0].visible);
+                    backgroundGUI.plane.setValue(environment.children[1].visible);
+                    var name = textureCamera.name;
+                    if (name.length > 0) {
+                        if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
+                        textureGUI.name = 'Hist: ' + name;
+                    }     
+                }
+                return gui;
             };
 
             function render() {
@@ -158,6 +197,8 @@
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
+                updateMaterial(textureMaterial);
+                gui.updateFromCameras(viewCamera, textureCamera, environment);
                 render();
             }
         </script>

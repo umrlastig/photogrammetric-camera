@@ -12,7 +12,7 @@ class OrientedImageMaterial extends ShaderMaterial {
             postTransform: new Matrix4(), postTransInv: new Matrix4()});
         const distortion = pop(options, 'distortion', {method: 1, type: 1, texture: true, view: false,
             r2img: 0., r2max: 0.});
-        const extrapolation = pop(options, 'extrapolation', {texture: false, view: false});
+        const extrapolation = pop(options, 'extrapolation', {texture: true, view: true});
         const uvDistortion = pop(options, 'uvDistortion', {type: 0, R: new Vector4(), C: new Vector3()});
         const homography = pop(options, 'homography', {H: new Matrix3(), invH: new Matrix3});
         const map = pop(options, 'map', null);

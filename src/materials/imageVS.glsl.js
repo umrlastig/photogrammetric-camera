@@ -18,6 +18,8 @@ export default /* glsl */`
 #endif
 
 uniform float size;
+attribute float visibility;
+varying float vVisibility;
 
 bool isPerspectiveMatrix( mat4 m ) {
     return m[ 2 ][ 3 ] == - 1.0;
@@ -27,6 +29,8 @@ void main() {
     #ifdef USE_COLOR
         vColor.xyz = color.xyz;
     #endif
+
+    vVisibility = visibility;
 
     #ifdef USE_MAP4
         vPosition = position;

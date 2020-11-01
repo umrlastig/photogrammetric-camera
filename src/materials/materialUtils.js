@@ -1,6 +1,7 @@
 import { Uniform, Vector3, Matrix4 } from 'three';
 import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
 import { default as FraserDistortion } from '../cameras/distortions/FraserDistortion';
+import { default as FishEyeDistortion } from '../cameras/distortions/FishEyeDistortion';
 
 export function pop(options, property, defaultValue) {
     if (options[property] === undefined) return defaultValue;
@@ -50,12 +51,12 @@ export function setDistortion(camera) {
                 distortion.b = disto.b;
                 break;
             case disto instanceof FishEyeDistortion:
-                uvDistortion.type = 3;
-                uvDistortion.F = disto.F;
-                uvDistortion.C = disto.C;
-                uvDistortion.R = disto.R;
-                uvDistortion.P = disto.P;
-                uvDistortion.b = disto.l;
+                distortion.type = 3;
+                distortion.F = disto.F;
+                distortion.C = disto.C;
+                distortion.R = disto.R;
+                distortion.P = disto.P;
+                distortion.b = disto.l;
                 break;
             default:
                 break;

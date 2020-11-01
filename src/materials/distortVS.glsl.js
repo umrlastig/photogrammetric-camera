@@ -59,11 +59,12 @@ void main() {
             vec4 distorted = uvw;
             if(distortion.type == 1) extrapolatedRegion = distortRadial(distorted, uvDistortion);
             else if(distortion.type == 2) extrapolatedRegion = distortHomography(distorted, uvDistortion, homography);
-            uvw.xy = distorted.xy*uvw.w;
+            if (uvDistortion.R.w > 0. && uvDistortion.type > 0 && uvDistortion.type < 4) uvw.xy = distorted.xy*uvw.w;
         } 
 
         gl_Position = uvwView.postTransform * uvw;
         vValid = extrapolatedRegion ? 1. : 0.;
+
     #else 
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
     #endif

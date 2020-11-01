@@ -190,16 +190,29 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         if(this.distos && this.distos.length == 1) {
             const disto = this.distos[0];
             const C = disto.C;
-            
+
             var p1 = new Vector2(0, 0);
             var p2 = new Vector2(w, 0);
             var p3 = new Vector2(0, h);
             var p4 = new Vector2(w, h);
 
             var pimg = this.maxPoint(p4, this.maxPoint(p3, this.maxPoint(p2, p1, C), C), C);
+            var rimg = new Vector2(pimg.x - C.x, pimg.y - C.y);
             var r2img = this.getRadius(pimg, C);
-            this.radius.r2img = r2img;
-            this.radius.r2max = disto.R.w;
+
+            var pdimg = pimg.clone(); disto.project(pdimg); 
+            var rd2img = this.getRadius(pdimg, C);
+            var ratio = Math.sqrt(r2img/rd2img);
+
+            ratio = this.undistortPoint(pimg, r2img, rd2img, ratio, disto);
+
+            if (ratio > 0.) {
+                var p = new Vector2(C.x + ratio*rimg.x, C.y + ratio*rimg.y);
+                this.radius.r2img = this.getRadius(p, C);
+            } else this.radius.r2img = r2img;
+            
+            if(disto.R.w != Infinity) this.radius.r2max = disto.R.w;
+            else this.radius.r2max = this.radius.r2img;     
         } else {
             const x = w/2.;
             const y = h/2.;
@@ -221,6 +234,33 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         return x*x + y*y;
     }
 
+    undistortPoint(p, r2, rd2, ratio, d) {
+        const disto = this.distos[0];
+        const rmax = Math.sqrt(disto.R.w);
+        var rd = Math.sqrt(r2);
+        var r0 = rd; var r1 = rd*ratio;
+        var r = r1;
+        var point = new Vector2(p.normalize().x*r + disto.C.x, p.normalize().y*r + disto.C.y);
+        d.project(point);
+        var rpoint = new Vector2(point.x - disto.C.x, point.y - disto.C.y);
+        var r2point = rpoint.x*rpoint.x + rpoint.y*rpoint.y;
+        var dr0 = Math.sqrt(rd2); var dr1 = Math.sqrt(r2point);
+        var err = rd - dr1; var err2 = err*err;
+        for (var i=0; i<50; i++) {
+            if(err2 < 0.5) break;
+            r = Math.min(Math.max(r + (err*(r1-r0)/(dr1-dr0)), 0.), rmax);
+            r0 = r1; r1 = r;
+            point = new Vector2(p.normalize().x*r + disto.C.x, p.normalize().y*r + disto.C.y);
+            d.project(point);
+            rpoint = new Vector2(point.x - disto.C.x, point.y - disto.C.y);
+            r2point = rpoint.x*rpoint.x + rpoint.y*rpoint.y;
+            dr0 = dr1; dr1 = Math.sqrt(r2point);
+            err = rd - dr1, err2 = err*err;
+        }
+        if(err2 > 0.5) return 0.;
+        else return r/rd;
+    }
+
     lerp(camera, t) {
         this.focal.lerp(camera.focal, t);
         this.point.lerp(camera.point, t);
@@ -239,6 +279,11 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         this.view.height += t * (camera.view.height - this.view.height);
         this.view.fullWidth += t * (camera.view.fullWidth - this.view.fullWidth);
         this.view.fullHeight += t * (camera.view.fullHeight - this.view.fullHeight);
+        // Distortion interpolation
+        if(t < 0.2) this.radius.r2img += (t - 0.2) * this.radius.r2img;
+        else if(t < 0.8) this.radius.r2img = 0;
+        else this.radius.r2img += (1. - t) * (camera.radius.r2img - this.radius.r2img);
+
         return this.updateProjectionMatrix();
     }
 
@@ -254,6 +299,7 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         this.aspect = source.aspect;
         this.near = source.near;
         this.imageMatrix.copy(source.imageMatrix);
+        Object.assign(this.radius, source.radius);
         Object.assign(this.view, source.view);
         return this.updateProjectionMatrix();
     }

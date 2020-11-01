@@ -71,7 +71,6 @@
                 // Scene
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color(0xf0f0f0);
-                //scene.background = new THREE.Color(0x000000);
 
                 // Cameras 
                 cameras = new THREE.Group();
@@ -118,6 +117,7 @@
                 collections = {
                     Sample: function(){
                         clean();
+                        worldPlane.visible = false;
                         var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
@@ -131,16 +131,13 @@
                     },
                     Frejus: function() {
                         clean();
+                        backgroundSphere.visible = false;
                         collection = 'collections/frejus/';
-                        loadJSON(server + collection);
-                    },
-                    Nanterre: function() {
-                        clean();
-                        collection = 'collections/nanterre/';
                         loadJSON(server + collection);
                     },
                     Viabon: function() {
                         clean();
+                        backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
                         loadJSON(server + collection);
                     },
@@ -182,7 +179,7 @@
 
                 // Texture Camera
                 function updateRmaxFromGUI(value) {
-                    textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2max;
+                    textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2img;
                     textureMaterial.setHomography(textureCamera);
                 };
 
@@ -192,13 +189,39 @@
                 textureGUI.extrapol = textureGUI.add(textureMaterial.extrapolation, 'texture').name('extrapolate');
                 textureGUI.add(params.distortion, 'rmax', 0, 1).name('rmax ratio').onChange(updateRmaxFromGUI);
 
+                // Background 
+                var backgroundGUI = gui.addFolder('Background');
+                backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
+                backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
+                backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
+
                 // Debug
+                function radialDistortionWarn() {
+                    if(textureMaterial.distortion.type == 2 && textureMaterial.distortion.method == 2)
+                        console.warn('Double pass rendering only supports the radial part of the distortion model');
+                }
+
                 var debugGUI = gui.addFolder('Debug');
                 debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
                 debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
-                debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2}).name('rendering');
-                debugGUI.distortion = debugGUI.add(textureMaterial.distortion, 'type', {radial: 1, complete: 2}).name('distortion');
+                debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2})
+                    .name('rendering').onChange(radialDistortionWarn);
+                debugGUI.distortion = debugGUI.add(textureMaterial.distortion, 'type', {radial: 1, complete: 2})
+                    .name('distortion mode').onChange(radialDistortionWarn);
+
+                // Update controls functions
+                gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {
+                    viewGUI.zoom.setValue(viewCamera.zoom);
+                    backgroundGUI.sphere.setValue(environment.children[0].visible);
+                    backgroundGUI.plane.setValue(environment.children[1].visible);
+                    var name = textureCamera.name;
+                    if (name.length > 0) {
+                        if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
+                        textureGUI.name = 'Hist: ' + name;
+                    }     
+                }
+                return gui;
             };
 
             function render() {
@@ -211,6 +234,8 @@
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
                 updateMaterial(textureMaterial);
+                textureMaterial.setUniforms(scenePass.uniforms);
+                gui.updateFromCameras(viewCamera, textureCamera, environment);
                 render();
             }
         </script>
