@@ -266,7 +266,6 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         this.point.lerp(camera.point, t);
         this.position.lerp(camera.position, t);
         this.quaternion.slerp(camera.quaternion, t);
-        // TODO: this.distos = ???
         this.imageMatrix.lerp(camera.imageMatrix, t);
         this.skew += t * (camera.skew - this.skew);
         this.zoom += t * (camera.zoom - this.zoom);
@@ -283,7 +282,6 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         if(t < 0.2) this.radius.r2img += (t - 0.2) * this.radius.r2img;
         else if(t < 0.8) this.radius.r2img = 0;
         else this.radius.r2img += (1. - t) * (camera.radius.r2img - this.radius.r2img);
-
         return this.updateProjectionMatrix();
     }
 
@@ -293,7 +291,24 @@ class PhotogrammetricCamera extends PerspectiveCamera {
         this.point.copy(source.point);
         this.position.copy(source.position);
         this.quaternion.copy(source.quaternion);
-        this.distos = source.distos.slice(0); // TODO: deep copy ?
+        this.distos = source.distos.slice(0); 
+        this.skew = source.skew;
+        this.zoom = source.zoom;
+        this.aspect = source.aspect;
+        this.near = source.near;
+        this.imageMatrix.copy(source.imageMatrix);
+        this.radius = source.radius;
+        Object.assign(this.view, source.view);
+        return this.updateProjectionMatrix();
+    }
+
+    setDefinetly(source) {
+        this.name = source.name;
+        this.focal.copy(source.focal);
+        this.point.copy(source.point);
+        this.position.copy(source.position);
+        this.quaternion.copy(source.quaternion);
+        this.distos = source.distos.slice(0); 
         this.skew = source.skew;
         this.zoom = source.zoom;
         this.aspect = source.aspect;

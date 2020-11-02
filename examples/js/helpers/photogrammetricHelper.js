@@ -177,13 +177,13 @@ function onWindowResize() {
 
 function onDocumentKeyDown(event) {
     switch(event.key){
-        case 's': setView(getCamera(textureCamera, -1));  break;
-        case 'z': setView(getCamera(textureCamera, +1));  break;
+        case 's': setView(getCamera(nextCamera, -1));  break;
+        case 'z': setView(getCamera(nextCamera, +1));  break;
         case 'q': setTexture(getCamera(textureCamera, -1));  break;
         case 'd': setTexture(getCamera(textureCamera, +1));  break;
-        case 'a': setCamera(getCamera(textureCamera, -1));  break;
-        case 'e': setCamera(getCamera(textureCamera, +1));  break;
-        case 't': setTexture(getCamera(textureCamera));  break;
+        case 'a': setCamera(getCamera(nextCamera, -1));  break;
+        case 'e': setCamera(getCamera(nextCamera, +1));  break;
+        case 't': setTexture(getCamera(nextCamera));  break;
         case 'v': setView(getCamera(textureCamera));  break;
         case 'c': console.log(nextCamera); break;
         case 'p': console.log(viewCamera.position); break;
@@ -456,7 +456,7 @@ function interpolateCamera(timestamp) {
             viewCamera.set(prevCamera).lerp(nextCamera, t);
             textureMaterial.debug.showImage = false;
         } else {
-            viewCamera.set(nextCamera);
+            viewCamera.setDefinetly(nextCamera);
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
 
