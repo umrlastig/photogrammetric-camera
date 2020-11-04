@@ -1,6 +1,6 @@
 import { ShaderMaterial, ShaderLib, Matrix3, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
-import numeric from 'numeric';
 import {pop, definePropertyUniform, setUvwCamera, setDistortion} from './materialUtils';
+import numeric from 'numeric';
 
 class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
@@ -13,19 +13,18 @@ class OrientedImageMaterial extends ShaderMaterial {
         const distortion = pop(options, 'distortion', {method: 1, type: 1, texture: true, view: false,
             r2img: 0., r2max: 0.});
         const extrapolation = pop(options, 'extrapolation', {texture: true, view: true});
-        const uvDistortion = pop(options, 'uvDistortion', {type: 0, R: new Vector4(), C: new Vector3()});
+        const uvDistortion = pop(options, 'uvDistortion', {type: 0, F: 0., C: new THREE.Vector2(), 
+            R: new THREE.Vector4(), P: new THREE.Vector2(), b: new THREE.Vector2()});
         const homography = pop(options, 'homography', {H: new Matrix3(), invH: new Matrix3});
         const map = pop(options, 'map', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
-        const debug = pop(options, 'debug', {borderSharpness: 500, diffuseColorGrey: true,
+        const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: true,
             debugOpacity: 0, showImage: false});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
-        if (map) {
-            options.defines.USE_MAP4 = '';
-        }
+        if (map) options.defines.USE_MAP4 = '';
         if (alphaMap) options.defines.USE_ALPHAMAP = '';
         if (options.vertexColors) options.defines.USE_COLOR = '';
         if (options.logarithmicDepthBuffer) options.defines.USE_LOGDEPTHBUF = '';

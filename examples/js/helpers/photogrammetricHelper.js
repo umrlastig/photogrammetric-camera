@@ -12,8 +12,8 @@ var environment, backgroundSphere, worldPlane;
 
 var composer, scenePass;
 
-var basicMaterial, wireMaterial, textureMaterial, viewMaterials = {};
-var textureMaterialUniforms, viewMaterialUniforms, sceneMaterialUniforms;
+var basicMaterial, wireMaterial, textureMaterial, multipleTextureMaterial, viewMaterials = {};
+var textureMaterialUniforms, multipleTextureMaterialUniforms, viewMaterialUniforms, sceneMaterialUniforms;
 
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
@@ -62,6 +62,28 @@ function initTextureMaterial(vs, fs, map) {
 
     return [uniforms, material];
 }
+
+function initMultipleTextureMaterial(vs, fs, map, renderer) {
+    // Maximum number of textures
+    const maxTextures = getMaxTextureUnitsCount(renderer);
+
+   var uniforms = {
+        map: map,
+        size: 2,
+        sizeAttenuation: false,
+        transparent: true,
+        vertexColors: THREE.VertexColors,
+        blending: THREE.NormalBlending,
+        maxTexture: maxTextures,
+        side: THREE.DoubleSide,
+        vertexShader: vs,
+        fragmentShader: fs
+    };
+
+   var material =  new MultipleOrientedImageMaterial(cameras, uniforms);
+
+   return [uniforms, material];
+};
 
 function initCameraMaterialUniforms(vs, fs, map) {
     var uniforms = {
@@ -216,19 +238,19 @@ function loadOrientedImage(orientationUrl, imageUrl, source, name) {
     loadImage(imageUrl, source).then(() => loadOrientation(orientationUrl, source, name));
 }
 
-function loadPlyMesh(url, source){
+function loadPlyMesh(url, source, material){
     return source.open(url, 'arrayBuffer')
     .then(parsePly(source))
-    .then(handleMesh(url));
+    .then(handleMesh(url, material));
 }
 
-function loadPlyPC(url, source){
+function loadPlyPC(url, source, material){
     return source.open(url, 'arrayBuffer')
     .then(parsePly(source))
-    .then(handlePointCloud(url));
+    .then(handlePointCloud(url, material));
 }
 
-function loadJSON(path, file) {
+function loadJSON(material, path, file) {
     file = file || 'index.json';
     var source = new FetchSource(path);
     source.open(file, 'text').then((json) => {
@@ -251,12 +273,12 @@ function loadJSON(path, file) {
         }
         
         if(json.up) viewCamera.up.copy(json.up);
-        if(json.pointSize) textureMaterial.size = json.pointSize;
+        if(json.pointSize) material.size = json.pointSize;
 
         updateEnvironment();
         
-        if(json.pc) json.pc.forEach((url) => loadPlyPC(url, source));
-        if(json.mesh) json.mesh.forEach((url) => loadPlyMesh(url, source));
+        if(json.pc) json.pc.forEach((url) => loadPlyPC(url, source, material));
+        if(json.mesh) json.mesh.forEach((url) => loadPlyMesh(url, source, material));
 
         if(json.ori && json.img) json.ori.forEach((orientationUrl, i) => 
             loadOrientedImage(orientationUrl, json.img[i], source));
@@ -291,7 +313,7 @@ function handleOrientation(name) {
     return function(camera) {
         if (!camera) return;
         handleCamera(camera, name);
-        if(textureMaterial.map == undefined) setCamera(camera);
+        if(cameras.children.length < 2) setCamera(camera);
         return camera;
     };
 }
@@ -324,15 +346,15 @@ function handleImage(name) {
     return function(texture) {
         if (!texture) return;
         texture.name = name;
-        textures[texture.name] = texture;
+        textures[texture.name] = texture ;
         return texture;
     };
 }
 
-function handlePointCloud(name){
+function handlePointCloud(name, material){
     return function(geometry){
         console.log(name);
-        var points = new THREE.Points(geometry, textureMaterial);
+        var points = new THREE.Points(geometry, material);
         environment.add(points);
         // Find center of the geometry
         geometry.computeBoundingBox();
@@ -345,11 +367,11 @@ function handlePointCloud(name){
     }
 }
 
-function handleMesh(name){
+function handleMesh(name, material){
     return function(geometry){
         console.log(name);
         geometry.computeVertexNormals();
-        var mesh = new THREE.Mesh(geometry, textureMaterial);
+        var mesh = new THREE.Mesh(geometry, material);
         environment.add(mesh);
         // Find center of the geometry
         geometry.computeBoundingBox();
@@ -367,6 +389,11 @@ function getCamera(camera, delta = 0){
     const array = cameras.children;
     const index = array.findIndex(cam => cam.name == camera.name);
     return array[(index + delta + array.length) % array.length];
+}
+
+function getMaxTextureUnitsCount(renderer) {
+    const gl = renderer.getContext();
+    return gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 }
 
 /* Sets ---------------------------------------------- */
@@ -388,9 +415,12 @@ function setTexture(camera) {
     if (!camera) return;
     console.log('Texture:', camera.name);
     textureCamera.copy(camera);
-    setMaterial(textureMaterial, camera);
-    setRadius(textureMaterial, camera);
-    textureMaterial.setHomography(camera);
+    if(textureMaterial) {
+        setMaterial(textureMaterial, camera);
+        setRadius(textureMaterial, camera);
+        textureMaterial.setHomography(camera);
+    }
+    if(multipleTextureMaterial) multipleTextureMaterial.setCamera(camera, textures);
 }
 
 function setCamera(camera) {
@@ -444,6 +474,11 @@ function updateControls() {
     controls.saveState();
 }
 
+function showMaterials(state) {
+    if (textureMaterial) textureMaterial.debug.showImage = state;
+    if (multipleTextureMaterial) multipleTextureMaterial.debug.showImage = state;
+}
+
 /* Movement ------------------------------------------ */
 function interpolateCamera(timestamp) {
     if (prevCamera.timestamp !== undefined) {
@@ -454,14 +489,14 @@ function interpolateCamera(timestamp) {
         if (timestamp < nextCamera.timestamp) {
             const t = 0.001 * (timestamp - prevCamera.timestamp) / params.interpolation.duration;
             viewCamera.set(prevCamera).lerp(nextCamera, t);
-            textureMaterial.debug.showImage = false;
+            showMaterials(false);
         } else {
             viewCamera.setDefinetly(nextCamera);
             prevCamera.timestamp = undefined;
             nextCamera.timestamp = undefined;
 
             controls.saveState();
-            textureMaterial.debug.showImage = true;
+            showMaterials(true);
         }
         viewCamera.updateProjectionMatrix(); 
     }
@@ -469,6 +504,13 @@ function interpolateCamera(timestamp) {
 
 /* Clean --------------------------------------------- */
 function basicClean() {
+    params = {
+        cameras: {size: 10000},
+        environment: {radius: 8000, epsilon: 5000, center: new THREE.Vector3(0.), elevation: 0},
+        distortion: {rmax: 1},
+        interpolation: {duration: 3.}
+    };
+
     const camera = new PhotogrammetricCamera();
     prevCamera.set(camera);
     nextCamera.set(camera);
@@ -478,7 +520,17 @@ function basicClean() {
 
     viewCamera.zoom = 0.5;
     viewCamera.up.set(0, 0, 1);
-    textureMaterial.map = null;
+    
+    if(textureMaterial) textureMaterial.map = null;
+
+    controls.target.set(0, 0, 0);
+
+    while(environment.children.length > 2) environment.remove(environment.children[environment.children.length - 1]);
+
+    backgroundSphere.visible = true;
+    worldPlane.visible = true;
+
+    Object.keys(textures).forEach(key => textures[key].dispose());
     while(cameras.children.length) cameras.remove(cameras.children[0]);
 }
 

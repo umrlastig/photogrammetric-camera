@@ -47,8 +47,10 @@ void main(){
 
     #ifdef USE_MAP4
         if(debug.showImage) {
-            // "uvwPreTransform * m" is equal to "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
-            // but more stable when both the texturing and viewing cameras have large coordinate values
+            // "uvwPreTransform * m" is equal to :
+            // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
+            // but more stable when both the texturing and viewing cameras have large
+            // coordinate values
             mat4 m = modelMatrix;
             m[3].xyz -= uvwTexture.position;
             vec4 uvw = uvwTexture.preTransform * m * vec4(vPosition, 1.);

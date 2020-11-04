@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Photogrammetric Camera</title>
+        <title>Photogrammetric Camera - Multiple Image Visualization</title>
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <link rel="shortcut icon" href="https://histovis.s3.eu-west-3.amazonaws.com/icons/histovis.ico">
         <style>
@@ -25,8 +25,11 @@
             var MicmacOrientationParser = photogrammetricCamera.MicmacOrientationParser;
             // Materials
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
+            var MultipleOrientedImageMaterial = photogrammetricCamera.MultipleOrientedImageMaterial;
             var imageVS = photogrammetricCamera.imageVS;
             var imageFS = photogrammetricCamera.imageFS;
+            var multipleVS = photogrammetricCamera.multipleVS;
+            var multipleFS = photogrammetricCamera.multipleFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
@@ -74,13 +77,14 @@
                 // Materials
                 basicMaterial = initBasicMaterial();
                 wireMaterial = initWireMaterial();
-                [textureMaterialUniforms, textureMaterial] = initTextureMaterial(imageVS, imageFS, uvTexture);
+                [multipleTextureMaterialUniforms, multipleTextureMaterial] = initMultipleTextureMaterial(
+                    multipleVS, multipleFS, uvTexture, renderer);
                 viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
 
                 // Environment
                 environment = new THREE.Group();
-                backgroundSphere = initBackgroundSphere(textureMaterial);
-                worldPlane = initWorldPlane(textureMaterial);
+                backgroundSphere = initBackgroundSphere(multipleTextureMaterial);
+                worldPlane = initWorldPlane(multipleTextureMaterial);
 
                 environment.add(backgroundSphere);
                 environment.add(worldPlane);
@@ -112,24 +116,24 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(multipleTextureMaterial, server + collection);
                     },
                     Frejus: function() {
                         clean();
                         backgroundSphere.visible = false;
                         collection = 'collections/frejus/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(multipleTextureMaterial, server + collection);
                     },
                     Viabon: function() {
                         clean();
                         backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(multipleTextureMaterial, server + collection);
                     },
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(multipleTextureMaterial, server + collection);
                     }
                 };
 
@@ -162,22 +166,22 @@
 
                 // Texture Camera
                 var textureGUI = gui.addFolder('Historical Camera');
-                textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
+                textureGUI.opacity = textureGUI.add(multipleTextureMaterial, 'opacity', 0, 1);
+                textureGUI.number = textureGUI.add(multipleTextureMaterial, 'orientedImageCount', 0, 1);
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
-                backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
+                backgroundGUI.wireframe = backgroundGUI.add(multipleTextureMaterial, 'wireframe');
                 backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
                 backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
 
                 // Debug
                 var debugGUI = gui.addFolder('Debug');
-                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("border sharpness");
-                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
-                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
+                debugGUI.borderSharpness = debugGUI.add(multipleTextureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
+                debugGUI.diffuseColorGrey = debugGUI.add(multipleTextureMaterial.debug, 'diffuseColorGrey');
 
                 // Update controls functions
-                gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {
+                gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, cameras, environment) {
                     viewGUI.zoom.setValue(viewCamera.zoom);
                     backgroundGUI.sphere.setValue(environment.children[0].visible);
                     backgroundGUI.plane.setValue(environment.children[1].visible);
@@ -186,6 +190,15 @@
                         if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
                         textureGUI.name = 'Hist: ' + name;
                     }     
+                    if (multipleTextureMaterial.defines.MAX_TEXTURE > cameras.children.length) {
+                        if(cameras.children.length > 1)
+                            textureGUI.number.max(cameras.children.length);
+                        else
+                            textureGUI.number.max(1);
+                    } else {
+                        textureGUI.number.max(multipleTextureMaterial.defines.MAX_TEXTURE);
+                    }
+                    textureGUI.number.setValue(Math.round(multipleTextureMaterial.orientedImageCount));
                 }
                 return gui;
             };
@@ -197,8 +210,8 @@
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-                updateMaterial(textureMaterial);
-                gui.updateFromCameras(viewCamera, textureCamera, environment);
+                multipleTextureMaterial.setCamera(textureCamera, textures);
+                gui.updateFromCameras(viewCamera, textureCamera, cameras, environment);
                 render();
             }
         </script>

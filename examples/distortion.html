@@ -127,24 +127,24 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(server + collection);
+                        loadJSON(textureMaterial, server + collection);
                     },
                     Frejus: function() {
                         clean();
                         backgroundSphere.visible = false;
                         collection = 'collections/frejus/';
-                        loadJSON(server + collection);
+                        loadJSON(textureMaterial, server + collection);
                     },
                     Viabon: function() {
                         clean();
                         backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
-                        loadJSON(server + collection);
+                        loadJSON(textureMaterial, server + collection);
                     },
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(server + collection);
+                        loadJSON(textureMaterial, server + collection);
                     }
                 };
 
@@ -202,7 +202,7 @@
                 }
 
                 var debugGUI = gui.addFolder('Debug');
-                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
+                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("border sharpness");
                 debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
                 debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2})

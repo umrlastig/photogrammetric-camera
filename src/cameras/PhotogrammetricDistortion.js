@@ -12,7 +12,6 @@ function polynom(c, x) {
 
 export const chunks = {
     shaders: `
-
     struct Distortion {
         int method;
         int type;
