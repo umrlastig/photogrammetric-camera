@@ -11,12 +11,23 @@
         </style>
     </head>
     <body>
-        <script src="../dist/photogrammetric-camera.js"></script>
+        <script src="../dist/three.js"></script>
         <script>
             // Three library
             var THREE = photogrammetricCamera.THREE;
             // Data GUI
             var GUI = photogrammetricCamera.GUI;
+        </script>
+
+        <script src="../dist/three-additional.js"></script>
+        <script>
+            // Three library
+            var MapControls = photogrammetricCamera.MapControls;
+            var PLYLoader = photogrammetricCamera.PLYLoader;
+        </script>
+
+        <script src="../dist/photogrammetric-camera.js"></script>
+        <script>
             // Files Management
             var FetchSource = photogrammetricCamera.FetchSource;
             var FilesSource = photogrammetricCamera.FilesSource;
@@ -33,13 +44,6 @@
             var sceneFS = photogrammetricCamera.sceneFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
-        </script>
-
-        <script src="../dist/three-additional.js"></script>
-        <script>
-            // Three library
-            var MapControls = photogrammetricCamera.MapControls;
-            var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
         <script src="js/helpers/photogrammetricHelper.js"></script>
