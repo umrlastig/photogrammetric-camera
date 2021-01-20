@@ -532,5 +532,7 @@ function basicClean() {
 
     Object.keys(textures).forEach(key => textures[key].dispose());
     while(cameras.children.length) cameras.remove(cameras.children[0]);
+
+    if(multipleTextureMaterial) multipleTextureMaterial.clean();
 }
 

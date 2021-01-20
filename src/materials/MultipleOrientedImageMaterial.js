@@ -119,6 +119,18 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             }
         }
     }
+
+    clean() {
+        for (let i = 0; i < this.defines.MAX_TEXTURE; ++i) {
+            this.projected[i] = noCamera;
+            this.texture[i] = noTexture;
+            this.uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
+                postTransform: new Matrix4(), postTransInv: new Matrix4()};
+            this.uvDistortion[i] = {type: 0, F: 0., C: new THREE.Vector2(), R: new THREE.Vector4(), 
+                P: new THREE.Vector2(), b: new THREE.Vector2()};
+        }
+        this.orientedImageCount = 0;
+    }
 }
 
 export const chunks = {
