@@ -80,7 +80,7 @@ function initMultipleTextureMaterial(vs, fs, map, renderer) {
         fragmentShader: fs
     };
 
-   var material =  new MultipleOrientedImageMaterial(cameras, uniforms);
+   var material =  new MultipleOrientedImageMaterial(cameras, textures, uniforms);
 
    return [uniforms, material];
 };
@@ -420,7 +420,7 @@ function setTexture(camera) {
         setRadius(textureMaterial, camera);
         textureMaterial.setHomography(camera);
     }
-    if(multipleTextureMaterial) multipleTextureMaterial.setCamera(camera, textures);
+    if(multipleTextureMaterial) multipleTextureMaterial.setCamera(camera);
 }
 
 function setCamera(camera) {

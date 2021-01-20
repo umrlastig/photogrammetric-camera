@@ -171,7 +171,6 @@
                 // Texture Camera
                 var textureGUI = gui.addFolder('Historical Camera');
                 textureGUI.opacity = textureGUI.add(multipleTextureMaterial, 'opacity', 0, 1);
-                textureGUI.number = textureGUI.add(multipleTextureMaterial, 'orientedImageCount', 0, 1);
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
@@ -194,15 +193,6 @@
                         if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
                         textureGUI.name = 'Hist: ' + name;
                     }     
-                    if (multipleTextureMaterial.defines.MAX_TEXTURE > cameras.children.length) {
-                        if(cameras.children.length > 1)
-                            textureGUI.number.max(cameras.children.length);
-                        else
-                            textureGUI.number.max(1);
-                    } else {
-                        textureGUI.number.max(multipleTextureMaterial.defines.MAX_TEXTURE);
-                    }
-                    textureGUI.number.setValue(Math.round(multipleTextureMaterial.orientedImageCount));
                 }
                 return gui;
             };
@@ -214,7 +204,7 @@
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-                multipleTextureMaterial.setCamera(textureCamera, textures);
+                multipleTextureMaterial.updateCamera(textureCamera, textures);
                 gui.updateFromCameras(viewCamera, textureCamera, cameras, environment);
                 render();
             }

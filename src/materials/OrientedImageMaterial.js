@@ -19,7 +19,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         const map = pop(options, 'map', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
-        const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: true,
+        const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false,
             debugOpacity: 0, showImage: false});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
