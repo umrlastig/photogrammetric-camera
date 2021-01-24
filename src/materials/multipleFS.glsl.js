@@ -7,6 +7,7 @@ ${material.shaders}
 uniform vec3 diffuse;
 uniform float opacity;
 uniform Debug debug;
+uniform Border border;
 
 #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
     uniform float logDepthBufFC;
@@ -35,17 +36,26 @@ float getAlphaBorder(vec2 p) {
     return min(d.x, d.y);
 }
 
+float getBorder(vec2 p, float thickness) {
+    float x = 0. - thickness;
+    float y = 1. + thickness;
+    vec2 d = clamp(min(p, 1. - p), x, y);
+    
+    return min(d.x, d.y);
+}
+
 vec4 mixBaseColor(vec4 aColor, vec4 baseColor) {
     baseColor.rgb += aColor.rgb * aColor.a;
     baseColor.a += aColor.a; 
     return baseColor;
 }
 
-vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count) {
+vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count, float thickness) {
     vec3 p = coords.xyz / (2. * coords.w);
     p += vec3(0.5);
 
     float d = getAlphaBorder(p.xy);
+    float b = getBorder(p.xy, thickness);
 
     if(d > 0.) {
         if(count < 1.){
@@ -58,6 +68,11 @@ vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inou
         color.a *= d; 
         
         return mixBaseColor(color, baseColor);
+    //} else if(b > -0.1){
+    //    vec4 color = vec4(1., 0., 0., 1.);
+    //    color.a *= 1.; 
+        
+    //    return mixBaseColor(color, baseColor);
     }
 
     return baseColor;
@@ -91,7 +106,9 @@ void main(){
                 vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
                 if( uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
                     uvw = uvwTexture[i].postTransform * uvw;
-                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count);
+                    vec4 thickness = vec4(border.thickness);
+                    thickness = uvwTexture[i].postTransform * thickness;
+                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count, thickness.x);
                 }
             }
         }

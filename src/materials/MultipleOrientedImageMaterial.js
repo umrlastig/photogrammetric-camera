@@ -15,6 +15,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
+        const border = pop(options, 'border', {thickness: 5});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -56,6 +57,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'alphaMap', alphaMap);
         definePropertyUniform(this, 'scale', scale);
         definePropertyUniform(this, 'debug', debug);
+        definePropertyUniform(this, 'border', border);
     }
 
     setCamera(camera) {
@@ -146,6 +148,10 @@ export const chunks = {
         float borderSharpness;
         bool diffuseColorGrey;
         bool showImage;
+    };
+
+    struct Border {
+        float thickness;
     };
 `,
 };
