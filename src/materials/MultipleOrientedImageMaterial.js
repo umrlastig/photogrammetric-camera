@@ -15,7 +15,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
-        const border = pop(options, 'border', {thickness: 5});
+        const border = pop(options, 'border', {visible: true, color: new Color(0x4080ff), linewidth: 5., fadein: 1., fadeout: 1.,
+             dashed: false, dashwidth: 2., fadedash: 2.});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -26,6 +27,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         if (pop(options, 'sizeAttenuation')) options.defines.USE_SIZEATTENUATION = '';
         options.defines.MAX_TEXTURE = maxTexture !== null ? maxTexture : 1;
         super(options);
+
+        this.extensions.derivatives = true; // use of derivatives
 
         this.cameras = cameras;
         this.maps = maps;
@@ -151,7 +154,16 @@ export const chunks = {
     };
 
     struct Border {
-        float thickness;
+        bool visible;
+        vec3 color;
+
+        float linewidth;
+        float fadein;
+        float fadeout; 
+
+        bool dashed;
+        float dashwidth;
+        float fadedash;
     };
 `,
 };

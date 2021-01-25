@@ -36,12 +36,15 @@ float getAlphaBorder(vec2 p) {
     return min(d.x, d.y);
 }
 
-float getBorder(vec2 p, float thickness) {
-    float x = 0. - thickness;
-    float y = 1. + thickness;
-    vec2 d = clamp(min(p, 1. - p), x, y);
+vec2 screenSpaceDistance(vec2 p) {
+    vec2 dx = dFdx(p);
+    vec2 dy = dFdy(p);
+    float lx = length(vec2(dx.x,dy.x));
+    float ly = length(vec2(dx.y,dy.y));
+    if (lx>0.0) p.x/=lx;
+    if (ly>0.0) p.y/=ly;
     
-    return min(d.x, d.y);
+    return vec2(min(p.x,p.y),max(p.x,p.y)); // miter join
 }
 
 vec4 mixBaseColor(vec4 aColor, vec4 baseColor) {
@@ -50,14 +53,12 @@ vec4 mixBaseColor(vec4 aColor, vec4 baseColor) {
     return baseColor;
 }
 
-vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count, float thickness) {
+vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count) {
     vec3 p = coords.xyz / (2. * coords.w);
     p += vec3(0.5);
 
-    float d = getAlphaBorder(p.xy);
-    float b = getBorder(p.xy, thickness);
-
-    if(d > 0.) {
+    float distImage = getAlphaBorder(p.xy);
+    if(distImage > 0.) {
         if(count < 1.){
             baseColor.a = 0.;
             baseColor.rgb = vec3(0.);
@@ -65,14 +66,36 @@ vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inou
         count += 1.; 
 
         vec4 color = texture2D(texture, p.xy);
-        color.a *= d; 
+        color.a *= distImage; 
         
         return mixBaseColor(color, baseColor);
-    //} else if(b > -0.1){
-    //    vec4 color = vec4(1., 0., 0., 1.);
-    //    color.a *= 1.; 
-        
-    //    return mixBaseColor(color, baseColor);
+    } else if(border.visible){
+        vec4 borderColor = vec4(border.color, 0.);
+
+        vec3 q = coords.xyz / coords.w;
+        vec2 d = screenSpaceDistance(abs(q.xy) - vec2(1.));
+
+        float distBorder = d.y;
+
+        float borderin  = (border.fadein > 0.) ? smoothstep(0., border.fadein, distBorder) : float(distBorder > 0.);
+        float borderout = (border.fadeout > 0.) ? smoothstep(0., border.fadeout, border.linewidth - distBorder) : float(distBorder < border.linewidth);
+
+        borderColor.a = borderin * borderout;
+
+        if(border.dashed) {
+            float dashwidth = border.dashwidth * border.linewidth; 
+
+            float dashratio = 0.75;         // ratios
+            float dashoffset = 0.; 
+
+            float dash = fract((dashoffset + d.x) / dashwidth);
+
+            float dashinout = (border.fadedash > 0.) ? smoothstep(0., border.fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
+
+            borderColor.a *= dashinout;
+        }
+
+        return mixBaseColor(borderColor, baseColor);
     }
 
     return baseColor;
@@ -104,11 +127,9 @@ void main(){
                 mat4 m = modelMatrix;
                 m[3].xyz -= uvwTexture[i].position;
                 vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
-                if( uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
+                if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
                     uvw = uvwTexture[i].postTransform * uvw;
-                    vec4 thickness = vec4(border.thickness);
-                    thickness = uvwTexture[i].postTransform * thickness;
-                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count, thickness.x);
+                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count);
                 }
             }
         }
