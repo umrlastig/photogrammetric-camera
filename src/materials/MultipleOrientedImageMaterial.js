@@ -1,5 +1,4 @@
-import { ShaderMaterial, ShaderLib, Matrix4, Vector3, Color, Texture } from 'three';
-import { default as PhotogrammetricCamera } from '../cameras/PhotogrammetricCamera';
+import { ShaderMaterial, ShaderLib, Matrix4, Vector2, Vector3, Color, Texture } from 'three';
 import { pop, definePropertyUniform, setUvwCamera, setDistortion } from './materialUtils';
 
 const noTexture = new Texture();
@@ -16,7 +15,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
         const border = pop(options, 'border', {visible: true, color: new Color(0x4080ff), linewidth: 5., fadein: 1., fadeout: 1.,
-             dashed: false, dashwidth: 2., fadedash: 2.});
+             dashed: false, dashwidth: 2., fadedash: 2., radius: 0.});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -63,6 +62,16 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'border', border);
     }
 
+    setRadius(camera, uvDistortion) {
+        uvDistortion.R.w  = camera.radius.r2img;
+
+        if(!(camera.distos && camera.distos.length == 1)) {
+            const x = camera.view.fullWidth/2.;
+            const y = camera.view.fullHeight/2.;
+            uvDistortion.C = new Vector2(x, y);
+        }
+    }
+
     setCamera(camera) {
         // The cameras have been loaded?
         if(this.cameras.children.length > 0) {
@@ -72,12 +81,17 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.texture[index] = this.maps[camera.name] || this.map; 
                 this.uvwTexture[index] = setUvwCamera(camera);
                 this.uvDistortion[index] = setDistortion(camera);
+                // Change the value or maximum radius to the one that only surrounds the image.
+                this.setRadius(camera, this.uvDistortion[index]);
                 // Project the image if it has not being done
             } else if (this.orientedImageCount < this.defines.MAX_TEXTURE) {
                 this.projected[this.orientedImageCount] = camera.name;
                 this.texture[this.orientedImageCount] = this.maps[camera.name] || this.map; 
                 this.uvwTexture[this.orientedImageCount] = setUvwCamera(camera);
                 this.uvDistortion[this.orientedImageCount] = setDistortion(camera);
+                // Change the value or maximum radius to the one that only surrounds the image.
+                this.setRadius(camera, this.uvDistortion[this.orientedImageCount]);
+
                 this.orientedImageCount++;
             } else {
                 console.log("The number of textures cannot be exceed from " + this.defines.MAX_TEXTURE + ".")
@@ -94,6 +108,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.texture[index] = this.maps[camera.name] || this.map; 
                 this.uvwTexture[index] = setUvwCamera(camera);
                 this.uvDistortion[index] = setDistortion(camera);
+                // Change the value or maximum radius to the one that only surrounds the image.
+                this.setRadius(camera, this.uvDistortion[index]);
             } 
         }
     }
@@ -164,6 +180,8 @@ export const chunks = {
         bool dashed;
         float dashwidth;
         float fadedash;
+
+        float radius;
     };
 `,
 };

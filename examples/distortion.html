@@ -183,6 +183,7 @@
 
                 // Texture Camera
                 function updateRmaxFromGUI(value) {
+                    params.distortion.rmax = value;
                     textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2img;
                     textureMaterial.setHomography(textureCamera);
                 };

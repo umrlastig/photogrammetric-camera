@@ -58,6 +58,7 @@ vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inou
     p += vec3(0.5);
 
     float distImage = getAlphaBorder(p.xy);
+
     if(distImage > 0.) {
         if(count < 1.){
             baseColor.a = 0.;
@@ -73,29 +74,32 @@ vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inou
         vec4 borderColor = vec4(border.color, 0.);
 
         vec3 q = coords.xyz / coords.w;
-        vec2 d = screenSpaceDistance(abs(q.xy) - vec2(1.));
 
-        float distBorder = d.y;
+        if(q.z > 0. && q.z < 1.) {
+            vec2 d = screenSpaceDistance(abs(q.xy) - vec2(1.));
 
-        float borderin  = (border.fadein > 0.) ? smoothstep(0., border.fadein, distBorder) : float(distBorder > 0.);
-        float borderout = (border.fadeout > 0.) ? smoothstep(0., border.fadeout, border.linewidth - distBorder) : float(distBorder < border.linewidth);
+            float distBorder = d.y;
 
-        borderColor.a = borderin * borderout;
+            float borderin  = (border.fadein > 0.) ? smoothstep(0., border.fadein, distBorder) : float(distBorder > 0.);
+            float borderout = (border.fadeout > 0.) ? smoothstep(0., border.fadeout, border.linewidth - distBorder) : float(distBorder < border.linewidth);
 
-        if(border.dashed) {
-            float dashwidth = border.dashwidth * border.linewidth; 
+            borderColor.a = borderin * borderout;
 
-            float dashratio = 0.75;         // ratios
-            float dashoffset = 0.; 
+            if(border.dashed) {
+                float dashwidth = border.dashwidth * border.linewidth; 
 
-            float dash = fract((dashoffset + d.x) / dashwidth);
+                float dashratio = 0.75;         // ratios
+                float dashoffset = 0.; 
 
-            float dashinout = (border.fadedash > 0.) ? smoothstep(0., border.fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
+                float dash = fract((dashoffset + d.x) / dashwidth);
 
-            borderColor.a *= dashinout;
+                float dashinout = (border.fadedash > 0.) ? smoothstep(0., border.fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
+
+                borderColor.a *= dashinout;
+            }
+
+            return mixBaseColor(borderColor, baseColor);
         }
-
-        return mixBaseColor(borderColor, baseColor);
     }
 
     return baseColor;
@@ -127,10 +131,18 @@ void main(){
                 mat4 m = modelMatrix;
                 m[3].xyz -= uvwTexture[i].position;
                 vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
+
+                vec2 v = uvw.xy/uvw.w - uvDistortion[i].C;
+                float r = dot(v, v);
+
                 if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
                     uvw = uvwTexture[i].postTransform * uvw;
                     diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count);
-                }
+                } 
+                //else {
+                //    diffuseColor.rgb += fract(uvw.xyz) * 0.5;
+                //    diffuseColor.a += 0.5;
+                //}
             }
         }
     #endif
