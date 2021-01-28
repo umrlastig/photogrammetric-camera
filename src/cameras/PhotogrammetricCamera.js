@@ -184,8 +184,9 @@ class PhotogrammetricCamera extends PerspectiveCamera {
     }
 
     setDistortionRadius() {
-        const w = this.view.fullWidth;
-        const h = this.view.fullHeight;
+        // Width with a few extra pixels (TODO: remove the extra pixels)
+        const w = this.view.fullWidth + 100;
+        const h = this.view.fullHeight + 100;
 
         if(this.distos && this.distos.length == 1) {
             const disto = this.distos[0];

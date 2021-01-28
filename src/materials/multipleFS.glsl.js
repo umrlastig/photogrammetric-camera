@@ -135,7 +135,7 @@ void main(){
                 vec2 v = uvw.xy/uvw.w - uvDistortion[i].C;
                 float r = dot(v, v);
 
-                if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
+                if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i]) && r < uvDistortion[i].R.w) {
                     uvw = uvwTexture[i].postTransform * uvw;
                     diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count);
                 } 
