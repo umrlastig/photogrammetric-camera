@@ -14,8 +14,6 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
-        const border = pop(options, 'border', {visible: true, color: new Color(0x4080ff), linewidth: 5., fadein: 1., fadeout: 1.,
-             dashed: false, dashwidth: 2., fadedash: 2., radius: 0.});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
         options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
         options.defines = options.defines || {};
@@ -33,14 +31,16 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         this.maps = maps;
 
         const projected = [];
-
         const texture = [];
+        const border = [];
         const uvwTexture = [];
         const uvDistortion = [];
 
         for (let i = 0; i < this.defines.MAX_TEXTURE; ++i) {
             projected[i] = noCamera;
             texture[i] = noTexture;
+            border[i] = {visible: true, color: new Color(0xeeeeee), linewidth: 5., fadein: 1., fadeout: 1.,
+                dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
             uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
                 postTransform: new Matrix4(), postTransInv: new Matrix4()};
             uvDistortion[i] = {type: 0, F: 0., C: new THREE.Vector2(), R: new THREE.Vector4(), 
@@ -69,6 +69,26 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             const x = camera.view.fullWidth/2.;
             const y = camera.view.fullHeight/2.;
             uvDistortion.C = new Vector2(x, y);
+        }
+    }
+
+    setBorder(camera, border = {}) {
+        // The cameras have been loaded?
+        if(this.cameras.children.length > 0) {
+            // Check if the camera is already projected
+            const index = this.projected.findIndex(proj => proj == camera.name);
+            if (index > -1) {
+                this.border[index].visible = pop(border, 'visible', this.border[index].visible);
+                this.border[index].color = pop(border, 'color', this.border[index].color);
+                this.border[index].linewidth = pop(border, 'linewidth', this.border[index].linewidth);
+                this.border[index].fadein = pop(border, 'fadein', this.border[index].fadein);
+                this.border[index].fadeout = pop(border, 'fadeout', this.border[index].fadeout);
+                this.border[index].dashed = pop(border, 'dashed', this.border[index].dashed);
+                this.border[index].dashwidth = pop(border, 'dashwidth', this.border[index].dashwidth);
+                this.border[index].fadedash = pop(border, 'fadedash', this.border[index].fadedash);
+                this.border[index].radius = pop(border, 'radius', this.border[index].radius);
+
+            } 
         }
     }
 
@@ -126,6 +146,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 for (let i = index; i < this.orientedImageCount; ++i) {
                     this.projected[i] = this.projected[i+1];
                     this.texture[i] = this.texture[i+1]; 
+                    this.border[i] = this.border[i+1];
                     this.uvwTexture[i] = this.uvwTexture[i+1];
                     this.uvDistortion[i] = this.uvDistortion[i+1];
                 }
@@ -133,6 +154,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 // Erase the last value
                 this.projected[this.orientedImageCount] = noCamera;
                 this.texture[this.orientedImageCount] = noTexture;
+                this.border[this.orientedImageCount] = {visible: true, color: new Color(0xeeeeee), linewidth: 5., fadein: 1., fadeout: 1.,
+                    dashed: false, dashwidth: 2., fadedash: 2., radius: 0.}
                 this.uvwTexture[this.orientedImageCount] = {position: new Vector3(), preTransform: new Matrix4(), 
                     postTransform: new Matrix4(), postTransInv: new Matrix4()};
                 this.uvDistortion[this.orientedImageCount] = {type: 0, F: 0., C: new THREE.Vector2(), R: new THREE.Vector4(), 
@@ -145,6 +168,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         for (let i = 0; i < this.defines.MAX_TEXTURE; ++i) {
             this.projected[i] = noCamera;
             this.texture[i] = noTexture;
+            this.border[i] = {visible: true, color: new Color(0xeeeeee), linewidth: 5., fadein: 1., fadeout: 1.,
+                dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
             this.uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
                 postTransform: new Matrix4(), postTransInv: new Matrix4()};
             this.uvDistortion[i] = {type: 0, F: 0., C: new THREE.Vector2(), R: new THREE.Vector4(), 

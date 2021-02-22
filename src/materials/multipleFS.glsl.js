@@ -7,7 +7,7 @@ ${material.shaders}
 uniform vec3 diffuse;
 uniform float opacity;
 uniform Debug debug;
-uniform Border border;
+uniform Border border[MAX_TEXTURE];
 
 #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
     uniform float logDepthBufFC;
@@ -53,7 +53,7 @@ vec4 mixBaseColor(vec4 aColor, vec4 baseColor) {
     return baseColor;
 }
 
-vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count) {
+vec4 projectiveTextureColor(vec4 coords, sampler2D texture, vec4 baseColor, inout float count, Border border) {
     vec3 p = coords.xyz / (2. * coords.w);
     p += vec3(0.5);
 
@@ -137,7 +137,7 @@ void main(){
 
                 if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i]) && r < uvDistortion[i].R.w) {
                     uvw = uvwTexture[i].postTransform * uvw;
-                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count);
+                    diffuseColor = projectiveTextureColor(uvw, texture[i], diffuseColor, count, border[i]);
                 } 
                 //else {
                 //    diffuseColor.rgb += fract(uvw.xyz) * 0.5;
