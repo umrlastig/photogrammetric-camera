@@ -105,7 +105,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[index]);
-                this.setBorder(opt);
+                this.setBorder(camera, opt);
                 // Project the image if it has not being done
             } else if (this.orientedImageCount < this.defines.MAX_TEXTURE) {
                 this.projected[this.orientedImageCount] = camera.name;
@@ -114,7 +114,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[this.orientedImageCount] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[this.orientedImageCount]);
-                this.setBorder(opt);
+                this.setBorder(camera, opt);
                 this.orientedImageCount++;
             } else {
                 console.log("The number of textures cannot be exceed from " + this.defines.MAX_TEXTURE + ".")
@@ -133,7 +133,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[index]);
-                this.setBorder(opt);
+                this.setBorder(camera, opt);
             } 
         }
     }
