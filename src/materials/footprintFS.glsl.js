@@ -120,7 +120,7 @@ void main() {
                                 float dash = fract((dashoffset + d.x) / dashwidth);
                 
                                 float dashinout = (border[i].fadedash > 0.) ? smoothstep(0., border[i].fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
-                
+        
                                 color.a *= dashinout;
                             }
 
