@@ -94,7 +94,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         }
     }
 
-    setCamera(camera) {
+    setCamera(camera, opt = {}) {
         // The cameras have been loaded?
         if(this.cameras.children.length > 0) {
             // Check if the camera is already projected
@@ -105,6 +105,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[index]);
+                this.setBorder(opt);
                 // Project the image if it has not being done
             } else if (this.orientedImageCount < this.defines.MAX_TEXTURE) {
                 this.projected[this.orientedImageCount] = camera.name;
@@ -113,7 +114,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[this.orientedImageCount] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[this.orientedImageCount]);
-
+                this.setBorder(opt);
                 this.orientedImageCount++;
             } else {
                 console.log("The number of textures cannot be exceed from " + this.defines.MAX_TEXTURE + ".")
@@ -121,7 +122,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         }
     }
 
-    updateCamera(camera) {
+    updateCamera(camera, opt = {}) {
         // The cameras have been loaded?
         if(this.cameras.children.length > 0) {
             // Check if the camera is already projected
@@ -132,6 +133,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
                 this.setRadius(camera, this.uvDistortion[index]);
+                this.setBorder(opt);
             } 
         }
     }
