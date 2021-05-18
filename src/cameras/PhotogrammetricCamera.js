@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Vector2, Matrix4 } from 'three';
 
-var ndcMatrix = new Matrix4().set(
+const ndcMatrix = new Matrix4().set(
     2, 0, 0, -1,
     0, -2, 0, 1,
     0, 0, 1, 0,

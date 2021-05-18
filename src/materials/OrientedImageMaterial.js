@@ -1,6 +1,8 @@
 import { Uniform, ShaderMaterial, ShaderLib, Matrix3, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
 import {pop, definePropertyUniform, setUvwCamera, setDistortion} from './materialUtils';
 import numeric from 'numeric';
+import OrientedImageMaterialVS from './shaders/OrientedImageMaterialVS.glsl';
+import OrientedImageMaterialFS from './shaders/OrientedImageMaterialFS.glsl';
 
 class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
@@ -22,8 +24,8 @@ class OrientedImageMaterial extends ShaderMaterial {
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false,
             debugOpacity: 0.5, showImage: false, showRadius: false, showGrid: false});
-        options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
-        options.fragmentShader = options.fragmentShader || ShaderLib.points.fragmentShader;
+        options.vertexShader = options.vertexShader || OrientedImageMaterialVS;
+        options.fragmentShader = options.fragmentShader || OrientedImageMaterialFS;
         options.defines = options.defines || {};
         if (map) options.defines.USE_MAP4 = '';
         if (alphaMap) options.defines.USE_ALPHAMAP = '';

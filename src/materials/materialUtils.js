@@ -3,6 +3,13 @@ import { default as RadialDistortion } from '../cameras/distortions/RadialDistor
 import { default as FraserDistortion } from '../cameras/distortions/FraserDistortion';
 import { default as FishEyeDistortion } from '../cameras/distortions/FishEyeDistortion';
 
+// maps [-1,1]^3 to [0,1]^3
+export const textureMatrix = new Matrix4().set(
+    1, 0, 0, 1,
+    0, 1, 0, 1,
+    0, 0, 1, 1,
+    0, 0, 0, 2);
+
 export function pop(options, property, defaultValue) {
     if (options[property] === undefined) return defaultValue;
     const value = options[property];
@@ -72,6 +79,7 @@ export function setUvwCamera(camera) {
     uvw.preTransform.setPosition(0,0,0);
     uvw.preTransform.premultiply(camera.preProjectionMatrix);
     uvw.postTransform.copy(camera.postProjectionMatrix);
+
     uvw.postTransInv = camera.postProjectionMatrix.clone().invert();
     return uvw;
 }
