@@ -1,4 +1,4 @@
-import { Vector2, Vector4 } from 'three';
+import { Vector2, Vector4, ShaderChunk } from 'three';
 import { default as PhotogrammetricDistortion } from '../PhotogrammetricDistortion';
 
 // http://fr.wikipedia.org/wiki/Methode_de_Cardan
@@ -97,8 +97,7 @@ class RadialDistortion {
   }
 }
 
-RadialDistortion.chunks = {
-    radial_pars_fragment: `
+ShaderChunk["distortions/radial_pars_fragment"] = `
 struct RadialDistortion {
   vec2 C;
   vec4 R;
@@ -113,7 +112,6 @@ bool distort_radial(inout vec4 p, RadialDistortion disto) {
   p.xy += dot(disto.R.xyz, vec3(r2, r4, r2*r4)) * r;
   return true;
 }
-`,
-};
+`;
 
 export default RadialDistortion;

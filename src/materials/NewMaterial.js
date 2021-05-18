@@ -1,27 +1,7 @@
-import { Uniform, ShaderMaterial, Matrix4, Vector3, Vector4 } from 'three';
-import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
+import { ShaderMaterial, Matrix4, Vector3, Vector4 } from 'three';
+import { pop, definePropertyUniform, textureMatrix } from './Material.js';
 import NewMaterialVS from './shaders/NewMaterialVS.glsl';
 import NewMaterialFS from './shaders/NewMaterialFS.glsl';
-
-function pop(options, property, defaultValue) {
-    if (options[property] === undefined) return defaultValue;
-    const value = options[property];
-    delete options[property];
-    return value;
-}
-
-function definePropertyUniform(object, property, defaultValue) {
-    object.uniforms[property] = new Uniform(object[property] || defaultValue);
-    Object.defineProperty(object, property, {
-        get: () => object.uniforms[property].value,
-        set: (value) => {
-            if (object.uniforms[property].value != value) {
-                object.uniformsNeedUpdate = true;
-                object.uniforms[property].value = value;
-            }
-        }
-    });
-}
 
 class NewMaterial extends ShaderMaterial {
   constructor(options = {}) {
@@ -53,10 +33,7 @@ class NewMaterial extends ShaderMaterial {
     definePropertyUniform(this, 'diffuseColorGrey', diffuseColorGrey);
 
     this.vertexShader = NewMaterialVS;
-    this.fragmentShader = `
-    ${RadialDistortion.chunks.radial_pars_fragment}
-    ${NewMaterialFS}
-    `;
+    this.fragmentShader = NewMaterialFS;
   }
 
   setCamera(camera) {
@@ -65,8 +42,9 @@ class NewMaterial extends ShaderMaterial {
       this.textureCameraPreTransform.setPosition(0, 0, 0);
       this.textureCameraPreTransform.premultiply(camera.preProjectionMatrix);
       this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
+      this.textureCameraPostTransform.premultiply(textureMatrix);
 
-			if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
+      if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
           this.uvDistortion = camera.distos[0];
       } else {
           this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
