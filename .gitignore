@@ -8,4 +8,5 @@
 /out/
 /dist/
 *.log
-.DS_Store
+/examples/data/dias/
+/examples/data/notredame/

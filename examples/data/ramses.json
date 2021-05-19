@@ -1,0 +1,40 @@
+{
+  "url" : "http://mathieu.bredif.free.fr/cors.php?url=data/ramses/",
+  "plane" :
+  {
+    "position":
+    {
+      "z": -5
+    }
+  },
+
+  "autocal":
+  [
+    "Ori-RadialBasic/AutoCal_Foc-50000_Cam-Canon_EOS_5D_Mark_II.xml"
+  ],
+
+  "ori":
+  [
+    "Ori-RadialBasic/Orientation-IMG_0359.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0357.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0356.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0355.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0354.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0353.jpg.xml",
+    "Ori-RadialBasic/Orientation-IMG_0350.jpg.xml"
+  ],
+
+  "img":
+  [
+    "IMG_0359.jpg",
+    "IMG_0357.jpg",
+    "IMG_0356.jpg",
+    "IMG_0355.jpg",
+    "IMG_0354.jpg",
+    "IMG_0353.jpg",
+    "IMG_0350.jpg"
+  ],
+
+  "ply": []
+
+}

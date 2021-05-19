@@ -1,0 +1,8 @@
+{
+  "url": "./data/notredame/",
+  "plane": { "visible" : false },
+  "sphere": { "visible" : false },
+  "list": "list2.txt",
+  "out": "notredame_cameras.out",
+  "imgpath": "images/"
+}
