@@ -20,6 +20,7 @@ export { default as OrientedImageMaterial } from './materials/OrientedImageMater
 export { default as MultipleOrientedImageMaterial } from './materials/MultipleOrientedImageMaterial';
 export { default as NewMaterial } from './materials/NewMaterial';
 export { default as ShadowMapMaterial } from './materials/ShadowMapMaterial';
+export { default as SpriteMaterial } from './materials/SpriteMaterial';
 
 import { OrbitControls, MapControls } from './controls/OrbitControls';
 import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls';
