@@ -1,0 +1,95 @@
+{
+  "url": "http://mathieu.bredif.free.fr/cors.php?url=data/maurepas/",
+  "target": {
+    "x": 9790,
+    "y": 8980,
+    "z": 83
+  },
+
+  "plane" :
+  {
+    "position":
+    {
+      "z": 80.4
+    }
+  },
+
+  "autocal":
+  [
+    "Ori-MEP_MaurepasExt/AutoCal_Foc-18000_Cam-Canon_EOS_70D.xml"
+  ],
+
+  "ori":
+  [
+    "ori/Orientation-Maurepas_ToitureSud_4428.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4438.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4439.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4444.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4472.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4474.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4479.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4484.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4488.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4489.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4494.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4497.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4501.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4505.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4509.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4512.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4516.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4519.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4520.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4523.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4531.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4536.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4539.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4542.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4545.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4548.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4551.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4557.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4560.JPG.xml",
+    "ori/Orientation-Maurepas_ToitureSud_4561.JPG.xml"
+  ],
+
+  "img":
+  [
+    "img/Maurepas_ToitureSud_4428.JPG",
+    "img/Maurepas_ToitureSud_4438.JPG",
+    "img/Maurepas_ToitureSud_4439.JPG",
+    "img/Maurepas_ToitureSud_4444.JPG",
+    "img/Maurepas_ToitureSud_4472.JPG",
+    "img/Maurepas_ToitureSud_4474.JPG",
+    "img/Maurepas_ToitureSud_4479.JPG",
+    "img/Maurepas_ToitureSud_4484.JPG",
+    "img/Maurepas_ToitureSud_4488.JPG",
+    "img/Maurepas_ToitureSud_4489.JPG",
+    "img/Maurepas_ToitureSud_4494.JPG",
+    "img/Maurepas_ToitureSud_4497.JPG",
+    "img/Maurepas_ToitureSud_4501.JPG",
+    "img/Maurepas_ToitureSud_4505.JPG",
+    "img/Maurepas_ToitureSud_4509.JPG",
+    "img/Maurepas_ToitureSud_4512.JPG",
+    "img/Maurepas_ToitureSud_4516.JPG",
+    "img/Maurepas_ToitureSud_4519.JPG",
+    "img/Maurepas_ToitureSud_4520.JPG",
+    "img/Maurepas_ToitureSud_4523.JPG",
+    "img/Maurepas_ToitureSud_4531.JPG",
+    "img/Maurepas_ToitureSud_4536.JPG",
+    "img/Maurepas_ToitureSud_4539.JPG",
+    "img/Maurepas_ToitureSud_4542.JPG",
+    "img/Maurepas_ToitureSud_4545.JPG",
+    "img/Maurepas_ToitureSud_4548.JPG",
+    "img/Maurepas_ToitureSud_4551.JPG",
+    "img/Maurepas_ToitureSud_4557.JPG",
+    "img/Maurepas_ToitureSud_4560.JPG",
+    "img/Maurepas_ToitureSud_4561.JPG"
+  ],
+
+  "ply":
+  [
+    "ply/Maurepas_FacadeSud_3-Nuage3D_SousEch.ply",
+    "ply/Maurepas_ToitureSud_3-Nuage3D_SousEch.ply"
+  ]
+}

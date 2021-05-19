@@ -240,6 +240,7 @@
             }
 
             function loadImage(url, source, name) {
+                if (!url) return Promise.resolve(undefined);
                 if (!name)
                 {
                     const match = url.match(/([^\/]*)\.[\w\d]/i);
@@ -251,6 +252,7 @@
             }
 
             function loadOrientation(url, source, name) {
+                if (!url) return Promise.resolve(undefined);
                 if (!name)
                 {
                     const match = url.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
@@ -271,6 +273,7 @@
             }
 
             function loadJSON(path, file) {
+                setURLSearchParams({scene:file,path:path});
                 file = file || 'index.json';
                 var source = new FetchSource(path);
                 source.open(file, 'text').then((json) => {
@@ -283,6 +286,7 @@
                         orbitControls.target.copy(plane.position);
                         const scale = json.plane.scale || 1000;
                         plane.scale.set(scale,scale,scale);
+                        if (json.plane.visible !== undefined) plane.visible = Boolean(json.plane.visible);
                     }
                     if (json.target) {
                         orbitControls.target.copy(json.target);
@@ -292,9 +296,29 @@
                         if (sphereRadius !== undefined) {
                             sphere.scale.set(sphereRadius, sphereRadius, sphereRadius);
                         }
+                        if (json.sphere.visible !== undefined) sphere.visible = Boolean(json.sphere.visible);
                     }
+                    if (json.url) source = new FetchSource(json.url);
+                    json.ply = json.ply || [];
+                    json.ori = json.ori || [];
+                    json.img = json.img || [];
                     json.ply.forEach(url => todos.push(() => loadPly(url, source)));
                     json.ori.forEach((orientationUrl, i) => todos.push(() => loadOrientedImage(orientationUrl, json.img[i], source, json.img[i])));
+                    if(json.out && json.list) {
+                        const list = source.open(json.list, 'text');
+                        const out  = source.open(json.out, 'text');
+                        const orientations = Promise.all([list, out]).then(Parsers.BundlerParser.parse).then(handleOrientation);
+                        orientations.then(cameras => cameras.forEach(cam => loadImage(json.imgpath+cam.name+'.jpg', source, cam.name)));
+                        orientations.then(cameras => {
+                            const geometry = new THREE.BufferGeometry();
+                            geometry.setAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
+                            geometry.setAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
+                            geometry.computeBoundingSphere();
+                            const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+                            const gcp = new THREE.Points(geometry, material);
+                            world.add(gcp);
+                        })
+                    }
                 });
             }
 
@@ -379,6 +403,18 @@
                 loadImage(imageUrl, source, name).then(() => loadOrientation(orientationUrl, source, name));
             }
 
+            function parseURLSearchParams() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const path = urlParams.get('path') || './data/';
+              const scene = urlParams.get('scene');
+              if (scene) loadJSON(path, scene);
+            }
+
+            function setURLSearchParams(obj) {
+              const params = new URLSearchParams(window.location.search);
+              for (const key of Object.keys(obj)) params.set(key, obj[key]);
+              window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+            }
 
             function init() {
                 var container = document.createElement( 'div' );
@@ -526,86 +562,37 @@
                 }
                 document.addEventListener('keydown', keyDown, false);
 
+                function clearScene() {
+                    todos.length = 0;
+                    const camera = new PhotogrammetricCamera();
+                    prevCamera.set(camera);
+                    viewCamera.set(camera);
+                    nextCamera.set(camera);
+                    nextCamera.timestamp = undefined;
+                    viewCamera.zoom = 0.8; // zoom out a bit to see the image borders
+                    textureCamera.copy(viewCamera);
+                    textureMaterial.map = null;
+                    Object.keys(textures).forEach(key => textures[key].dispose());
+                    while(cameras.children.length) cameras.remove(cameras.children[0]);
+                    while(plyGroup.children.length) plyGroup.remove(plyGroup.children[0]);
+                    showHelp(true);
+                    plane.position.z = 0;
+                    gui.clear();
+                }
+
                 /* preset scenes */
                 scenes = {
-                    Clear: function() {
-                        todos.length = 0;
-                        const camera = new PhotogrammetricCamera();
-                        prevCamera.set(camera);
-                        viewCamera.set(camera);
-                        nextCamera.set(camera);
-                        nextCamera.timestamp = undefined;
-                        viewCamera.zoom = 0.8; // zoom out a bit to see the image borders
-                        textureCamera.copy(viewCamera);
-                        textureMaterial.map = null;
-                        Object.keys(textures).forEach(key => textures[key].dispose());
-                        while(cameras.children.length) cameras.remove(cameras.children[0]);
-                        while(plyGroup.children.length) plyGroup.remove(plyGroup.children[0]);
-                        showHelp(true);
-                        plane.position.z = 0;
-                        gui.clear();
-                    },
-                    MicMacFilesSamples: function () {
-                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
-                        var source = new FetchSource(path);
-                        loadOrientation('Calib-00.xml', source);
-                        loadOrientation('Calib-1.xml', source);
-                        loadOrientation('CalibFrancesco.xml', source);
-                        loadOrientation('NewCalibD3X-mm.xml', source);
-                        loadOrientation('NewCalibD3X-pix.xml', source);
-                        loadOrientation('OriFrancesco.xml', source);
-                        loadOrientation('Orientation-00.xml', source);
-                        loadOrientation('Orientation-1.xml', source);
-                        loadOrientation('Test-NewApero-mm.xml', source);
-                        loadOrientation('Test-NewApero-pix.xml', source);
-                        loadOrientation('TestOri-1.xml', source);
-                        loadOrientation('TestOri-2.xml', source);
-                    },
-                    Abbey: function() {
-                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/NEW-DATA/CompensOnLine/';
-                        var source = new FetchSource(path);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
-                        plane.position.z = -16.56;
-                        orbitControls.target.set(0, 0, plane.position.z);
-                    },
-                    Maurepas: function() {
-                        loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/maurepas/');
-                        //loadJSON('./data/dias/Maurepas/');
-                        //loadJSON('./data/dias/Maurepas/', 'maurepas.json');
-                    },
-                    Ramses: function() {
-                        loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
-                    },
-                    Cuxa: function() {
-                        loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/cuxa/');
-                    },
-                    Viabon: function() {
-                        loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/viabon/');
-                    },
-                    NotreDame: function() {
-                        var source = new FetchSource('data/NotreDame/');
-                        const list = source.open('list2.txt', 'text');
-                        const out  = source.open('notredame.out', 'text');
-                        const orientations = Promise.all([list, out]).then(Parsers.BundlerParser.parse).then(handleOrientation);
-                        //orientations.then(cameras => cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name)));
-                        //orientations.then(cameras => console.log(cameras));
-                        orientations.then(cameras => cameras.forEach(cam => loadImage('images/'+cam.name, source, cam.name)));
-                        orientations.then(cameras => {
-                            const geometry = new THREE.BufferGeometry();
-                            geometry.setAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
-                            geometry.setAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
-                            geometry.computeBoundingSphere();
-                            const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-                            const gcp = new THREE.Points(geometry, material);
-                            world.add(gcp);
-                        })
-                        plane.visible = false;
-                        sphere.visible = false;
-                    },
-                    Alex: function() {
+                    Clear: clearScene,
+                    micmacfilessamples: function () { loadJSON('./data/', 'micmacfilessamples.json'); },
+                    abbey: function() {  loadJSON('./data/', 'abbey.json'); },
+                    maurepas: function() { loadJSON('./data/', 'maurepas.json'); },
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/');
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/', 'maurepas.json');
+                    ramses: function() { loadJSON('./data/', 'ramses.json'); },
+                    cuxa: function() { loadJSON('./data/', 'cuxa.json');  },
+                    viabon: function() { loadJSON('./data/', 'viabon.json');  },
+                    // notredame: function() { loadJSON('./data/', 'notredame.json');  }
+                    /* alex: function() {
                         var source = new FetchSource('data/alex/');
                         const pixel = 0.004; // mm
                         const focal = 123.9/pixel; // mm
@@ -669,8 +656,10 @@
                             world.add(lines);
                             lines.visible = false;
                         });
-                    }
-                }
+                    } */
+                };
+
+                parseURLSearchParams();
             }
 
             // GUI functions
@@ -806,9 +795,6 @@
             var gui = initGUI();
             animate();
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const sceneParam = urlParams.get('scene');
-            if (sceneParam) scenes[sceneParam]();
         </script>
     </body>
 </html>

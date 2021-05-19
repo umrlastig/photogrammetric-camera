@@ -1,0 +1,17 @@
+{
+"plane": { "position" : { "z": -16.56 } },
+"target": { "z": -16.56 },
+"url": "https://raw.githubusercontent.com/micmacIGN/Documentation/master/Data/CompensOnLine/",
+"ori": [
+  "Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml",
+  "Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml",
+  "Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml",
+  "Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml"
+],
+"img": [
+  "Abbey-IMG_0204.jpg",
+  "Abbey-IMG_0205.jpg",
+  "Abbey-IMG_0206.jpg",
+  "Abbey-IMG_0207.jpg"
+]
+}
