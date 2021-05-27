@@ -308,7 +308,8 @@
                         const list = source.open(json.list, 'text');
                         const out  = source.open(json.out, 'text');
                         const orientations = Promise.all([list, out]).then(Parsers.BundlerParser.parse).then(handleOrientation);
-                        orientations.then(cameras => cameras.forEach(cam => loadImage(json.imgpath+cam.name+'.jpg', source, cam.name)));
+                        if (json.imgpath)
+                          orientations.then(cameras => cameras.forEach(cam => loadImage(json.imgpath+cam.name+'.jpg', source, cam.name)));
                         orientations.then(cameras => {
                             const geometry = new THREE.BufferGeometry();
                             geometry.setAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
@@ -583,7 +584,7 @@
                 /* preset scenes */
                 scenes = {
                     Clear: clearScene,
-                    micmacfilessamples: function () { loadJSON('./data/', 'micmacfilessamples.json'); },
+                    micmacfilessamples: function () { loadJSON('./data/', 'micmacfilesamples.json'); },
                     abbey: function() {  loadJSON('./data/', 'abbey.json'); },
                     maurepas: function() { loadJSON('./data/', 'maurepas.json'); },
                     // maurepas: function() { loadJSON('./data/dias/Maurepas/'); },
@@ -591,7 +592,7 @@
                     ramses: function() { loadJSON('./data/', 'ramses.json'); },
                     cuxa: function() { loadJSON('./data/', 'cuxa.json');  },
                     viabon: function() { loadJSON('./data/', 'viabon.json');  },
-                    // notredame: function() { loadJSON('./data/', 'notredame.json');  }
+                    notredame: function() { loadJSON('./data/', 'notredame.json');  }
                     /* alex: function() {
                         var source = new FetchSource('data/alex/');
                         const pixel = 0.004; // mm

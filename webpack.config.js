@@ -20,6 +20,7 @@ module.exports = {
         ]
     },
   devServer: {
-    publicPath: '/dist/'
+    publicPath: '/photogrammetric-camera/dist/',
+    contentBase: path.join(__dirname, '..')
   },
 };
