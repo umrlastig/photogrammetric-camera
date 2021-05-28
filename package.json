@@ -1,5 +1,5 @@
 {
-  "name": "three-photogrammetric-camera",
+  "name": "photogrammetric-camera",
   "version": "0.1.1",
   "description": "PhotogrammetricCamera for THREE",
   "main": "src/main.js",
@@ -17,12 +17,12 @@
     "deploy": "gh-pages-deploy -- 'gh-pages-deploy'",
     "clean-source": "rimraf webpack.config.js src package.json package-lock.json"
   },
-  "repository": "mbredif/three-photogrammetric-camera",
-  "bugs": "https://github.com/mbredif/three-photogrammetric-camera/issues",
+  "repository": "mbredif/photogrammetric-camera",
+  "bugs": "https://github.com/itownsResearch/photogrammetric-camera/issues",
   "author": "Mathieu Brédif",
   "license": "(CECILL-B OR MIT)",
   "devDependencies": {
-    "gh-pages-deploy": "git+https://github.com/mbredif/gh-pages-deploy",
+    "gh-pages-deploy": "git+https://github.com/itownsResearch/gh-pages-deploy",
     "three": "^0.128.0",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.15",
@@ -32,7 +32,9 @@
   "peerDependencies": {
     "three": "^0.128.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "three": "^0.128.0"
+	},
   "directories": {
     "example": "examples"
   },

@@ -4,7 +4,7 @@ import SpriteMaterialVS from './shaders/SpriteMaterialVS.glsl';
 import SpriteMaterialFS from './shaders/SpriteMaterialFS.glsl';
 
 
-// M^(-1) -> this.viewProjectionInverse
+// M^(-1) * screen -> this.viewProjectionScreenInverse
 // C -> uniform vec3 cameraPosition
 // M' -> this.textureCameraPostTransform * this.textureCameraPreTransform
 // C' -> this.textureCameraPosition
@@ -20,7 +20,8 @@ class SpriteMaterial extends ShaderMaterial {
     definePropertyUniform(this, 'textureCameraPreTransform', new Matrix4());
     definePropertyUniform(this, 'textureCameraPostTransform', new Matrix4());
     definePropertyUniform(this, 'viewProjectionScreenInverse', new Matrix3());
-    definePropertyUniform(this, 'M_prime', new Matrix3());
+    definePropertyUniform(this, 'M_prime_Pre', new Matrix3());
+    definePropertyUniform(this, 'M_prime_Post', new Matrix3());
     definePropertyUniform(this, 'E_prime', new Vector3());
     definePropertyUniform(this, 'uvDistortion', {R: new Vector4(), C: new Vector3()});
     definePropertyUniform(this, 'map', null);
@@ -29,6 +30,7 @@ class SpriteMaterial extends ShaderMaterial {
     definePropertyUniform(this, 'diffuseColorGrey', true);
 
     this.defines.USE_COLOR = '';
+    this.defines.EPSILON = 1e-3;
 
     this.vertexShader = SpriteMaterialVS;
 
@@ -43,14 +45,19 @@ class SpriteMaterial extends ShaderMaterial {
       this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
       this.textureCameraPostTransform.premultiply(textureMatrix);
 
-      var tmp = new Matrix4().multiplyMatrices(this.textureCameraPostTransform, this.textureCameraPreTransform);
-      var els = tmp.elements;
-      this.M_prime.set(
-        els[0], els[4], els[8],
-        els[1], els[5], els[9],
-        els[3], els[7], els[11]);
+      var elsPre = this.textureCameraPreTransform.elements;
+      this.M_prime_Pre.set(
+        elsPre[0], elsPre[4], elsPre[8],
+        elsPre[1], elsPre[5], elsPre[9],
+        elsPre[3], elsPre[7], elsPre[11]);
 
-      if (camera.distos && camera.distos.length == 1 && camera.distos[0].type === 'ModRad') {
+      var elsPost = this.textureCameraPostTransform.elements;
+      this.M_prime_Post.set(
+        elsPost[0], elsPost[4], elsPost[12],
+        elsPost[1], elsPost[5], elsPost[13],
+        elsPost[3], elsPost[7], elsPost[15]);
+
+      if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
           this.uvDistortion = camera.distos[0];
       } else {
           this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
@@ -60,7 +67,7 @@ class SpriteMaterial extends ShaderMaterial {
 
   setViewCamera(camera) {
     camera.updateMatrixWorld(); // the matrixWorldInverse should be up to date
-    this.E_prime.subVectors(camera.position, this.textureCameraPosition).applyMatrix3(this.M_prime);
+    this.E_prime.subVectors(camera.position, this.textureCameraPosition).applyMatrix3(this.M_prime_Pre);
 
     var viewProjectionTransformMat4 = new Matrix4();
     viewProjectionTransformMat4.copy(camera.matrixWorldInverse);
@@ -69,6 +76,7 @@ class SpriteMaterial extends ShaderMaterial {
     viewProjectionTransformMat4.premultiply(camera.postProjectionMatrix);
 
     var els = viewProjectionTransformMat4.elements;
+
     this.viewProjectionScreenInverse.set(
       els[0], els[4], els[8],
       els[1], els[5], els[9],
@@ -81,9 +89,7 @@ class SpriteMaterial extends ShaderMaterial {
     );
 
     this.viewProjectionScreenInverse.multiply(screenInverse);
-
   }
-
 
    setScreenSize(width, height) {
      this.uniforms.screenSize.value.set(width, height);

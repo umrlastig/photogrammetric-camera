@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>radial image</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+        }
+        #help {
+          margin: 20px;
+        }
+    </style>
+  </head>
+  <body>
+    <script src="../dist/photogrammetric-camera.js"></script>
+    <script type="module">
+      var THREE = PhotogrammetricCamera.THREE;
+      var THREE_ = PhotogrammetricCamera.THREE_;
+
+      let renderer, scene, camera, animated;
+      let composer, radialEffect, radialSumEffect = [], radialBlurEffect;
+
+      init();
+      animate();
+
+      function initScene() {
+
+        animated = true;
+        camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.z = 400;
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog( 0x0000ff, 1, 1000 );
+        scene.background = new THREE.Color( 0x000011 );
+
+        const geometry = new THREE.SphereGeometry( 1, 4, 4 );
+        const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+
+        for ( let i = 0; i < 100; i ++ ) {
+
+          const mesh = new THREE.Mesh( geometry, material );
+          mesh.position.set( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 ).normalize();
+          mesh.position.multiplyScalar( Math.random() * 400 );
+          mesh.rotation.set( Math.random() * 2, Math.random() * 2, Math.random() * 2 );
+          mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 50;
+          scene.add( mesh );
+
+        }
+
+        scene.add( new THREE.AmbientLight( 0x222222 ) );
+
+        const light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 1, 1, 1 );
+        scene.add( light );
+        return scene;
+      }
+
+      function initPostProcessing() {
+
+        const renderTarget = new THREE.WebGLRenderTarget(0,0,{
+           minFilter: THREE.LinearFilter,
+           magFilter: THREE.LinearFilter,
+           type:THREE.FloatType
+         });
+        //renderTarget.texture.internalFormat ="RGBA32I";
+        //renderTarget.texture.format = THREE.RGBAIntegerFormat;
+        //renderTarget.texture.type =THREE.IntType;
+
+        composer = new THREE_.EffectComposer( renderer, renderTarget );
+        composer.addPass( new THREE_.RenderPass( scene, camera ) );
+
+        radialEffect = new PhotogrammetricCamera.RawShaderPass( PhotogrammetricCamera.RadialShader );
+        composer.addPass( radialEffect );
+
+        for(let i = 0; i < 12; ++i ) {
+          radialSumEffect[i] = new PhotogrammetricCamera.RawShaderPass( PhotogrammetricCamera.SumShader );
+          composer.addPass( radialSumEffect[i] );
+        }
+        //radialSumEffect[0].uniforms.amount.value = 2; // 11 sum passes with <=2048 pix
+        //radialSumEffect[0].uniforms.amount.value = 3; // 7 sum passes with <=2187 pix
+        //radialSumEffect[0].uniforms.amount.value = 4; // 6 sum passes with <=4096 pix
+        //radialSumEffect[0].uniforms.amount.value = 5; // 5 sum passes with <=3125 pix
+        radialSumEffect[0].uniforms.amount.value = 7; // 4 sum passes with <=2401 pix
+
+        radialBlurEffect = new PhotogrammetricCamera.RawShaderPass( PhotogrammetricCamera.RadialBlurShader );
+        composer.addPass( radialBlurEffect );
+      }
+
+      function init() {
+        if ( THREE_.WEBGL.isWebGL2Available() === false ) {
+          document.body.appendChild( THREE_.WEBGL.getWebGL2ErrorMessage() );
+        }
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        scene = initScene();
+        initPostProcessing();
+
+        window.addEventListener( 'resize', onWindowResize );
+        window.addEventListener( 'mousemove', onMouseMove );
+        window.addEventListener( 'click', onClick );
+        window.addEventListener( 'keydown', onKeyDown );
+        onWindowResize();
+
+      }
+
+      function onWindowResize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+
+        const pad = 1;
+        const wpad = w + 2 * pad;
+        const hpad = h + 2 * pad;
+        renderer.setSize( w, h );
+        composer.setSize( wpad, 2 * hpad );
+        const s = Math.max( wpad, hpad );
+        let enabled = radialSumEffect[0].enabled;
+        const amount = radialSumEffect[0].uniforms.amount.value;
+        for(var i = 0, stride = 1; i<radialSumEffect.length; ++i) {
+          radialSumEffect[i].uniforms.resolution.value.set( wpad, hpad );
+          radialSumEffect[i].uniforms.stride.value = stride;
+          radialSumEffect[i].uniforms.amount.value = amount;
+          radialSumEffect[i].enabled = enabled;
+          stride *= amount;
+          enabled = enabled && (stride < s);
+        }
+        radialEffect.uniforms.resolution.value.set( w, h );
+        radialEffect.uniforms.pad.value = pad;
+        radialBlurEffect.uniforms.resolution.value.set( w, h );
+        radialBlurEffect.uniforms.pad.value = pad;
+      }
+
+      function setCenter(x,y) {
+        radialEffect.uniforms.center.value.set(x,y);
+        radialBlurEffect.uniforms.center.value.set(x,y);
+      }
+
+      function moveCenter(dx,dy) {
+        const x = radialEffect.uniforms.center.value.x + dx;
+        const y = radialEffect.uniforms.center.value.y + dy;
+        setCenter(x,y);
+      }
+
+      function onMouseMove(e) {
+        let x = e.clientX/window.innerWidth;
+        let y = 1-e.clientY/window.innerHeight;
+        setCenter(x,y);
+      }
+
+      function moveBlur(delta) {
+        let blur = Math.max(0,radialBlurEffect.uniforms.blur.value + delta);
+        radialBlurEffect.uniforms.blur.value = blur;
+        console.log("blur", blur);
+      }
+
+      function moveAmount(delta) {
+        let amount = Math.max(2,radialSumEffect[0].uniforms.amount.value + delta);
+        radialSumEffect[0].uniforms.amount.value = amount;
+        onWindowResize();
+        console.log("amount", amount, ", passes", 1+radialSumEffect.map(e => e.enabled).lastIndexOf(true));
+      }
+
+      function onClick(e) {
+        const enabled = !radialBlurEffect.enabled;
+        radialBlurEffect.enabled = enabled;
+        radialEffect.enabled = enabled;
+        radialSumEffect[0].enabled = enabled;
+        onWindowResize();
+      }
+
+      function onKeyDown(e) {
+        if (event.defaultPrevented) return;
+
+        const speed = 10;
+        switch (event.key) {
+          case "ArrowDown" : moveCenter(0,-speed/window.innerHeight); break;
+          case "ArrowUp"   : moveCenter(0, speed/window.innerHeight); break;
+          case "ArrowLeft" : moveCenter(-speed/window.innerWidth,0); break;
+          case "ArrowRight": moveCenter(speed/window.innerWidth,0); break;
+          case "Enter"     : onClick(); break;
+          case " "         : animated = !animated; break;
+          case "+"         : moveBlur(+1); break;
+          case "-"         : moveBlur(-1); break;
+          case "PageUp"    : moveAmount(+1); break;
+          case "PageDown"  : moveAmount(-1); break;
+          default          : return;
+        }
+        event.preventDefault();
+      }
+
+      function animate() {
+        if(animated) {
+          scene.rotation.x += 0.005;
+          scene.rotation.y += 0.01;
+        }
+
+        composer.render();
+        requestAnimationFrame( animate );
+
+      }
+
+    </script>
+
+  </body>
+</html>

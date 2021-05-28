@@ -48,17 +48,17 @@
             </ul>
             Mathieu Brédif (<a href="http://recherche.ign.fr/labos/matis/~bredif">IGN ENSG, Lastig/Geovis, Univ. Paris Est</a>, <a href="http://github.com/mbredif/three-photogrammetric-camera">github</a>)
         </div>
-        <script src="../dist/three-photogrammetric-camera.js"></script>
+        <script src="../dist/photogrammetric-camera.js"></script>
         <script>
-            var THREE = ThreePhotogrammetricCamera.THREE;
-            var PhotogrammetricCamera = ThreePhotogrammetricCamera.PhotogrammetricCamera;
-            var Parsers = ThreePhotogrammetricCamera.Parsers;
-            var Serializers = ThreePhotogrammetricCamera.Serializers;
-            var FetchSource = ThreePhotogrammetricCamera.FetchSource;
-            var FilesSource = ThreePhotogrammetricCamera.FilesSource;
-            var OrientedImageMaterial = ThreePhotogrammetricCamera.OrientedImageMaterial;
-            var NewMaterial = ThreePhotogrammetricCamera.NewMaterial;
-            var ShadowMapMaterial = ThreePhotogrammetricCamera.ShadowMapMaterial;
+            var THREE = PhotogrammetricCamera.THREE;
+            var Parsers = PhotogrammetricCamera.Parsers;
+            var Serializers = PhotogrammetricCamera.Serializers;
+            var FetchSource = PhotogrammetricCamera.FetchSource;
+            var FilesSource = PhotogrammetricCamera.FilesSource;
+            var OrientedImageMaterial = PhotogrammetricCamera.OrientedImageMaterial;
+            var NewMaterial = PhotogrammetricCamera.NewMaterial;
+            var ShadowMapMaterial = PhotogrammetricCamera.ShadowMapMaterial;
+            var PhotogrammetricCamera = PhotogrammetricCamera.PhotogrammetricCamera;
         </script>
         <script src="js/dat.gui.min.js"></script>
         <script src="js/PLYLoader.js"></script>
@@ -273,8 +273,8 @@
             }
 
             function loadJSON(path, file) {
-                setURLSearchParams({scene:file,path:path});
                 file = file || 'index.json';
+                setURLSearchParams({scene:file,path:path});
                 var source = new FetchSource(path);
                 source.open(file, 'text').then((json) => {
                     json = JSON.parse(json);
@@ -586,8 +586,8 @@
                     micmacfilessamples: function () { loadJSON('./data/', 'micmacfilessamples.json'); },
                     abbey: function() {  loadJSON('./data/', 'abbey.json'); },
                     maurepas: function() { loadJSON('./data/', 'maurepas.json'); },
-                    // maurepas: function() { loadJSON('./data/dias/Maurepas/');
-                    // maurepas: function() { loadJSON('./data/dias/Maurepas/', 'maurepas.json');
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/'); },
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/', 'maurepas.json'); },
                     ramses: function() { loadJSON('./data/', 'ramses.json'); },
                     cuxa: function() { loadJSON('./data/', 'cuxa.json');  },
                     viabon: function() { loadJSON('./data/', 'viabon.json');  },
