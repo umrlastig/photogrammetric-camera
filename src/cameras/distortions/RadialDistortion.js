@@ -130,6 +130,16 @@ bool distort_radial(inout vec4 p, RadialDistortion disto) {
   p.xy += polynom(disto.R.xyz, r2) * r;
   return true;
 }
+
+bool distort_radial_vec3(inout vec3 p, RadialDistortion disto) {
+  p /= p.z;
+  vec2 r = p.xy - disto.C;
+  float r2 = dot(r, r);
+  if (r2 > disto.R.w) return false; // to be culled
+  float r4 = r2*r2;
+  p.xy += dot(disto.R.xyz, vec3(r2, r4, r2*r4)) * r;
+  return true;
+}
 `;
 
 export default RadialDistortion;

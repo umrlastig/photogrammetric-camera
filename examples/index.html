@@ -60,18 +60,17 @@
             var OrbitControls = photogrammetricCamera.OrbitControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
             var MapControls = photogrammetricCamera.MapControls;
-            var ThreePhotogrammetricCamera = photogrammetricCamera;
         </script>
         <script>
-            var THREE = ThreePhotogrammetricCamera.THREE;
-            var PhotogrammetricCamera = ThreePhotogrammetricCamera.PhotogrammetricCamera;
-            var Parsers = ThreePhotogrammetricCamera.Parsers;
-            var Serializers = ThreePhotogrammetricCamera.Serializers;
-            var FetchSource = ThreePhotogrammetricCamera.FetchSource;
-            var FilesSource = ThreePhotogrammetricCamera.FilesSource;
-            var OrientedImageMaterial = ThreePhotogrammetricCamera.OrientedImageMaterial;
-            var NewMaterial = ThreePhotogrammetricCamera.NewMaterial;
-            var ShadowMapMaterial = ThreePhotogrammetricCamera.ShadowMapMaterial;
+            var THREE = photogrammetricCamera.THREE;
+            var Parsers = photogrammetricCamera.Parsers;
+            var Serializers = photogrammetricCamera.Serializers;
+            var FetchSource = photogrammetricCamera.FetchSource;
+            var FilesSource = photogrammetricCamera.FilesSource;
+            var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
+            var NewMaterial = photogrammetricCamera.NewMaterial;
+            var ShadowMapMaterial = photogrammetricCamera.ShadowMapMaterial;
+            var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
         <script src="js/helpers/photogrammetricHelper.js"></script>
 		<script src="js/download.js"></script>
@@ -284,8 +283,8 @@
                 }
 
                 function loadJSON(path, file) {
-                setURLSearchParams({scene:file,path:path});
                     file = file || 'index.json';
+                setURLSearchParams({scene:file,path:path});
                     var source = new FetchSource(path);
                     source.open(file, 'text').then((json) => {
                         json = JSON.parse(json);
@@ -600,8 +599,8 @@
                     micmacfilessamples: function () { loadJSON('./data/', 'micmacfilessamples.json'); },
                     abbey: function() {  loadJSON('./data/', 'abbey.json'); },
                     maurepas: function() { loadJSON('./data/', 'maurepas.json'); },
-                    // maurepas: function() { loadJSON('./data/dias/Maurepas/');
-                    // maurepas: function() { loadJSON('./data/dias/Maurepas/', 'maurepas.json');
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/'); },
+                    // maurepas: function() { loadJSON('./data/dias/Maurepas/', 'maurepas.json'); },
                     ramses: function() { loadJSON('./data/', 'ramses.json'); },
                     cuxa: function() { loadJSON('./data/', 'cuxa.json');  },
                     viabon: function() { loadJSON('./data/', 'viabon.json');  },
