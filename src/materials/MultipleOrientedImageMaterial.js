@@ -14,6 +14,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const maxTexture = pop(options, 'maxTexture', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
+        const line = pop(options, 'linewidth', 5);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
         const footprint = pop(options, 'footprint', {border: 2, image: true, heatmap: true});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
@@ -41,7 +42,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         for (let i = 0; i < this.defines.MAX_TEXTURE; ++i) {
             projected[i] = noCamera;
             texture[i] = noTexture;
-            border[i] = {color: new Color(0x000), linewidth: 5., fadein: 1., fadeout: 1.,
+            border[i] = {color: new Color(0x000), linewidth: line, fadein: 1., fadeout: 1.,
                 dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
             uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
                 postTransform: new Matrix4(), postTransInv: new Matrix4()};

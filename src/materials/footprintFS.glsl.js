@@ -84,7 +84,6 @@ void main() {
 
                 if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i]) && r < uvDistortion[i].R.w) {
                     uvw = uvwTexture[i].postTransform * uvw;
-    
                     vec3 p = uvw.xyz / (2. * uvw.w);
                     p += vec3(0.5);
     
