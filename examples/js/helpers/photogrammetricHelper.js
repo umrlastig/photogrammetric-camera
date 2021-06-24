@@ -17,6 +17,12 @@ var textureMaterialUniforms, multipleTextureMaterialUniforms, viewMaterialUnifor
 
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
+
+const whiteData = new Uint8Array(3);
+whiteData.set([255, 255, 255]);
+whiteTexture = new THREE.DataTexture(whiteData, 1, 1, THREE.RGBFormat);
+whiteTexture.name = 'white';
+
 var textures = {};
 
 var params = {
@@ -48,6 +54,7 @@ function initWireMaterial() {
 function initTextureMaterial(vs, fs, map) {
     var uniforms = {
         map: map,
+        depthMap: whiteTexture,
         size: 2,
         sizeAttenuation: false,
         transparent: true,
@@ -333,11 +340,21 @@ function handleCamera(camera, name){
     camera.near = 0.1;
     camera.setDistortionRadius();
     camera.updateProjectionMatrix();
+
+    // Camera helper
     var helper = cameraHelper(camera);
     helper.name = "helper";
     camera.add(helper);
     camera.updateMatrixWorld();
 
+    // Camera renderer target
+    var target = getRenderTarget();
+    camera.renderTarget = target;
+
+    renderer.setRenderTarget(target);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    
     cameras.add(camera);
     cameras.children.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -396,6 +413,21 @@ function getMaxTextureUnitsCount(renderer) {
     return gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 }
 
+function getRenderTarget() {
+    var target = new THREE.WebGLRenderTarget(1024, 1024); // (window.innerWidth, window.innerHeight);
+    target.texture.format = THREE.RGBFormat;
+    target.texture.minFilter = THREE.NearestFilter;
+    target.texture.magFilter = THREE.NearestFilter;
+    target.texture.generateMipmaps = false;
+    target.stencilBuffer = false;
+    target.depthBuffer = true;
+    target.depthTexture = new THREE.DepthTexture();
+    target.depthTexture.format = THREE.DepthFormat;
+    target.depthTexture.type = THREE.UnsignedIntType;
+
+    return target;
+}
+
 /* Sets ---------------------------------------------- */
 function setView(camera) {
     if (!camera) return;
@@ -430,6 +462,7 @@ function setCamera(camera) {
 
 function setMaterial(material, camera) {
     material.map =  textures[camera.name] || uvTexture;
+    if(camera.renderTarget) material.depthMap = camera.renderTarget.depthTexture || whiteTexture;
     material.setCamera(camera, viewCamera);
 }
 

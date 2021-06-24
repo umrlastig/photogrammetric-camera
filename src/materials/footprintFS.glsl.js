@@ -92,6 +92,7 @@ void main() {
                         if(footprint.image && i < MAX_TEXTURE) {
                             vec4 imageColor = texture2D(texture[i], p.xy);
                             imageColor.a *= min(1., debug.borderSharpness*min(distImage.x, distImage.y));
+                            //imageColor.a *= 1./(p.z*p.z);
 
                             diffuseColor.rgb += imageColor.rgb * imageColor.a;
                             diffuseColor.a += imageColor.a;

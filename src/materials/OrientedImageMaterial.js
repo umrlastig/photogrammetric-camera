@@ -17,6 +17,7 @@ class OrientedImageMaterial extends ShaderMaterial {
             R: new THREE.Vector4(), P: new THREE.Vector2(), b: new THREE.Vector2()});
         const homography = pop(options, 'homography', {H: new Matrix3(), invH: new Matrix3});
         const map = pop(options, 'map', null);
+        const depthMap = pop(options, 'depthMap', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false,
@@ -29,6 +30,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         if (options.vertexColors) options.defines.USE_COLOR = '';
         if (options.logarithmicDepthBuffer) options.defines.USE_LOGDEPTHBUF = '';
         if (pop(options, 'sizeAttenuation')) options.defines.USE_SIZEATTENUATION = '';
+        options.defines.EPSILON = 1e-3;
         super(options);
         definePropertyUniform(this, 'size', size);
         definePropertyUniform(this, 'diffuse', diffuse);
@@ -40,6 +42,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'homography', homography);
         definePropertyUniform(this, 'opacity', this.opacity);
         definePropertyUniform(this, 'map', map);
+        definePropertyUniform(this, 'depthMap', depthMap);
         definePropertyUniform(this, 'alphaMap', alphaMap);
         definePropertyUniform(this, 'scale', scale);
         definePropertyUniform(this, 'debug', debug);

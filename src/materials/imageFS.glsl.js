@@ -24,6 +24,7 @@ uniform Debug debug;
     uniform Camera uvwTexture;
     uniform DistortionParams uvDistortion;
     uniform sampler2D map;
+    uniform sampler2D depthMap;
 
     varying highp vec3 vPosition;
 #endif
@@ -53,20 +54,36 @@ void main(){
             // coordinate values
             mat4 m = modelMatrix;
             m[3].xyz -= uvwTexture.position;
+
             vec4 uvw = uvwTexture.preTransform * m * vec4(vPosition, 1.);
-            if( uvw.w > 0. && distortBasic(uvw, uvDistortion)) {
-                uvw = uvwTexture.postTransform * uvw;
-                uvw.xyz /= 2. * uvw.w;
-                uvw.xyz += vec3(0.5);
-                vec3 border = min(uvw.xyz, 1. - uvw.xyz);
-                if (all(greaterThan(border,vec3(0.)))) {
-                    vec4 color = texture2D(map, uvw.xy);
-                    color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
-                    diffuseColor.rgb += color.rgb * color.a;
-                    diffuseColor.a += color.a;
-                } else {
-                    diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
-                    diffuseColor.a += debug.debugOpacity;
+
+            // Shadow mapping
+            vec4 uvwNotDistorted = uvwTexture.postTransform * uvw;
+            uvwNotDistorted.xyz /= 2. * uvwNotDistorted.w;
+            uvwNotDistorted.xyz += vec3(0.5);
+            
+            float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
+            float distanceCamera = uvwNotDistorted.z;
+
+            vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
+
+            // Test for shadow mapping
+            if (all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON) {
+                // Projecting the texture
+                if( uvw.w > 0. && distortBasic(uvw, uvDistortion)) {
+                    uvw = uvwTexture.postTransform * uvw;
+                    uvw.xyz /= 2. * uvw.w;
+                    uvw.xyz += vec3(0.5);
+                    vec3 border = min(uvw.xyz, 1. - uvw.xyz);
+                    if (all(greaterThan(border,vec3(0.)))) {
+                        vec4 color = texture2D(map, uvw.xy);
+                        color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
+                        diffuseColor.rgb += color.rgb * color.a;
+                        diffuseColor.a += color.a;
+                    } else {
+                        diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
+                        diffuseColor.a += debug.debugOpacity;
+                    }
                 }
             }
         }
