@@ -22,8 +22,8 @@ uniform Debug debug;
 #ifdef USE_MAP4
     #undef USE_MAP
     uniform mat4 modelMatrix;
-    uniform Camera uvwTexture[MAX_TEXTURE];
-    uniform DistortionParams uvDistortion[MAX_TEXTURE];
+    uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
+    uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
     uniform sampler2D texture[MAX_TEXTURE];
 
     varying highp vec3 vPosition;
@@ -49,28 +49,30 @@ void main() {
 
     #ifdef USE_MAP4
         if(debug.showImage) {
-            for (int i = 0; i < MAX_TEXTURE; i++) {
-                // "uvwPreTransform * m" is equal to :
-                // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
-                // but more stable when both the texturing and viewing cameras have large
-                // coordinate values
-                mat4 m = modelMatrix;
-                m[3].xyz -= uvwTexture[i].position;
-                vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
+            for (int i = 0; i < PROY_IMAGE_COUNT; i++) {
+                if(i < MAX_TEXTURE) {
+                    // "uvwPreTransform * m" is equal to :
+                    // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
+                    // but more stable when both the texturing and viewing cameras have large
+                    // coordinate values
+                    mat4 m = modelMatrix;
+                    m[3].xyz -= uvwTexture[i].position;
+                    vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
 
-                if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
-                    uvw = uvwTexture[i].postTransform * uvw;
-                    uvw.xyz /= 2. * uvw.w;
-                    uvw.xyz += vec3(0.5);
+                    if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
+                        uvw = uvwTexture[i].postTransform * uvw;
+                        uvw.xyz /= 2. * uvw.w;
+                        uvw.xyz += vec3(0.5);
 
-                    vec3 border = min(uvw.xyz, 1. - uvw.xyz);
-                    if (all(greaterThan(border, vec3(0.)))) {
-                        vec4 imageColor = texture2D(texture[i], uvw.xy);
-                        imageColor.a *= min(1., debug.borderSharpness*min(border.x, border.y));
+                        vec3 border = min(uvw.xyz, 1. - uvw.xyz);
+                        if (all(greaterThan(border, vec3(0.)))) {
+                            vec4 imageColor = texture2D(texture[i], uvw.xy);
+                            imageColor.a *= min(1., debug.borderSharpness*min(border.x, border.y));
 
-                        diffuseColor.rgb += imageColor.rgb * imageColor.a;
-                        diffuseColor.a += imageColor.a;
-                    } 
+                            diffuseColor.rgb += imageColor.rgb * imageColor.a;
+                            diffuseColor.a += imageColor.a;
+                        } 
+                    }
                 }
             }
         }

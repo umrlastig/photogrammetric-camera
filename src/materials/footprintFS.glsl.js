@@ -10,8 +10,6 @@ uniform float opacity;
 uniform Debug debug;
 uniform Footprint footprint;
 
-uniform float orientedImageCount;
-
 #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
     uniform float logDepthBufFC;
     varying float vFragDepth;
@@ -25,10 +23,10 @@ uniform float orientedImageCount;
 #ifdef USE_MAP4
     #undef USE_MAP
     uniform mat4 modelMatrix;
-    uniform Camera uvwTexture[MAX_TEXTURE];
-    uniform DistortionParams uvDistortion[MAX_TEXTURE];
+    uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
+    uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
     uniform sampler2D texture[MAX_TEXTURE];
-    uniform Border border[MAX_TEXTURE];
+    uniform Border border[ORIENTED_IMAGE_COUNT];
 
     varying highp vec3 vPosition;
 #endif
@@ -70,7 +68,7 @@ void main() {
     #ifdef USE_MAP4
         if(debug.showImage) {
             float count = 0.;
-            for (int i = 0; i < MAX_TEXTURE; i++) {
+            for (int i = 0; i < PROY_IMAGE_COUNT; i++) {
                 // "uvwPreTransform * m" is equal to :
                 // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
                 // but more stable when both the texturing and viewing cameras have large
@@ -91,7 +89,7 @@ void main() {
                     if (all(greaterThan(distImage, vec3(0.)))) {
                         if(count < 1.) diffuseColor = vec4(0.); 
                         count += 1.; 
-                        if(footprint.image) {
+                        if(footprint.image && i < MAX_TEXTURE) {
                             vec4 imageColor = texture2D(texture[i], p.xy);
                             imageColor.a *= min(1., debug.borderSharpness*min(distImage.x, distImage.y));
 
@@ -133,7 +131,8 @@ void main() {
             diffuseColor.rgb /= diffuseColor.a > 0. ? diffuseColor.a : 1.;
 
             if(count > 0. && footprint.heatmap) {
-                float weight = count/orientedImageCount;
+                float proyImages = float(PROY_IMAGE_COUNT);
+                float weight = count/proyImages;
                 vec4 heatColor = vec4(heatmapGradient(weight), 1.);
 
                 diffuseColor.rgb = footprint.image ? mix(diffuseColor.rgb, heatColor.rgb, .75) : heatColor.rgb;
