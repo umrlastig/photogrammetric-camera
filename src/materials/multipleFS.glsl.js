@@ -25,6 +25,7 @@ uniform Debug debug;
     uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
     uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
     uniform sampler2D texture[MAX_TEXTURE];
+    uniform sampler2D depthTexture[MAX_TEXTURE];
 
     varying highp vec3 vPosition;
 #endif
@@ -49,16 +50,27 @@ void main() {
 
     #ifdef USE_MAP4
         if(debug.showImage) {
-            for (int i = 0; i < PROY_IMAGE_COUNT; i++) {
-                if(i < MAX_TEXTURE) {
-                    // "uvwPreTransform * m" is equal to :
-                    // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
-                    // but more stable when both the texturing and viewing cameras have large
-                    // coordinate values
-                    mat4 m = modelMatrix;
-                    m[3].xyz -= uvwTexture[i].position;
-                    vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
+            for (int i = 0; i < MAX_TEXTURE; i++) {
+                // "uvwPreTransform * m" is equal to :
+                // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
+                // but more stable when both the texturing and viewing cameras have large
+                // coordinate values
+                mat4 m = modelMatrix;
+                m[3].xyz -= uvwTexture[i].position;
+                vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
 
+                // Shadow mapping
+                vec4 uvwNotDistorted = uvwTexture[i].postTransform * uvw;
+                uvwNotDistorted.xyz /= 2. * uvwNotDistorted.w;
+                uvwNotDistorted.xyz += vec3(0.5);
+
+                float minDist = texture2D(depthTexture[i], uvwNotDistorted.xy).r;
+                float distanceCamera = uvwNotDistorted.z;
+
+                vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
+
+                // Test for shadow mapping
+                if (all(greaterThan(testBorderNotDistorted, vec3(0.))) && distanceCamera <= minDist + EPSILON) {
                     if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i])) {
                         uvw = uvwTexture[i].postTransform * uvw;
                         uvw.xyz /= 2. * uvw.w;

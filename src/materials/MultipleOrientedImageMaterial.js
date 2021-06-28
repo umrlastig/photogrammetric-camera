@@ -1,7 +1,8 @@
-import { ShaderMaterial, ShaderLib, Matrix4, Vector2, Vector3, Color, Texture } from 'three';
+import { ShaderMaterial, ShaderLib, Matrix4, Vector2, Vector3, Color, Texture, DepthTexture } from 'three';
 import { pop, definePropertyUniform, setUvwCamera, setDistortion } from './materialUtils';
 
 const noTexture = new Texture();
+const noDepthTexture = new DepthTexture();
 const noCamera = "noCamera";
 
 class MultipleOrientedImageMaterial extends ShaderMaterial {
@@ -10,6 +11,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const diffuse = pop(options, 'diffuse', new Color(0xeeeeee));
         const showImage = pop(options, 'showImage', true);
         const map = pop(options, 'map', null);
+        const depthMap = pop(options, 'depthMap', null);
         const maxTexture = pop(options, 'maxTexture', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
@@ -25,9 +27,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         if (options.logarithmicDepthBuffer) options.defines.USE_LOGDEPTHBUF = '';
         if (pop(options, 'sizeAttenuation')) options.defines.USE_SIZEATTENUATION = '';
 
-        options.defines.MAX_TEXTURE = maxTexture !== null ? maxTexture : 0;
+        options.defines.MAX_TEXTURE = maxTexture !== null ? Math.floor(maxTexture/2) - 1 : 0;
         options.defines.ORIENTED_IMAGE_COUNT = cameras.children.length > 0 ? cameras.children.length : 1;
         options.defines.PROY_IMAGE_COUNT = 0;
+        options.defines.EPSILON = 1e-3;
 
         super(options);
 
@@ -38,6 +41,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
 
         var projected = [];
         var texture = [];
+        var depthTexture = [];
         var border = [];
         var uvwTexture = [];
         var uvDistortion = [];
@@ -45,6 +49,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         for (let i = 0; i < this.defines.ORIENTED_IMAGE_COUNT; ++i) {
             projected[i] = noCamera;
             texture[i] = noTexture;
+            depthTexture[i] = noDepthTexture;
             border[i] = {color: new Color(0x000), linewidth: line, fadein: 1., fadeout: 1.,
                 dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
             uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
@@ -58,9 +63,11 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'showImage', showImage);
         definePropertyUniform(this, 'projected', projected);
         definePropertyUniform(this, 'texture', texture);
+        definePropertyUniform(this, 'depthTexture', depthTexture);
         definePropertyUniform(this, 'uvwTexture', uvwTexture);
         definePropertyUniform(this, 'uvDistortion', uvDistortion);
         definePropertyUniform(this, 'map', map);
+        definePropertyUniform(this, 'depthMap', depthMap);
         definePropertyUniform(this, 'opacity', this.opacity);
         definePropertyUniform(this, 'alphaMap', alphaMap);
         definePropertyUniform(this, 'scale', scale);
@@ -106,8 +113,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             // Check if the camera is already projected
             const index = this.projected.findIndex(proj => proj == camera.name);
             if (index > -1) {
-                if (index < this.defines.MAX_TEXTURE) 
+                if (index < this.defines.MAX_TEXTURE) {
                     this.texture[index] = this.maps[camera.name] || this.map; 
+                    if(camera.renderTarget) this.depthTexture[index] = camera.renderTarget.depthTexture || this.depthMap; 
+                }
                 this.uvwTexture[index] = setUvwCamera(camera);
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
@@ -116,8 +125,11 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 // Project the image if it has not being done
             } else {
                 this.projected[this.defines.PROY_IMAGE_COUNT] = camera.name;
-                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) 
+                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) { 
                     this.texture[this.defines.PROY_IMAGE_COUNT] = this.maps[camera.name] || this.map; 
+                    if(camera.renderTarget) 
+                        this.depthTexture[this.defines.PROY_IMAGE_COUNT] = camera.renderTarget.depthTexture || this.depthMap;
+                }
                 this.uvwTexture[this.defines.PROY_IMAGE_COUNT] = setUvwCamera(camera);
                 this.uvDistortion[this.defines.PROY_IMAGE_COUNT] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
@@ -135,8 +147,11 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             // Check if the camera is already projected
             const index = this.projected.findIndex(proj => proj == camera.name);
             if (index > -1) {
-                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) 
+                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) {
                     this.texture[index] = this.maps[camera.name] || this.map; 
+                    if(camera.renderTarget) this.depthTexture[index] = camera.renderTarget.depthTexture || this.depthMap; 
+                }
+                    
                 this.uvwTexture[index] = setUvwCamera(camera);
                 this.uvDistortion[index] = setDistortion(camera);
                 // Change the value or maximum radius to the one that only surrounds the image.
@@ -151,13 +166,17 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             // Update the data of each camera
             const projected = [];
             const texture = [];
+            const depthTexture = [];
             const border = [];
             const uvwTexture = [];
             const uvDistortion = [];
 
             for (let i = 0; i < this.cameras.children.length; ++i) {
                 projected[i] = noCamera;
-                if(i < this.defines.MAX_TEXTURE) texture[i] = noTexture;
+                if(i < this.defines.MAX_TEXTURE) {
+                    texture[i] = noTexture;
+                    depthTexture[i] = noDepthTexture;
+                } 
                 border[i] = {color: new Color(0x000), linewidth: this.line, fadein: 1., fadeout: 1.,
                     dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
                 uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
@@ -171,7 +190,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 const index = this.projected.findIndex(proj => proj == camera.name);
                 if(index > -1) {
                     projected[count] = this.projected[index];
-                    if (count < this.defines.MAX_TEXTURE) texture[count] = this.texture[index];
+                    if (count < this.defines.MAX_TEXTURE) {
+                        texture[count] = this.texture[index];
+                        depthTexture[count] = this.depthTexture[index];
+                    } 
                     border[count] = this.border[index];
                     uvwTexture[count] = this.uvwTexture[index];
                     uvDistortion[count] = this.uvDistortion[index];
@@ -181,6 +203,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
 
             this.projected = projected;
             this.texture = texture;
+            this.depthTexture = depthTexture;
             this.border = border;
             this.uvwTexture = uvwTexture;
             this.uvDistortion = uvDistortion;
@@ -202,8 +225,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 // Move all the images one slot 
                 for (let i = index; i < this.defines.PROY_IMAGE_COUNT; ++i) {
                     this.projected[i] = this.projected[i+1];
-                    if (i < this.defines.MAX_TEXTURE) 
+                    if (i < this.defines.MAX_TEXTURE) {
                         this.texture[i] = this.texture[i+1]; 
+                        this.depthTexture[i] = this.depthTexture[i+1]; 
+                    }
                     this.border[i] = this.border[i+1];
                     this.uvwTexture[i] = this.uvwTexture[i+1];
                     this.uvDistortion[i] = this.uvDistortion[i+1];
@@ -211,8 +236,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
 
                 // Erase the last value
                 this.projected[this.defines.PROY_IMAGE_COUNT] = noCamera;
-                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) 
+                if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) {
                     this.texture[this.defines.PROY_IMAGE_COUNT] = noTexture;
+                    this.depthTexture[this.defines.PROY_IMAGE_COUNT] = noDepthTexture;
+                }
                 this.border[this.defines.PROY_IMAGE_COUNT] = {color: new Color(0x000),
                     linewidth: 5., fadein: 1., fadeout: 1., dashed: false, dashwidth: 2., fadedash: 2., radius: 0.}
                 this.uvwTexture[this.defines.PROY_IMAGE_COUNT] = {position: new Vector3(), preTransform: new Matrix4(), 
@@ -229,7 +256,10 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
 
         for (let i = 0; i < this.defines.ORIENTED_IMAGE_COUNT; ++i) {
             this.projected[i] = noCamera;
-            this.texture[i] = noTexture;
+            if (i < this.defines.MAX_TEXTURE) {
+                this.texture[i] = noTexture;
+                this.depthTexture[i] = noDepthTexture;
+            }
             this.border[i] = {color: new Color(0x000), linewidth: this.line, fadein: 1., fadeout: 1.,
                 dashed: false, dashwidth: 2., fadedash: 2., radius: 0.};
             this.uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 

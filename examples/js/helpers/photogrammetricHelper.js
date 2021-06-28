@@ -76,6 +76,7 @@ function initMultipleTextureMaterial(vs, fs, map, renderer) {
 
    var uniforms = {
         map: map,
+        depthMap: whiteTexture,
         size: 2,
         sizeAttenuation: false,
         transparent: true,
