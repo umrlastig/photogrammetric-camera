@@ -23,10 +23,10 @@ uniform Footprint footprint;
 #ifdef USE_MAP4
     #undef USE_MAP
     uniform mat4 modelMatrix;
+    uniform Border border[ORIENTED_IMAGE_COUNT];
     uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
     uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
     uniform sampler2D texture[MAX_TEXTURE];
-    uniform Border border[ORIENTED_IMAGE_COUNT];
 
     varying highp vec3 vPosition;
 #endif
