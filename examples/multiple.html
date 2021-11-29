@@ -83,7 +83,7 @@
                 basicMaterial = initBasicMaterial();
                 wireMaterial = initWireMaterial();
                 [multipleTextureMaterialUniforms, multipleTextureMaterial] = initMultipleTextureMaterial(
-                    multipleVS, multipleFS, uvTexture, renderer);
+                    multipleVS, footprintFS, uvTexture, renderer);
                 viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
 
                 // Environment

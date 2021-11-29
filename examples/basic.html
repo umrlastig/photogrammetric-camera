@@ -38,6 +38,7 @@
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
             var imageVS = photogrammetricCamera.imageVS;
             var imageFS = photogrammetricCamera.imageFS;
+            var viewFS = photogrammetricCamera.viewFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
@@ -79,7 +80,7 @@
                 basicMaterial = initBasicMaterial();
                 wireMaterial = initWireMaterial();
                 [textureMaterialUniforms, textureMaterial] = initTextureMaterial(imageVS, imageFS, uvTexture);
-                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
+                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
 
                 // Environment
                 environment = new THREE.Group();
@@ -92,7 +93,7 @@
                 scene.add(environment);
 
                 // Controls
-                controls = new MapControls( viewCamera, renderer.domElement );
+                controls = new MapControls(viewCamera, renderer.domElement);
 				controls.enableDamping = false;
 				controls.screenSpacePanning = false;
                 controls.maxPolarAngle = 0.75*Math.PI;
@@ -161,24 +162,20 @@
                 };
 
                 var viewGUI = gui.addFolder('View Camera'); // View
-                viewGUI.visible = viewGUI.add(cameras, 'visible');
+                viewGUI.visible = viewGUI.add(cameras, 'visible').name('viewpoints');
                 viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
 
                 // Texture Camera
                 var textureGUI = gui.addFolder('Historical Camera');
                 textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
+                textureGUI.borderSharpness = textureGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("sharpness");
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
+                backgroundGUI.diffuseColorGrey = backgroundGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
                 backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
                 backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
-
-                // Debug
-                var debugGUI = gui.addFolder('Debug');
-                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("border sharpness");
-                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
-                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
 
                 // Update controls functions
                 gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {

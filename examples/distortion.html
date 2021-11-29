@@ -22,7 +22,7 @@
         <script src="../dist/three-additional.js"></script>
         <script>
             // Three library
-            var MapControls = photogrammetricCamera.MapControls;
+            var OrbitControls = photogrammetricCamera.OrbitControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
@@ -38,6 +38,7 @@
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
             var imageVS = photogrammetricCamera.imageVS;
             var imageFS = photogrammetricCamera.imageFS;
+            var viewFS = photogrammetricCamera.viewFS;
             var distortVS = photogrammetricCamera.distortVS;
             var distortFS = photogrammetricCamera.distortFS;
             var sceneVS = photogrammetricCamera.sceneVS;
@@ -86,7 +87,7 @@
                 basicMaterial = initBasicMaterial();
                 wireMaterial = initWireMaterial();
                 [textureMaterialUniforms, textureMaterial] = initTextureMaterial(distortVS, distortFS, uvTexture);
-                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
+                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
                 sceneMaterialUniforms = initSceneMaterialUniforms(sceneVS, sceneFS, textureMaterial);
 
                 // Environment
@@ -100,7 +101,7 @@
                 scene.add(environment);
 
                 // Controls
-                controls = new MapControls( viewCamera, renderer.domElement );
+                controls = new OrbitControls( viewCamera, renderer.domElement );
 				controls.enableDamping = false;
 				controls.screenSpacePanning = false;
                 controls.maxPolarAngle = 0.75*Math.PI;
@@ -131,7 +132,7 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(textureMaterial, server + collection, 'index-original.json');
                     },
                     Frejus: function() {
                         clean();
@@ -148,7 +149,7 @@
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(textureMaterial, server + collection, 'index-half.json');
                     }
                 };
 
@@ -176,7 +177,7 @@
                 };
 
                 var viewGUI = gui.addFolder('View Camera'); // View
-                viewGUI.visible = viewGUI.add(cameras, 'visible');
+                viewGUI.visible = viewGUI.add(cameras, 'visible').name('viewpoints');
                 viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
                 viewGUI.distort = viewGUI.add(textureMaterial.distortion, 'view').name('distort');
                 viewGUI.extrapol = viewGUI.add(textureMaterial.extrapolation, 'view').name('extrapolate');
@@ -190,12 +191,14 @@
 
                 var textureGUI = gui.addFolder('Historical Camera');
                 textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
+                textureGUI.borderSharpness = textureGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("sharpness");
                 textureGUI.distort = textureGUI.add(textureMaterial.distortion, 'texture').name('distort');
                 textureGUI.extrapol = textureGUI.add(textureMaterial.extrapolation, 'texture').name('extrapolate');
-                textureGUI.add(params.distortion, 'rmax', 0, 1).name('rmax ratio').onChange(updateRmaxFromGUI);
+                textureGUI.add(params.distortion, 'rmax', 0, 10).name('rmax ratio').onChange(updateRmaxFromGUI);
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
+                backgroundGUI.diffuseColorGrey = backgroundGUI.add(textureMaterial.debug, 'diffuseColorGrey');
                 backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
                 backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
                 backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
@@ -206,9 +209,9 @@
                         console.warn('Double pass rendering only supports the radial part of the distortion model');
                 }
 
-                var debugGUI = gui.addFolder('Debug');
-                debugGUI.borderSharpness = debugGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("border sharpness");
-                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'diffuseColorGrey');
+                var debugGUI = gui.addFolder('Debug Distortion');
+                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'showRadius');
+                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'showGrid');
                 debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
                 debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2})
                     .name('rendering').onChange(radialDistortionWarn);

@@ -99,6 +99,7 @@ function initCameraMaterialUniforms(vs, fs, map) {
         opacity: 1,
         transparent: true,
         blending: THREE.NormalBlending,
+        side: THREE.DoubleSide,
         vertexShader: vs,
         fragmentShader: fs
     };
@@ -133,7 +134,7 @@ function initBackgroundSphere(material) {
 }
 
 function initWorldPlane(material) {
-    var plane = new THREE.PlaneBufferGeometry(-1, -1, 100, 100);
+    var plane = new THREE.PlaneBufferGeometry(-1, -1, 15, 15);
     var visibility = new Float32Array(plane.attributes.position.count); // invisible
     plane.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(plane, material);
@@ -173,10 +174,11 @@ function cameraHelper(camera) {
     {
         viewMaterials[camera.name] = new OrientedImageMaterial(viewMaterialUniforms);
         setMaterial(viewMaterials[camera.name], camera);
+        viewMaterials[camera.name].debug.showImage = true;
 
         var vertices = v.slice(3);
         var uvs = new Float32Array([ 0., 0.,  0., 1.,  1., 1.,  1., 0.]);
-        var visibility = new Float32Array(Array(geometry.attributes.position.count).fill(1.));
+        var visibility = new Float32Array(Array(geometry.attributes.position.count).fill(0.));
         var indices = [0, 2, 1,  0, 3, 2];
         var geometry = new THREE.BufferGeometry();
         geometry.setIndex(indices);
@@ -188,10 +190,10 @@ function cameraHelper(camera) {
         group.add(mesh);
     }
     // place a sphere at the camera center
-    {
-        var geometry = new THREE.SphereBufferGeometry(0.03, 8, 8);
-        group.add(new THREE.Mesh( geometry, basicMaterial));
-    }
+    //{
+        //var geometry = new THREE.SphereBufferGeometry(1, 8, 8);
+        //group.add(new THREE.Mesh( geometry, basicMaterial));
+    //}
     return group;
 }
 
@@ -337,8 +339,8 @@ function handleCamera(camera, name){
     if (camera.check) check = camera.check() ? '[Y]' : '[N]';
     console.log(check, name);
     
-    camera.far = params.environment.radius+params.environment.epsilon;
     camera.near = 0.1;
+    camera.far = params.environment.radius+params.environment.epsilon;
     camera.setDistortionRadius();
     camera.updateProjectionMatrix();
 
@@ -569,4 +571,3 @@ function basicClean() {
 
     if(multipleTextureMaterial) multipleTextureMaterial.clean();
 }
-

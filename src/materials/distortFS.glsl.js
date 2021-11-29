@@ -60,7 +60,7 @@ void main(){
 
         bool extrapolatedRegion = true;
         vec4 debugColor = vec4(0.);
-        if(distortion.method == 1){
+        if(distortion.method == 1 && debug.showRadius){
             vec2 v = uvw.xy/uvw.w - uvDistortion.C;
             float r = dot(v, v)/uvDistortion.R.w;
             debugColor = vec4(vec3(0.), fract(clamp(r*r*r*r*r, 0., 1.)));
@@ -78,9 +78,9 @@ void main(){
             if (all(greaterThan(border,vec3(0.)))) {
                 vec4 color = texture2D(map, uvw.xy);
                 color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
-                diffuseColor.rgb += color.rgb * color.a;
-                diffuseColor.a += color.a;
-            } else {
+                diffuseColor.rgb += color.rgb * opacity*color.a;
+                diffuseColor.a += opacity*color.a;
+            } else if(debug.showGrid){
                 diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
                 diffuseColor.a += debug.debugOpacity;
             }
@@ -92,9 +92,9 @@ void main(){
     #endif
 
     diffuseColor.rgb /= diffuseColor.a > 0. ? diffuseColor.a : 1.;
-    diffuseColor.a = min(1., diffuseColor.a);
+    diffuseColor.a = max(min(1., diffuseColor.a), 0.);
 
     vec3 outgoingLight = diffuseColor.rgb;
-    gl_FragColor = vec4(outgoingLight, diffuseColor.a * opacity);
+    gl_FragColor = vec4(outgoingLight, diffuseColor.a);
 }
 `;

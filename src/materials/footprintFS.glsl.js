@@ -65,6 +65,7 @@ void main() {
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
     #endif
 
+
     #ifdef USE_MAP4
         if(debug.showImage) {
             float count = 0.;
@@ -103,7 +104,7 @@ void main() {
                             vec2 d = screenSpaceDistance(abs(q.xy) - vec2(1.));
                 
                             float distBorder = d.y;
-                
+
                             float borderin  = (border[i].fadein > 0.) ? smoothstep(0., border[i].fadein, distBorder) : float(distBorder > 0.);
                             float borderout = (border[i].fadeout > 0.) ? smoothstep(0., border[i].fadeout, border[i].linewidth - distBorder) : float(distBorder < border[i].linewidth);
 
@@ -121,9 +122,10 @@ void main() {
         
                                 color.a *= dashinout;
                             }
-
+                            
                             borderColor.rgb += color.rgb * color.a;
                             borderColor.a += color.a;
+                            
                         }
                     }
                 }

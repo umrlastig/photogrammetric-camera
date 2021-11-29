@@ -8,6 +8,7 @@ export { default as MultipleOrientedImageMaterial } from './materials/MultipleOr
 
 export { default as imageVS } from './materials/imageVS.glsl';
 export { default as imageFS } from './materials/imageFS.glsl';
+export { default as viewFS } from './materials/viewFS.glsl';
 export { default as multipleVS } from './materials/multipleVS.glsl';
 export { default as multipleFS } from './materials/multipleFS.glsl';
 export { default as footprintFS } from './materials/footprintFS.glsl';

@@ -42,9 +42,9 @@ void main(){
         diffuseColor.rgb = vec3(dot(diffuseColor.rgb, vec3(0.333333)));
     }
 
-    #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
-        gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
-    #endif
+    //#if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
+    //    gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
+    //#endif
 
     #ifdef USE_MAP4
         if(debug.showImage) {
@@ -62,13 +62,22 @@ void main(){
             uvwNotDistorted.xyz /= 2. * uvwNotDistorted.w;
             uvwNotDistorted.xyz += vec3(0.5);
             
-            float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
-            float distanceCamera = uvwNotDistorted.z;
+            float minDist = texture2D(depthMap, uvwNotDistorted.xy).x;
+            bool passShadowMapTest;
+
+            #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
+                float glPosition_w = uvwNotDistorted.w / 2.0;
+                float glFragDepthEXT = log2(glPosition_w + 1.0) * logDepthBufFC * 0.5;
+                passShadowMapTest = (glFragDepthEXT >= (minDist - EPSILON - 0.001)) && (glFragDepthEXT <= (minDist + EPSILON + 0.001));
+            #else
+                float distanceCamera = uvwNotDistorted.z;
+                passShadowMapTest = distanceCamera <= (minDist + EPSILON);
+            #endif
 
             vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
 
             // Test for shadow mapping
-            if (all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON) {
+            if (all(greaterThan(testBorderNotDistorted,vec3(0.))) && passShadowMapTest) {
                 // Projecting the texture
                 if( uvw.w > 0. && distortBasic(uvw, uvDistortion)) {
                     uvw = uvwTexture.postTransform * uvw;
@@ -78,8 +87,8 @@ void main(){
                     if (all(greaterThan(border,vec3(0.)))) {
                         vec4 color = texture2D(map, uvw.xy);
                         color.a *= min(1., debug.borderSharpness*min(border.x, border.y));
-                        diffuseColor.rgb += color.rgb * color.a;
-                        diffuseColor.a += color.a;
+                        diffuseColor.rgb = color.rgb * color.a;
+                        diffuseColor.a = color.a;
                     } else {
                         diffuseColor.rgb += fract(uvw.xyz) * debug.debugOpacity;
                         diffuseColor.a += debug.debugOpacity;

@@ -34,7 +34,7 @@ void main(){
     if(distortion.view && distortion.method == 2) extrapolatedRegion = distortInverseRadial(uvw, uvDistortion);
     
     vec4 debugColor = vec4(0.);
-    if(distortion.method == 2) {
+    if(distortion.method == 2 && debug.showRadius) {
         vec2 v = uvw.xy/uvw.w - uvDistortion.C;
         float r = uvDistortion.R.w > 0. ? dot(v, v)/uvDistortion.R.w : 0.;
         debugColor = vec4(vec3(0.), fract(clamp(r*r*r*r*r, 0., 1.)));
