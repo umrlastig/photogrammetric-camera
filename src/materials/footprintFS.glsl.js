@@ -9,6 +9,7 @@ uniform vec3 diffuse;
 uniform float opacity;
 uniform Debug debug;
 uniform Footprint footprint;
+uniform Border border;
 
 #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
     uniform float logDepthBufFC;
@@ -23,7 +24,7 @@ uniform Footprint footprint;
 #ifdef USE_MAP4
     #undef USE_MAP
     uniform mat4 modelMatrix;
-    uniform Border border[ORIENTED_IMAGE_COUNT];
+    uniform vec3 bColor[ORIENTED_IMAGE_COUNT];
     uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
     uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
     uniform sampler2D texture[MAX_TEXTURE];
@@ -82,6 +83,7 @@ void main() {
                 float r = dot(v, v);
 
                 if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i]) && r < uvDistortion[i].R.w) {
+                //if(uvw.w > 0. && r < uvDistortion[i].R.w) {
                     uvw = uvwTexture[i].postTransform * uvw;
                     vec3 p = uvw.xyz / (2. * uvw.w);
                     p += vec3(0.5);
@@ -95,8 +97,8 @@ void main() {
                             imageColor.a *= min(1., debug.borderSharpness*min(distImage.x, distImage.y));
                             //imageColor.a *= 1./(p.z*p.z);
 
-                            diffuseColor.rgb += imageColor.rgb * imageColor.a;
-                            diffuseColor.a += imageColor.a;
+                            diffuseColor.rgb += imageColor.rgb * opacity*imageColor.a;
+                            diffuseColor.a += opacity*imageColor.a;
                         }
                     } else if(footprint.border > 0.) {
                         vec3 q = uvw.xyz / uvw.w;
@@ -105,20 +107,20 @@ void main() {
                 
                             float distBorder = d.y;
 
-                            float borderin  = (border[i].fadein > 0.) ? smoothstep(0., border[i].fadein, distBorder) : float(distBorder > 0.);
-                            float borderout = (border[i].fadeout > 0.) ? smoothstep(0., border[i].fadeout, border[i].linewidth - distBorder) : float(distBorder < border[i].linewidth);
+                            float borderin  = (border.fadein > 0.) ? smoothstep(0., border.fadein, distBorder) : float(distBorder > 0.);
+                            float borderout = (border.fadeout > 0.) ? smoothstep(0., border.fadeout, border.linewidth - distBorder) : float(distBorder < border.linewidth);
 
-                            vec4 color = vec4(border[i].color, borderin * borderout);
+                            vec4 color = vec4(bColor[i], borderin * borderout);
 
-                            if(border[i].dashed) {
-                                float dashwidth = border[i].dashwidth * border[i].linewidth; 
+                            if(border.dashed) {
+                                float dashwidth = border.dashwidth * border.linewidth; 
                 
                                 float dashratio = 0.75;         // ratios
                                 float dashoffset = 0.; 
                 
                                 float dash = fract((dashoffset + d.x) / dashwidth);
                 
-                                float dashinout = (border[i].fadedash > 0.) ? smoothstep(0., border[i].fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
+                                float dashinout = (border.fadedash > 0.) ? smoothstep(0., border.fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
         
                                 color.a *= dashinout;
                             }
@@ -136,9 +138,9 @@ void main() {
             if(count > 0. && footprint.heatmap) {
                 float proyImages = float(PROY_IMAGE_COUNT);
                 float weight = count/proyImages;
-                vec4 heatColor = vec4(heatmapGradient(weight), 1.);
+                vec4 heatColor = vec4(heatmapGradient(weight), opacity);
 
-                diffuseColor.rgb = footprint.image ? mix(diffuseColor.rgb, heatColor.rgb, .75) : heatColor.rgb;
+                diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
                 diffuseColor.a += heatColor.a;
             } 
 
@@ -155,6 +157,6 @@ void main() {
     #endif
 
     vec3 outgoingLight = diffuseColor.rgb;
-    gl_FragColor = vec4(outgoingLight, diffuseColor.a * opacity);
+    gl_FragColor = vec4(outgoingLight, diffuseColor.a);
 }
 `;
