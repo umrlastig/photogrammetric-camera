@@ -1,5 +1,5 @@
 import { Vector2 } from 'three';
-import { default as PhotogrammetricDistortion } from '../PhotogrammetricDistortion';
+import { default as PhotogrammetricDistortion } from './PhotogrammetricDistortion';
 import { default as RadialDistortion } from './RadialDistortion';
 import { default as TangentialDistortion } from './TangentialDistortion';
 

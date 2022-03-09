@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as Distortions from './distortions/distortions';
 import * as Parsers from './parsers/parsers';
 import * as Serializers from './serializers/serializers';
 import * as dat from 'dat.gui';
@@ -10,8 +11,9 @@ export { GUI };
 // import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
 
 export { THREE };
-export { Serializers };
+export { Distortions };
 export { Parsers };
+export { Serializers };
 export { default as PhotogrammetricCamera } from './cameras/PhotogrammetricCamera';
 export { default as FilesSource } from './sources/FilesSource';
 export { default as FetchSource } from './sources/FetchSource';

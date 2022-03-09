@@ -1,7 +1,7 @@
 import { Uniform, Vector3, Matrix4 } from 'three';
-import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
-import { default as FraserDistortion } from '../cameras/distortions/FraserDistortion';
-import { default as FishEyeDistortion } from '../cameras/distortions/FishEyeDistortion';
+import { default as RadialDistortion } from '../distortions/RadialDistortion';
+import { default as FraserDistortion } from '../distortions/FraserDistortion';
+import { default as FishEyeDistortion } from '../distortions/FishEyeDistortion';
 
 // maps [-1,1]^3 to [0,1]^3
 export const textureMatrix = new Matrix4().set(

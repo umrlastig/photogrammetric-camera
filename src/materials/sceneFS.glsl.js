@@ -1,4 +1,4 @@
-import { chunks as disto } from '../cameras/PhotogrammetricDistortion';
+import { chunks as disto } from '../distortions/PhotogrammetricDistortion';
 import { chunks as material } from '../materials/OrientedImageMaterial';
 
 export default /* glsl */`
