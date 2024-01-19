@@ -12,6 +12,8 @@
     </head>
     <body>
         <script src="../dist/three.js"></script>
+        <script src="../dist/photogrammetric-camera.js"></script>
+
         <script>
             // Three library
             var THREE = photogrammetricCamera.THREE;
@@ -19,14 +21,13 @@
             var GUI = photogrammetricCamera.GUI;
         </script>
 
-        <script src="../dist/three-additional.js"></script>
+        <!-- <script src="../dist/three-additional.js"></script> -->
         <script>
             // Three library
             var MapControls = photogrammetricCamera.MapControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
-        <script src="../dist/photogrammetric-camera.js"></script>
         <script>
             // Files Management
             var FetchSource = photogrammetricCamera.FetchSource;
@@ -64,7 +65,7 @@
                 height = window.innerHeight;
 
                 // Renderer
-                renderer = new THREE.WebGLRenderer({antialias: true});
+                renderer = new THREE.WebGL1Renderer({antialias: true});
                 renderer.setPixelRatio(window.devicePixelRatio);
                 renderer.setSize(width, height);
                 container.appendChild(renderer.domElement);

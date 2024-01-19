@@ -126,6 +126,7 @@ void main() {
                             }
                             
                             borderColor.rgb += color.rgb * color.a;
+
                             borderColor.a += color.a;
                             
                         }
@@ -135,22 +136,22 @@ void main() {
 
             diffuseColor.rgb /= diffuseColor.a > 0. ? diffuseColor.a : 1.;
 
-            if(count > 0. && footprint.heatmap) {
-                float proyImages = float(PROY_IMAGE_COUNT);
-                float weight = count/proyImages;
-                vec4 heatColor = vec4(heatmapGradient(weight), opacity);
+            // if(count > 0. && footprint.heatmap) {
+            //     float proyImages = float(PROY_IMAGE_COUNT);
+            //     float weight = count/proyImages;
+            //     vec4 heatColor = vec4(heatmapGradient(weight), opacity);
 
-                diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
-                diffuseColor.a += heatColor.a;
-            } 
+            //     diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
+            //     diffuseColor.a += heatColor.a;
+            // }
 
-            if(footprint.border > 1. || (count < 1. && footprint.border > 0.)) {
-                borderColor.rgb /= borderColor.a > 0. ? borderColor.a : 1.;
-                borderColor.a = min(1., borderColor.a);
+            // if(footprint.border > 1. || (count < 1. && footprint.border > 0.)) {
+            //     borderColor.rgb /= borderColor.a > 0. ? borderColor.a : 1.;
+            //     borderColor.a = min(1., borderColor.a);
 
-                diffuseColor.rgb = mix(diffuseColor.rgb, borderColor.rgb, borderColor.a);
-                diffuseColor.a += borderColor.a;
-            }
+            //     diffuseColor.rgb = mix(diffuseColor.rgb, borderColor.rgb, borderColor.a);
+            //     diffuseColor.a += borderColor.a;
+            // }
             
             diffuseColor.a = min(1., diffuseColor.a);
         }

@@ -127,14 +127,14 @@ function initSceneMaterialUniforms(vs, fs, material) {
 
 /* Environment --------------------------------------- */
 function initBackgroundSphere(material) {
-    var sphere = new THREE.SphereBufferGeometry(-1, 32, 32);
+    var sphere = new THREE.SphereGeometry(-1, 32, 32);
     var visibility = new Float32Array(sphere.attributes.position.count); // invisible
     sphere.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(sphere, material);
 }
 
 function initWorldPlane(material) {
-    var plane = new THREE.PlaneBufferGeometry(-1, -1, 15, 15);
+    var plane = new THREE.PlaneGeometry(-1, -1, 15, 15);
     var visibility = new Float32Array(plane.attributes.position.count); // invisible
     plane.setAttribute('visibility', new THREE.BufferAttribute(visibility, 1));
     return new THREE.Mesh(plane, material);
@@ -151,7 +151,7 @@ function cameraAspect(camera) {
 
 function cameraHelper(camera) {
     var group = new THREE.Group();
-    m = new THREE.Matrix4().getInverse(camera.projectionMatrix);
+    m = camera.projectionMatrix.clone().invert();
     var v = new Float32Array(15);
     // get the 4 corners on the near plane (neglecting distortion)
     new THREE.Vector3( -1, -1, -1 ).applyMatrix4(m).toArray(v,  3);
@@ -315,7 +315,7 @@ function parseImage(source){
     }
 }
 
-var plyLoader = new PLYLoader();
+var plyLoader = new photogrammetricCamera.PLYLoader();
 var parsePly = (source) => (data => plyLoader.parse(data));
 
 /* Handling ------------------------------------------ */

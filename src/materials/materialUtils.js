@@ -72,6 +72,6 @@ export function setUvwCamera(camera) {
     uvw.preTransform.setPosition(0,0,0);
     uvw.preTransform.premultiply(camera.preProjectionMatrix);
     uvw.postTransform.copy(camera.postProjectionMatrix);
-    uvw.postTransInv = new Matrix4().getInverse(camera.postProjectionMatrix);
+    uvw.postTransInv = camera.postProjectionMatrix.clone().invert();
     return uvw;
 }

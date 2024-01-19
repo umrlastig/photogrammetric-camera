@@ -4,7 +4,7 @@ module.exports = {
     entry: {
         "three": [path.resolve(__dirname, 'src/three.js')],
         "photogrammetric-camera": [path.resolve(__dirname, 'src/main.js')],
-        "three-additional": [path.resolve(__dirname, 'src/three-additional.js')]
+        "three_additional": [path.resolve(__dirname, 'src/three-additional.js')]
     },
     devtool: 'source-map',
     output: {

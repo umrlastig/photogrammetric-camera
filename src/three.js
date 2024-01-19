@@ -1,4 +1,9 @@
 import * as THREE from 'three';
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
+import * as dat from 'dat.gui';
 
-export { THREE, GUI };
+const GUI = dat.GUI;
+
+export { GUI };
+// import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
+
+export { THREE };

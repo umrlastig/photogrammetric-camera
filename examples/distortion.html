@@ -19,14 +19,15 @@
             var GUI = photogrammetricCamera.GUI;
         </script>
 
-        <script src="../dist/three-additional.js"></script>
+        <script src="../dist/three_additional.js">
+        </script>
+        <script src="../dist/photogrammetric-camera.js"></script>
         <script>
             // Three library
             var OrbitControls = photogrammetricCamera.OrbitControls;
             var PLYLoader = photogrammetricCamera.PLYLoader;
         </script>
 
-        <script src="../dist/photogrammetric-camera.js"></script>
         <script>
             // Files Management
             var FetchSource = photogrammetricCamera.FetchSource;
@@ -71,7 +72,8 @@
                 container.appendChild(renderer.domElement);
 
                 // Post-processing
-                composer = new THREE.EffectComposer(renderer);
+
+                composer = new photogrammetricCamera.EffectComposer(renderer);
 
                 // Scene
                 scene = new THREE.Scene();
@@ -108,9 +110,9 @@
                 controls.enableKeys = false;
 
                 // Compose rendering passes
-                composer.addPass(new THREE.RenderPass(scene, viewCamera));
+                composer.addPass(new photogrammetricCamera.RenderPass(scene, viewCamera));
 
-                scenePass = new THREE.ShaderPass(sceneMaterialUniforms);
+                scenePass = new photogrammetricCamera.ShaderPass(sceneMaterialUniforms);
                 scenePass.renderToScreen = true;
                 composer.addPass(scenePass);
 
