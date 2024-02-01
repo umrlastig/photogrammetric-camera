@@ -42,7 +42,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         this.maps = maps;
 
         var projected = [];
-        var texture = [];
+        var textures = [];
         var depthTexture = [];
         var bColor = [];
         var uvwTexture = [];
@@ -50,7 +50,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
 
         for (let i = 0; i < this.defines.ORIENTED_IMAGE_COUNT; ++i) {
             projected[i] = noCamera;
-            texture[i] = noTexture;
+            textures[i] = noTexture;
             depthTexture[i] = noDepthTexture;
             bColor[i] = new Color(0x000);
             uvwTexture[i] = {position: new Vector3(), preTransform: new Matrix4(), 
@@ -63,7 +63,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         definePropertyUniform(this, 'diffuse', diffuse);
         definePropertyUniform(this, 'showImage', showImage);
         definePropertyUniform(this, 'projected', projected);
-        definePropertyUniform(this, 'texture', texture);
+        definePropertyUniform(this, 'textures', textures);
         definePropertyUniform(this, 'depthTexture', depthTexture);
         definePropertyUniform(this, 'uvwTexture', uvwTexture);
         definePropertyUniform(this, 'uvDistortion', uvDistortion);
@@ -117,7 +117,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             const index = this.projected.findIndex(proj => proj == camera.name);
             if (index > -1) {
                 if (index < this.defines.MAX_TEXTURE) {
-                    this.texture[index] = this.maps[camera.name] || this.map; 
+                    this.textures[index] = this.maps[camera.name] || this.map;
                     if(camera.renderTarget) this.depthTexture[index] = camera.renderTarget.depthTexture || this.depthMap; 
                 }
                 this.uvwTexture[index] = setUvwCamera(camera);
@@ -129,7 +129,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             } else {
                 this.projected[this.defines.PROY_IMAGE_COUNT] = camera.name;
                 if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) { 
-                    this.texture[this.defines.PROY_IMAGE_COUNT] = this.maps[camera.name] || this.map; 
+                    this.textures[this.defines.PROY_IMAGE_COUNT] = this.maps[camera.name] || this.map;
                     if(camera.renderTarget) 
                         this.depthTexture[this.defines.PROY_IMAGE_COUNT] = camera.renderTarget.depthTexture || this.depthMap;
                 }
@@ -151,7 +151,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             const index = this.projected.findIndex(proj => proj == camera.name);
             if (index > -1) {
                 if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) {
-                    this.texture[index] = this.maps[camera.name] || this.map; 
+                    this.textures[index] = this.maps[camera.name] || this.map;
                     if(camera.renderTarget) this.depthTexture[index] = camera.renderTarget.depthTexture || this.depthMap; 
                 }
                     
@@ -193,7 +193,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 if(index > -1) {
                     projected[count] = this.projected[index];
                     if (count < this.defines.MAX_TEXTURE) {
-                        texture[count] = this.texture[index];
+                        texture[count] = this.textures[index];
                         depthTexture[count] = this.depthTexture[index];
                     } 
                     bColor[count] = this.bColor[index];
@@ -204,7 +204,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
             });
 
             this.projected = projected;
-            this.texture = texture;
+            this.textures = texture;
             this.depthTexture = depthTexture;
             this.bColor = bColor;
             this.uvwTexture = uvwTexture;
@@ -228,7 +228,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 for (let i = index; i < this.defines.PROY_IMAGE_COUNT; ++i) {
                     this.projected[i] = this.projected[i+1];
                     if (i < this.defines.MAX_TEXTURE) {
-                        this.texture[i] = this.texture[i+1]; 
+                        this.textures[i] = this.textures[i+1];
                         this.depthTexture[i] = this.depthTexture[i+1]; 
                     }
                     this.bColor[i] = this.bColor[i+1];
@@ -239,7 +239,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
                 // Erase the last value
                 this.projected[this.defines.PROY_IMAGE_COUNT] = noCamera;
                 if (this.defines.PROY_IMAGE_COUNT < this.defines.MAX_TEXTURE) {
-                    this.texture[this.defines.PROY_IMAGE_COUNT] = noTexture;
+                    this.textures[this.defines.PROY_IMAGE_COUNT] = noTexture;
                     this.depthTexture[this.defines.PROY_IMAGE_COUNT] = noDepthTexture;
                 }
                 this.bColor[this.defines.PROY_IMAGE_COUNT] = new Color(0x000);
@@ -251,6 +251,11 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         }
     }
 
+    onBeforeCompile(shader) {
+        shader.fragmentShader = shader.fragmentShader.replace(/PROY_IMAGE_COUNT/i, this.defines.PROY_IMAGE_COUNT);
+        shader.fragmentShader = shader.fragmentShader.replace(/MAX_TEXTURE/i, this.defines.MAX_TEXTURE);
+    }
+
     clean() {
         this.defines.PROY_IMAGE_COUNT = 0;
         this.ORIENTED_IMAGE_COUNT = this.cameras.children.length > 0 ? this.cameras.children.length : 1;
@@ -258,7 +263,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         for (let i = 0; i < this.defines.ORIENTED_IMAGE_COUNT; ++i) {
             this.projected[i] = noCamera;
             if (i < this.defines.MAX_TEXTURE) {
-                this.texture[i] = noTexture;
+                this.textures[i] = noTexture;
                 this.depthTexture[i] = noDepthTexture;
             }
             this.bColor[i] = new Color(0x000);

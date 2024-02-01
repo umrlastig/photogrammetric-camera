@@ -27,7 +27,7 @@ uniform Border border;
     uniform vec3 bColor[ORIENTED_IMAGE_COUNT];
     uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
     uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
-    uniform sampler2D texture[MAX_TEXTURE];
+    uniform sampler2D textures[MAX_TEXTURE];
 
     varying highp vec3 vPosition;
 #endif
@@ -50,6 +50,8 @@ vec2 screenSpaceDistance(vec2 p) {
     return vec2(min(p.x,p.y),max(p.x,p.y)); // miter join
 }
 
+int arrayToInt[64] = int[64](0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63);
+
 void main() {
     vec4 diffuseColor = vec4(diffuse*vVisibility, vVisibility);
     vec4 borderColor = vec4(0.);
@@ -70,17 +72,24 @@ void main() {
     #ifdef USE_MAP4
         if(debug.showImage) {
             float count = 0.;
+            mat4 m;
+            vec4 uvw;
+            vec2 v;
+            float r;
+
+
+#pragma unroll_loop_start
             for (int i = 0; i < PROY_IMAGE_COUNT; i++) {
                 // "uvwPreTransform * m" is equal to :
                 // "camera.preProjectionMatrix * camera.matrixWorldInverse * modelMatrix"
                 // but more stable when both the texturing and viewing cameras have large
                 // coordinate values
-                mat4 m = modelMatrix;
+                m = modelMatrix;
                 m[3].xyz -= uvwTexture[i].position;
-                vec4 uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
+                uvw = uvwTexture[i].preTransform * m * vec4(vPosition, 1.);
 
-                vec2 v = uvw.xy/uvw.w - uvDistortion[i].C;
-                float r = dot(v, v);
+                v = uvw.xy/uvw.w - uvDistortion[i].C;
+                r = dot(v, v);
 
                 if(uvw.w > 0. && distortBasic(uvw, uvDistortion[i]) && r < uvDistortion[i].R.w) {
                 //if(uvw.w > 0. && r < uvDistortion[i].R.w) {
@@ -92,8 +101,8 @@ void main() {
                     if (all(greaterThan(distImage, vec3(0.)))) {
                         if(count < 1.) diffuseColor = vec4(0.); 
                         count += 1.; 
-                        if(footprint.image && i < MAX_TEXTURE) {
-                            vec4 imageColor = texture2D(texture[i], p.xy);
+                        if(footprint.image && arrayToInt[i] < MAX_TEXTURE) {
+                            vec4 imageColor = texture2D(textures[i], p.xy);
                             imageColor.a *= min(1., debug.borderSharpness*min(distImage.x, distImage.y));
                             //imageColor.a *= 1./(p.z*p.z);
 
@@ -133,9 +142,11 @@ void main() {
                     }
                 }
             }
+#pragma unroll_loop_end
 
             diffuseColor.rgb /= diffuseColor.a > 0. ? diffuseColor.a : 1.;
 
+//!\ ## Fix
             // if(count > 0. && footprint.heatmap) {
             //     float proyImages = float(PROY_IMAGE_COUNT);
             //     float weight = count/proyImages;
@@ -144,14 +155,15 @@ void main() {
             //     diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
             //     diffuseColor.a += heatColor.a;
             // }
+// ##
 
-            // if(footprint.border > 1. || (count < 1. && footprint.border > 0.)) {
-            //     borderColor.rgb /= borderColor.a > 0. ? borderColor.a : 1.;
-            //     borderColor.a = min(1., borderColor.a);
+            if(footprint.border > 1. || (count < 1. && footprint.border > 0.)) {
+                borderColor.rgb /= borderColor.a > 0. ? borderColor.a : 1.;
+                borderColor.a = min(1., borderColor.a);
 
-            //     diffuseColor.rgb = mix(diffuseColor.rgb, borderColor.rgb, borderColor.a);
-            //     diffuseColor.a += borderColor.a;
-            // }
+                diffuseColor.rgb = mix(diffuseColor.rgb, borderColor.rgb, borderColor.a);
+                diffuseColor.a += borderColor.a;
+            }
             
             diffuseColor.a = min(1., diffuseColor.a);
         }

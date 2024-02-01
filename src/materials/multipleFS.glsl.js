@@ -24,7 +24,7 @@ uniform Debug debug;
     uniform mat4 modelMatrix;
     uniform Camera uvwTexture[ORIENTED_IMAGE_COUNT];
     uniform DistortionParams uvDistortion[ORIENTED_IMAGE_COUNT];
-    uniform sampler2D texture[MAX_TEXTURE];
+    uniform sampler2D textures[MAX_TEXTURE];
     uniform sampler2D depthTexture[MAX_TEXTURE];
 
     varying highp vec3 vPosition;
@@ -78,7 +78,7 @@ void main() {
 
                         vec3 border = min(uvw.xyz, 1. - uvw.xyz);
                         if (all(greaterThan(border, vec3(0.)))) {
-                            vec4 imageColor = texture2D(texture[i], uvw.xy);
+                            vec4 imageColor = texture2D(textures[i], uvw.xy);
                             imageColor.a *= min(1., debug.borderSharpness*min(border.x, border.y));
 
                             diffuseColor.rgb += imageColor.rgb * imageColor.a;
