@@ -147,14 +147,14 @@ void main() {
             diffuseColor.rgb /= diffuseColor.a > 0. ? diffuseColor.a : 1.;
 
 //!\ ## Fix
-            // if(count > 0. && footprint.heatmap) {
-            //     float proyImages = float(PROY_IMAGE_COUNT);
-            //     float weight = count/proyImages;
-            //     vec4 heatColor = vec4(heatmapGradient(weight), opacity);
+            if(count > 0. && footprint.heatmap) {
+                float proyImages = float(PROY_IMAGE_COUNT);
+                float weight = count/proyImages;
+                vec4 heatColor = vec4(heatmapGradient(weight), opacity);
 
-            //     diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
-            //     diffuseColor.a += heatColor.a;
-            // }
+                diffuseColor.rgb = mix(diffuseColor.rgb, heatColor.rgb, opacity);
+                diffuseColor.a += heatColor.a;
+            }
 // ##
 
             if(footprint.border > 1. || (count < 1. && footprint.border > 0.)) {

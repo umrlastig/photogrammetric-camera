@@ -17,7 +17,7 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
         const scale = pop(options, 'scale', 1);
         const line = pop(options, 'linewidth', 5);
         const debug = pop(options, 'debug', {borderSharpness: 1000, diffuseColorGrey: false, showImage: false});
-        const footprint = pop(options, 'footprint', {border: 2, image: true, heatmap: true});
+        const footprint = pop(options, 'footprint', {border: 2, image: true, heatmap: false});
         const border = pop(options, 'border', {linewidth: line, fadein: 1., fadeout: 1.,
             dashed: false, dashwidth: 2., fadedash: 2., radius: 0.});
         options.vertexShader = options.vertexShader || ShaderLib.points.vertexShader;
