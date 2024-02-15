@@ -18,9 +18,9 @@ var textureMaterialUniforms, multipleTextureMaterialUniforms, viewMaterialUnifor
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
 
-const whiteData = new Uint8Array(3);
-whiteData.set([255, 255, 255]);
-whiteTexture = new THREE.DataTexture(whiteData, 1, 1, THREE.RGBFormat);
+const whiteData = new Uint8Array(4);
+whiteData.set([255, 255, 255, 255]);
+whiteTexture = new THREE.DataTexture(whiteData, 1, 1, THREE.RGBAFormat);
 whiteTexture.name = 'white';
 
 var textures = {};
@@ -420,7 +420,7 @@ function getMaxTextureUnitsCount(renderer) {
 
 function getRenderTarget() {
     var target = new THREE.WebGLRenderTarget(1024, 1024); // (window.innerWidth, window.innerHeight);
-    target.texture.format = THREE.RGBFormat;
+    target.texture.format = THREE.RGBAFormat;
     target.texture.minFilter = THREE.NearestFilter;
     target.texture.magFilter = THREE.NearestFilter;
     target.texture.generateMipmaps = false;
