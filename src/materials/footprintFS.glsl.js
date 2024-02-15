@@ -46,7 +46,7 @@ vec2 screenSpaceDistance(vec2 p) {
     float ly = length(vec2(dx.y,dy.y));
     if (lx>0.0) p.x/=lx;
     if (ly>0.0) p.y/=ly;
-    
+
     return vec2(min(p.x,p.y),max(p.x,p.y)); // miter join
 }
 
@@ -96,11 +96,11 @@ void main() {
                     uvw = uvwTexture[i].postTransform * uvw;
                     vec3 p = uvw.xyz / (2. * uvw.w);
                     p += vec3(0.5);
-    
+
                     vec3 distImage = min(p, 1. - p);
                     if (all(greaterThan(distImage, vec3(0.)))) {
-                        if(count < 1.) diffuseColor = vec4(0.); 
-                        count += 1.; 
+                        if(count < 1.) diffuseColor = vec4(0.);
+                        count += 1.;
                         if(footprint.image && arrayToInt[i] < MAX_TEXTURE) {
                             vec4 imageColor = texture2D(textures[i], p.xy);
                             imageColor.a *= min(1., debug.borderSharpness*min(distImage.x, distImage.y));
@@ -113,7 +113,7 @@ void main() {
                         vec3 q = uvw.xyz / uvw.w;
                         if(q.z > 0. && q.z < 1.) {
                             vec2 d = screenSpaceDistance(abs(q.xy) - vec2(1.));
-                
+
                             float distBorder = d.y;
 
                             float borderin  = (border.fadein > 0.) ? smoothstep(0., border.fadein, distBorder) : float(distBorder > 0.);
@@ -122,22 +122,22 @@ void main() {
                             vec4 color = vec4(bColor[i], borderin * borderout);
 
                             if(border.dashed) {
-                                float dashwidth = border.dashwidth * border.linewidth; 
-                
+                                float dashwidth = border.dashwidth * border.linewidth;
+
                                 float dashratio = 0.75;         // ratios
-                                float dashoffset = 0.; 
-                
+                                float dashoffset = 0.;
+
                                 float dash = fract((dashoffset + d.x) / dashwidth);
-                
+
                                 float dashinout = (border.fadedash > 0.) ? smoothstep(0., border.fadedash/dashwidth, min(dash, dashratio - dash)) : float(dash < dashratio);
-        
+
                                 color.a *= dashinout;
                             }
-                            
+
                             borderColor.rgb += color.rgb * color.a;
 
                             borderColor.a += color.a;
-                            
+
                         }
                     }
                 }
@@ -164,7 +164,7 @@ void main() {
                 diffuseColor.rgb = mix(diffuseColor.rgb, borderColor.rgb, borderColor.a);
                 diffuseColor.a += borderColor.a;
             }
-            
+
             diffuseColor.a = min(1., diffuseColor.a);
         }
     #endif
