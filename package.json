@@ -28,11 +28,10 @@
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "three": "^0.154.0",
+    "three": "^0.159.0",
     "numeric": "^1.2.6"
   },
   "dependencies": {
-    "three": "^0.154.0",
     "numeric": "^1.2.6",
     "dat.gui": "^0.7.9"
   },
