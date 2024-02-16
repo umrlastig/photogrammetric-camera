@@ -252,7 +252,8 @@ class MultipleOrientedImageMaterial extends ShaderMaterial {
     }
 
     onBeforeCompile(shader) {
-        shader.fragmentShader = shader.fragmentShader.replace(/PROY_IMAGE_COUNT/i, this.defines.PROY_IMAGE_COUNT);
+        const PROY_IMAGE_COUNT = Math.min(this.defines.PROY_IMAGE_COUNT, this.defines.MAX_TEXTURE);
+        shader.fragmentShader = shader.fragmentShader.replace(/PROY_IMAGE_COUNT/i, PROY_IMAGE_COUNT);
         shader.fragmentShader = shader.fragmentShader.replace(/MAX_TEXTURE/i, this.defines.MAX_TEXTURE);
     }
 
