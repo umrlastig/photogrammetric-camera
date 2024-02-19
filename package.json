@@ -12,20 +12,20 @@
     "noprompt": false
   },
   "scripts": {
-    "build": "webpack -p",
-    "start": "webpack-dev-server -d --inline --hot",
+    "build": "webpack",
+    "start": "webpack serve --open",
     "deploy": "gh-pages-deploy -- 'gh-pages-deploy'",
     "clean-source": "rimraf webpack.config.js src package.json package-lock.json"
   },
   "repository": "epaizreyes/photogrammetric-camera",
-  "bugs": "https://github.com/epaizreyes/photogrammetric-camera/issues",
-  "author": "Mathieu Brédif & Evelyn Paiz",
+  "bugs": "https://github.com/umrlastig/photogrammetric-camera/issues",
+  "author": "Mathieu Brédif, Evelyn Paiz, Gérald Choqueux",
   "license": "(CECILL-B OR MIT)",
   "devDependencies": {
     "gh-pages-deploy": "^0.5.1",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.2"
   },
   "peerDependencies": {
     "three": "^0.159.0",
