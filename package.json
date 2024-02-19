@@ -1,6 +1,6 @@
 {
   "name": "photogrammetric-camera",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "PhotogrammetricCamera for THREE",
   "main": "src/main.js",
   "gh-pages-deploy": {
@@ -17,7 +17,7 @@
     "deploy": "gh-pages-deploy -- 'gh-pages-deploy'",
     "clean-source": "rimraf webpack.config.js src package.json package-lock.json"
   },
-  "repository": "epaizreyes/photogrammetric-camera",
+  "repository": "https://github.com/umrlastig/photogrammetric-camera",
   "bugs": "https://github.com/umrlastig/photogrammetric-camera/issues",
   "author": "Mathieu Brédif, Evelyn Paiz, Gérald Choqueux",
   "license": "(CECILL-B OR MIT)",
