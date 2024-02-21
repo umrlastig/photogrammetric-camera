@@ -92,6 +92,8 @@ class RadialDistortion {
     var r2 = x * x + y * y;
     var R = this.R.toArray(); R.pop();
     var radial = r2 * PhotogrammetricDistortion.polynom(R, r2);
+    // change Commit use polynomVector3
+    // var radial = r2 * PhotogrammetricDistortion.polynomVector3(this.R, r2);
     p.x += radial * x;
     p.y += radial * y;
     return p;
