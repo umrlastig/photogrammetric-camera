@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>THREE - Photogrammetric Camera</title>
+        <title>Photogrammetric Camera</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <style>
@@ -214,7 +214,12 @@
                 function handleOrientation(camera) {
                     showHelp(false);
                     if (!camera) return;
-										if (camera instanceof Array) return camera.map(handleOrientation);
+					if (camera instanceof Array) {
+						const res = camera.map(handleOrientation);
+						res.points = camera.points;
+						res.colors = camera.colors;
+						return res;
+					}
                     if (cameras.children.find(cam => cam.name == camera.name)) {
                         console.warn(`Camera "${camera.name}" was already loaded, skipping`);
                         return;
@@ -270,10 +275,10 @@
                     .then(handlePly(url));
                 }
 
-                function loadImage(url, source) {
+                function loadImage(url, source, name) {
                     return source.open(url, 'dataURL')
                     .then(parseImage(source))
-                    .then(handleImage(url));
+                    .then(handleImage(name || url));
                 }
 
                 function loadOrientation(name, source) {
@@ -511,7 +516,7 @@
 												geometry.addAttribute('position', new THREE.BufferAttribute( data.position, 3 ));
 												const material = new THREE.PointsMaterial( { color: 0xff0000, size: 10} );
 												const gcp = new THREE.Points(geometry, material);
-												 scene.add(gcp);
+												scene.add(gcp);
 											});
 
 											Promise.all([xyz, orientations, mes]).then(res => {
