@@ -33,7 +33,8 @@ class FetchSource {
     }
 
     open(url, type) {
-        return this.fetch(this.path + url, this.fetchOptions)
+        if(!url.startsWith('http')) url = this.path + url; // todo: better handling of absolute and relative urls
+        return this.fetch(url, this.fetchOptions)
             .then(response => this.decode(response, type));
     }
 

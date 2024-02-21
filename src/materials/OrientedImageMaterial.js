@@ -1,4 +1,4 @@
-import { Uniform, ShaderMaterial, ShaderLib, ShaderChunk, Matrix4, Vector3, Vector4, Color } from 'three';
+import { Uniform, ShaderMaterial, ShaderLib, ShaderChunk, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
 import { default as RadialDistortion } from '../cameras/distortions/RadialDistortion';
 
 function pop(options, property, defaultValue) {
@@ -96,7 +96,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         const uvwPosition = pop(options, 'uvwPosition', new Vector3());
         const uvwPreTransform = pop(options, 'uvwPreTransform', new Matrix4());
         const uvwPostTransform = pop(options, 'uvwPostTransform', new Matrix4());
-        const uvDistortion = pop(options, 'uvDistortion', {R: new Vector4(), C: new Vector3()});
+        const uvDistortion = pop(options, 'uvDistortion', {R: new Vector4(), C: new Vector2()});
         const map = pop(options, 'map', null);
         const alphaMap = pop(options, 'alphaMap', null);
         const scale = pop(options, 'scale', 1);
@@ -137,7 +137,7 @@ class OrientedImageMaterial extends ShaderMaterial {
         this.uvwPostTransform.copy(camera.postProjectionMatrix);
 
         // TODO: handle other distorsion types and arrays of distortions
-        if (camera.distos && camera.distos.length == 1 && camera.distos[0].type === 'ModRad') {
+        if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
             this.uvDistortion = camera.distos[0];
         } else {
             this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };

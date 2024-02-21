@@ -66,7 +66,7 @@ class NewMaterial extends ShaderMaterial {
       this.textureCameraPreTransform.premultiply(camera.preProjectionMatrix);
       this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
 
-      if (camera.distos && camera.distos.length == 1 && camera.distos[0].type === 'ModRad') {
+			if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
           this.uvDistortion = camera.distos[0];
       } else {
           this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
