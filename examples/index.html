@@ -52,8 +52,8 @@
         <script>
             var THREE = ThreePhotogrammetricCamera.THREE;
             var PhotogrammetricCamera = ThreePhotogrammetricCamera.PhotogrammetricCamera;
-            var OrientationParsers = ThreePhotogrammetricCamera.Parsers;
-            var BundlerOrientationParser = ThreePhotogrammetricCamera.BundlerOrientationParser;
+            var Parsers = ThreePhotogrammetricCamera.Parsers;
+            var Serializers = ThreePhotogrammetricCamera.Serializers;
             var FetchSource = ThreePhotogrammetricCamera.FetchSource;
             var FilesSource = ThreePhotogrammetricCamera.FilesSource;
             var OrientedImageMaterial = ThreePhotogrammetricCamera.OrientedImageMaterial;
@@ -223,8 +223,8 @@
 
             function parseOrientation(source, name) {
                 return (data) => {
-                    for(const parser of OrientationParsers) {
-                        var parsed = parser.parse(data, source, name);
+                    for(const parser in Parsers) {
+                        var parsed = Parsers[parser].parse(data, source, name);
                         if (parsed) return parsed;
                     }
                     return undefined;
@@ -486,7 +486,7 @@
                         var ext = name.substr(name.lastIndexOf('.') + 1).toLowerCase();
                         switch (ext) {
                             case 'ply': loadPly(name, source); break;
-                            case 'out': case 'xml': loadOrientation(name, source); break;
+                            case 'out': case 'xml': case 'json': loadOrientation(name, source); break;
                             case 'jpg': loadImage(name, source); break;
                             default:
                         }
@@ -509,8 +509,8 @@
 
                 function keyDown(event) {
                     switch(event.key) {
-                        case '+': textureMaterial.size++; break;
-                        case '-': textureMaterial.size--; break;
+                        case '+': textureMaterial.size++; setTexture(textureCamera); break;
+                        case '-': textureMaterial.size--; setTexture(textureCamera); break;
                         case 'ArrowDown': setView(getCamera(nextCamera, -1));  break;
                         case 'ArrowUp': setView(getCamera(nextCamera, +1));  break;
                         case 'ArrowLeft': setTexture(getCamera(textureCamera, -1));  break;
@@ -572,6 +572,9 @@
                         orbitControls.target.set(0, 0, plane.position.z);
                     },
                     Maurepas: function() {
+                        loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/maurepas/');
+                        //loadJSON('./data/dias/Maurepas/');
+                        //loadJSON('./data/dias/Maurepas/', 'maurepas.json');
                     },
                     Ramses: function() {
                         loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
@@ -586,7 +589,7 @@
                         var source = new FetchSource('data/NotreDame/');
                         const list = source.open('list2.txt', 'text');
                         const out  = source.open('notredame.out', 'text');
-                        const orientations = Promise.all([list, out]).then(BundlerOrientationParser.parse).then(handleOrientation);
+                        const orientations = Promise.all([list, out]).then(Parsers.BundlerParser.parse).then(handleOrientation);
                         //orientations.then(cameras => cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name)));
                         //orientations.then(cameras => console.log(cameras));
                         orientations.then(cameras => cameras.forEach(cam => loadImage('images/'+cam.name, source, cam.name)));
@@ -622,8 +625,8 @@
                         const scale = 30000;
                         plane.scale.set(scale,scale,scale);
 
-                        const mes = source.open('sample.MES', 'text').then(text => OPKOrientationParser.parseMES(text, 'sample.MES'));
-                        const xyz = source.open('sample.XYZ', 'text').then(text => OPKOrientationParser.parseXYZ(text, 'sample.XYZ'));
+                        const mes = source.open('sample.MES', 'text').then(text => Parsers.OPKParser.parseMES(text, 'sample.MES'));
+                        const xyz = source.open('sample.XYZ', 'text').then(text => Parsers.OPKParser.parseXYZ(text, 'sample.XYZ'));
 
                         xyz.then(data => {
                             const geometry = new THREE.BufferGeometry();
@@ -744,6 +747,17 @@
                 const debugGUI = gui.addFolder('Debug');
                 debugGUI.add(screenQuads, 'visible').name('thumbs visible');
                 //debugGUI.add(textureMaterial, 'debugOpacity', 0, 1);
+
+                const debug = {
+                  saveAllAsGeoJSON: function () {
+                    download("cameras.json", Serializers.GeoJSONSerializer.serialize(cameras, "EPSG:2154"));
+                  },
+                  saveViewAsGML: function () {
+                    download("camera.gml", Serializers.GMLSerializer.serialize(viewCamera));
+                  }
+                };
+                debugGUI.add(debug, 'saveAllAsGeoJSON');
+                debugGUI.add(debug, 'saveViewAsGML');
 
                 gui.clear();
                 return gui;
