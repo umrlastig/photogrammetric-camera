@@ -30,8 +30,12 @@
             var FetchSource = photogrammetricCamera.FetchSource;
             var FilesSource = photogrammetricCamera.FilesSource;
             // Parsers
-            var MatisOrientationParser = photogrammetricCamera.MatisOrientationParser;
-            var MicmacOrientationParser = photogrammetricCamera.MicmacOrientationParser;
+            var Parsers = photogrammetricCamera.Parsers;
+
+            var MatisOrientationParser = Parsers.MatisParser;
+            var MicmacOrientationParser = Parsers.MicmacParser;
+            var OPKOrientationParser = Parsers.OPKParser;
+            var BundlerOrientationParser = Parsers.BundlerParser;
             // Materials
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
             var MultipleOrientedImageMaterial = photogrammetricCamera.MultipleOrientedImageMaterial;

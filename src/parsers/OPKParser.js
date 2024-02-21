@@ -2,7 +2,7 @@ import { Vector3, Euler, MathUtils } from 'three';
 import PhotogrammetricCamera from '../cameras/PhotogrammetricCamera';
 
 export default {
-    /** @module OPKOrientationParser */
+    /** @module OPKParser */
     /** Parse an orientation using the IGN internal XML format
      * @function parse
      * @param {string} text - the text content of the OPK file.

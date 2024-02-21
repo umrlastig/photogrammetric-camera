@@ -240,7 +240,7 @@ function parseOrientation(xml, name, intrinsics) {
 
 
 export default {
-    /** @module MicmacOrientationParser */
+    /** @module MicmacParser */
     /** Parse an Orientation*.xml from Micmac (see {@link https://github.com/micmacIGN})
      * @function parse
      * @param {string|XMLDocument} xml - the xml content of the orientation file.

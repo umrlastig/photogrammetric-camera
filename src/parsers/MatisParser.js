@@ -19,7 +19,7 @@ function getNumbers(xml, tagName, dims) {
 function parseSpheric(xml, size) {
     var camera = new Camera();
     camera.lambdaphi = getNumbers(xml, 'frame', ['lambda_min', 'lambda_max', 'phi_min', 'phi_max']);
-    // patching the ori.MatisOrientationParser..
+    // patching the ori.MatisParser..
     camera.view.fullHeight = 718;
     camera.lambdaphi[2] = camera.lambdaphi[3] - camera.view.fullHeight * (camera.lambdaphi[1] - camera.lambdaphi[0]) / camera.view.fullWidth;
     // set the projection to the top face of the cube map
@@ -91,7 +91,7 @@ function parseExtrinsics(xml) {
 }
 
 export default {
-    /** @module MatisOrientationParser */
+    /** @module MatisParser */
     /** Parse an orientation using the IGN Matis internal XML format
      * @function parse
      * @param {string|XMLDocument} xml - the xml content of the orientation file.
@@ -110,7 +110,7 @@ export default {
         camera.matrix = parseExtrinsics(xml);
         camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
         camera.updateMatrixWorld(true);
-				camera.name = name;
+        camera.name = name;
         return camera;
     },
     format: 'matis/orientation',

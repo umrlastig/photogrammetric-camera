@@ -1,5 +1,8 @@
 import * as THREE from 'three';
+import * as Parsers from './parsers/parsers';
+import * as Serializers from './serializers/serializers';
 import * as dat from 'dat.gui';
+
 
 const GUI = dat.GUI;
 
@@ -7,11 +10,9 @@ export { GUI };
 // import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
 
 export { THREE };
+export { Serializers };
+export { Parsers };
 
-export { default as MatisOrientationParser } from './parsers/MatisOrientationParser';
-export { default as MicmacOrientationParser } from './parsers/MicmacOrientationParser';
-export { default as OPKOrientationParser } from './parsers/OPKOrientationParser';
-export { default as BundlerOrientationParser } from './parsers/BundlerOrientationParser';
 export { default as PhotogrammetricCamera } from './cameras/PhotogrammetricCamera';
 export { default as FilesSource } from './sources/FilesSource';
 export { default as FetchSource } from './sources/FetchSource';
@@ -44,5 +45,3 @@ export { default as distortVS } from './materials/distortVS.glsl';
 export { default as distortFS } from './materials/distortFS.glsl';
 export { default as sceneVS } from './materials/sceneVS.glsl';
 export { default as sceneFS } from './materials/sceneFS.glsl';
-
-export { default as Parsers } from './parsers/parsers';
