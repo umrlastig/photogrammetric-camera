@@ -73,7 +73,7 @@ class RadialDistortion {
  **/
   constructor(C, R, R2max) {
     if(R.length > 3) {
-        console.warn('RadialDistortion is currently limited to 3 coefficients: Neglecting higher order coefficients.');
+        console.warn('RadialDistortion is currently limited to degrees 3,5,7: Neglecting higher order coefficients.');
     }
     R[0] = R[0] || 0;
     R[1] = R[1] || 0;
@@ -81,6 +81,7 @@ class RadialDistortion {
     R[3] = R2max || r2max(R);
     this.C = Array.isArray(C) ? new Vector2().fromArray(C) : C;
     this.R = new Vector4().fromArray(R);
+    this.isRadialDistortion = true;
   }
 
 
@@ -110,7 +111,7 @@ class RadialDistortion {
     }
 }
 
-export const chunks = {
+RadialDistortion.chunks = {
     radial_pars_fragment: `
 struct RadialDistortion {
   vec2 C;
@@ -131,7 +132,6 @@ bool distort_radial(inout vec4 p, RadialDistortion disto) {
   return true;
 }
 `,
-}
-
+};
 
 export default RadialDistortion;

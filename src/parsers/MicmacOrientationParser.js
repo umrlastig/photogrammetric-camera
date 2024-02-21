@@ -230,7 +230,7 @@ function parseCheck(xml) {
 
 function parseOrientation(xml, name, intrinsics) {
     var camera = parseIntrinsics(intrinsics, parseOrIntImaM2C(xml));
-		camera.name = name;
+    camera.name = name;
     camera.matrix = parseExtrinsics(xml);
     camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
     camera.updateMatrixWorld(true);
@@ -252,8 +252,8 @@ export default {
         if (!(xml instanceof Node)) {
             xml = new window.DOMParser().parseFromString(xml, 'text/xml');
         }
-				const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
-				if (match) name = match[1];
+        const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
+        if (match) name = match[1];
 
         // sanity check for format
         xml = xml.getElementsByTagName('OrientationConique')[0];

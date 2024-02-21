@@ -19,6 +19,7 @@ class FraserDistortion {
     this.R = radial.R;
     this.P = tangential.P;
     this.b = new Vector2().fromArray(b);
+    this.isFraserDistortion = true;
   }
 
 // https://github.com/micmacIGN/micmac/blob/e0008b7a084f850aa9db4dc50374bd7ec6984da6/src/photogram/phgr_ebner_brown_dist.cpp#L441-L475

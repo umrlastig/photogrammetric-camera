@@ -9,6 +9,7 @@ class EbnerDistortion {
     this.B = B;
     this.P = P;
     this.B2 = B * B / 1.5;
+    this.isEbnerDistortion = true;
   }
 
   // https://github.com/micmacIGN/micmac/blob/e0008b7a084f850aa9db4dc50374bd7ec6984da6/src/photogram/phgr_ebner_brown_dist.cpp#L361-L396

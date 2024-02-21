@@ -44,3 +44,5 @@ export { default as distortVS } from './materials/distortVS.glsl';
 export { default as distortFS } from './materials/distortFS.glsl';
 export { default as sceneVS } from './materials/sceneVS.glsl';
 export { default as sceneFS } from './materials/sceneFS.glsl';
+
+export { default as Parsers } from './parsers/parsers';

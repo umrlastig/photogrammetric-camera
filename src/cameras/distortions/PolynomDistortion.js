@@ -35,6 +35,7 @@ class PolynomDistortion {
     this.S = S;
     this.R = R;
     this.degree = degree;
+    this.isPolynomDistortion = true;
   }
 
   // https://github.com/micmacIGN/micmac/blob/e0008b7a084f850aa9db4dc50374bd7ec6984da6/src/photogram/phgr_ebner_brown_dist.cpp#L527-L591

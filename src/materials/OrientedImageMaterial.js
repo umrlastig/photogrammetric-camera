@@ -1,4 +1,4 @@
-import { ShaderMaterial, ShaderLib, Matrix3, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
+import { Uniform, ShaderMaterial, ShaderLib, Matrix3, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
 import {pop, definePropertyUniform, setUvwCamera, setDistortion} from './materialUtils';
 import numeric from 'numeric';
 

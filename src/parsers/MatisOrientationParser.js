@@ -1,5 +1,5 @@
-import {Matrix4, Quaternion, Camera} from 'three';
-import PhotogrammetricDistortion from '../cameras/PhotogrammetricDistortion';
+import {Matrix4, Vector3, Quaternion, Camera} from 'three';
+import RadialDistortion from '../cameras/distortions/RadialDistortion';
 import PhotogrammetricCamera from '../cameras/PhotogrammetricCamera';
 
 function getText(xml, tagName) {

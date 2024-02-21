@@ -8,6 +8,7 @@ class BrownDistortion {
   constructor(F, P) {
     this.F = F;
     this.P = P;
+    this.isBrownDistortion = true;
   }
 
   project(p) {

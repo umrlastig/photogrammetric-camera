@@ -7,13 +7,13 @@ var ndcMatrix = new Matrix4().set(
     0, 0, 0, 1);
 
 Matrix4.prototype.lerp = function(m, t) {
-	var te = this.elements;
-	var me = m.elements;
-	te[0]+=t*(me[0]-te[0]);   te[1]+=t*(me[1]-te[1]);   te[2]+=t*(me[2]-te[2]);   te[3]+=t*(me[3]-te[3]);
-	te[4]+=t*(me[4]-te[4]);   te[5]+=t*(me[5]-te[5]);   te[6]+=t*(me[6]-te[6]);   te[7]+=t*(me[7]-te[7]);
-	te[8]+=t*(me[8]-te[8]);   te[9]+=t*(me[9]-te[9]);   te[10]+=t*(me[10]-te[10]);te[11]+=t*(me[11]-te[11]);
-	te[12]+=t*(me[12]-te[12]);te[13]+=t*(me[13]-te[13]);te[14]+=t*(me[14]-te[14]);te[15]+=t*(me[15]-te[15]);
-	return this;
+    var te = this.elements;
+    var me = m.elements;
+    te[0]+=t*(me[0]-te[0]);   te[1]+=t*(me[1]-te[1]);   te[2]+=t*(me[2]-te[2]);   te[3]+=t*(me[3]-te[3]);
+    te[4]+=t*(me[4]-te[4]);   te[5]+=t*(me[5]-te[5]);   te[6]+=t*(me[6]-te[6]);   te[7]+=t*(me[7]-te[7]);
+    te[8]+=t*(me[8]-te[8]);   te[9]+=t*(me[9]-te[9]);   te[10]+=t*(me[10]-te[10]);te[11]+=t*(me[11]-te[11]);
+    te[12]+=t*(me[12]-te[12]);te[13]+=t*(me[13]-te[13]);te[14]+=t*(me[14]-te[14]);te[15]+=t*(me[15]-te[15]);
+    return this;
 };
 
 class PhotogrammetricCamera extends PerspectiveCamera {
@@ -162,8 +162,8 @@ class PhotogrammetricCamera extends PerspectiveCamera {
     }
 
     copy(source, recursive) {
+			  if (this==source) return this;
         super.copy(source, recursive);
-        this.view = {};
         return this.set(source);
     }
 

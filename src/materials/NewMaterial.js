@@ -1,5 +1,5 @@
 import { Uniform, ShaderMaterial, Matrix4, Vector3, Vector4 } from 'three';
-import { chunks } from '../cameras/distortions/RadialDistortion';
+import RadialDistortion from '../cameras/distortions/RadialDistortion';
 import NewMaterialVS from './shaders/NewMaterialVS.glsl';
 import NewMaterialFS from './shaders/NewMaterialFS.glsl';
 
@@ -54,7 +54,7 @@ class NewMaterial extends ShaderMaterial {
 
     this.vertexShader = NewMaterialVS;
     this.fragmentShader = `
-    ${chunks.radial_pars_fragment}
+    ${RadialDistortion.chunks.radial_pars_fragment}
     ${NewMaterialFS}
     `;
   }
@@ -66,7 +66,7 @@ class NewMaterial extends ShaderMaterial {
       this.textureCameraPreTransform.premultiply(camera.preProjectionMatrix);
       this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
 
-      if (camera.distos && camera.distos.length == 1 && camera.distos[0].type === 'ModRad') {
+			if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
           this.uvDistortion = camera.distos[0];
       } else {
           this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
