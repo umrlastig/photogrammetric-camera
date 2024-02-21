@@ -210,36 +210,33 @@
                     };
                 }
 
-                function handleOrientation(name) {
+                function handleOrientation(camera) {
                     showHelp(false);
-                    return function(camera) {
-                        if (!camera) return;
-                        const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
-                        camera.name = match ? match[1] : name;
-                        if (cameras.children.find(cam => cam.name == camera.name)) {
-                            console.warn(`Camera "${camera.name}" was already loaded, skipping`);
-                            return;
-                        }
-                        var check = '[?]';
-                        if (camera.check) check = camera.check() ? '[Y]' : '[N]';
-                        console.log(check, name);
-                        camera.far = sphereRadius+epsilonRadius;
-                        camera.updateProjectionMatrix();
-                        if (useCustomCameraHelper) {
-                            // use our Camera Helper
-                            camera.add(cameraHelper(camera));
-                        } else {
-                            // use THREE.CameraHelper
-                            camera.near = 0.5;
-                            camera.far = 1;
-                            scene.add(new THREE.CameraHelper(camera));
-                        }
-                        cameras.add(camera);
-                        cameras.children.sort((a, b) => a.name.localeCompare(b.name));
-                        setCamera(camera);
-                        return camera;
-                    };
-                }
+                    if (!camera) return;
+										if (camera instanceof Array) return camera.map(handleOrientation);
+                    if (cameras.children.find(cam => cam.name == camera.name)) {
+                        console.warn(`Camera "${camera.name}" was already loaded, skipping`);
+                        return;
+                    }
+                    var check = '[?]';
+                    if (camera.check) check = camera.check() ? '[Y]' : '[N]';
+                    console.log(check, name);
+                    camera.far = sphereRadius+epsilonRadius;
+                    camera.updateProjectionMatrix();
+                    if (useCustomCameraHelper) {
+                        // use our Camera Helper
+                        camera.add(cameraHelper(camera));
+                    } else {
+                        // use THREE.CameraHelper
+                        camera.near = 0.5;
+                        camera.far = 1;
+                        scene.add(new THREE.CameraHelper(camera));
+                    }
+                    cameras.add(camera);
+                    cameras.children.sort((a, b) => a.name.localeCompare(b.name));
+                    setCamera(camera);
+                    return camera;
+                };
 
                 // parse functions
                 var plyLoader = new THREE.PLYLoader();
@@ -253,11 +250,11 @@
                     }
                 }
 
-                function parseOrientation(source) {
+                function parseOrientation(source, name) {
                     var parsers = [MicmacOrientationParser, MatisOrientationParser];
                     return (data) => {
                         for(const parser of parsers) {
-                            var parsed = parser.parse(data, source);
+                            var parsed = parser.parse(data, source, name);
                             if (parsed) return parsed;
                         }
                         return undefined;
@@ -280,8 +277,8 @@
 
                 function loadOrientation(name, source) {
                     return source.open(name, 'text')
-                        .then(parseOrientation(source))
-                        .then(handleOrientation(name));
+                        .then(parseOrientation(source, name))
+                        .then(handleOrientation);
                 }
 
                 function loadFileImSel(dir, source) {
