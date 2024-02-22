@@ -299,7 +299,7 @@ function loadJSON(material, path, file) {
 
 /* Parsing ------------------------------------------- */
 function parseOrientation(source, name) {
-    var parsers = [MicmacOrientationParser, MatisOrientationParser, OPKOrientationParser];
+    var parsers = [MicmacOrientationParser, MatisOrientationParser, OPKOrientationParser, BundlerOrientationParser];
     return (data) => {
         for(const parser of parsers) {
             var parsed = parser.parse(data, source, name);

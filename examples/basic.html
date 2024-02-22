@@ -35,6 +35,8 @@
             var MatisOrientationParser = photogrammetricCamera.MatisOrientationParser;
             var MicmacOrientationParser = photogrammetricCamera.MicmacOrientationParser;
             var OPKOrientationParser = photogrammetricCamera.OPKOrientationParser;
+            var BundlerOrientationParser = photogrammetricCamera.BundlerOrientationParser;
+
             // Materials
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
             var imageVS = photogrammetricCamera.imageVS;
@@ -227,6 +229,30 @@
                             scene.add(lines);
                             lines.visible = false;
                         });
+                    },
+                    NotreDame: function() {
+                        var sphere = new THREE.Mesh(new THREE.SphereGeometry(-1, 32, 32), textureMaterial);
+                        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 100, 100), textureMaterial);
+
+                        var source = new FetchSource('data/NotreDame/');
+                        const list = source.open('list2.txt', 'text');
+                        const out  = source.open('notredame_cameras.out', 'text');
+                        const orientations = Promise.all([list, out]).then(BundlerOrientationParser.parse).then(cameras => {
+                                handleOrientation(cameras);
+                                // cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name));
+                                cameras.map(cam => loadImage('images/'+cam.name + '.jpg', source, cam.name))
+                                console.log('cameras', cameras);
+                                const geometry = new THREE.BufferGeometry();
+                                geometry.setAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
+                                geometry.setAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
+                                geometry.computeBoundingSphere();
+                                const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+                                const gcp = new THREE.Points(geometry, material);
+                                scene.add(gcp);
+                            }
+                        );
+                        plane.visible = false;
+                        sphere.visible = false;
                     },
                 };
 
