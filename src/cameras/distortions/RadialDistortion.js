@@ -110,4 +110,28 @@ class RadialDistortion {
     }
 }
 
+export const chunks = {
+    radial_pars_fragment: `
+struct RadialDistortion {
+  vec2 C;
+  vec4 R;
+};
+
+float polynom(vec3 R, float r2) {
+  float r4 = r2*r2;
+  return dot(R, vec3(r2, r4, r2*r4));
+}
+
+bool distort_radial(inout vec4 p, RadialDistortion disto) {
+  p /= p.w;
+  vec2 r = p.xy - disto.C;
+  float r2 = dot(r, r);
+  if (r2 > disto.R.w) return false; // to be culled
+  p.xy += polynom(disto.R.xyz, r2) * r;
+  return true;
+}
+`,
+}
+
+
 export default RadialDistortion;

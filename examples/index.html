@@ -77,14 +77,16 @@
             var viewFS = photogrammetricCamera.viewFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
+            var NewMaterial = photogrammetricCamera.NewMaterial;
+            var ShadowMapMaterial = photogrammetricCamera.ShadowMapMaterial;
         </script>
         <script src="js/helpers/photogrammetricHelper.js"></script>
 
         <script>
             var orbitTarget, orbitControls;
             var scene, renderer, plyGroup, cameras;
-            var textureMaterial, wireMaterial, viewMaterialOptions = {}, viewMaterials = {};
-            var textures = {};
+            var textureMaterial, wireMaterial, pointsMaterial, shadowMapMaterial, viewMaterialOptions = {}, viewMaterials = {};
+            var textures = {}, uvTexture;
             var prevCamera = new PhotogrammetricCamera();
             var viewCamera = new PhotogrammetricCamera();
             var nextCamera = new PhotogrammetricCamera();
@@ -114,7 +116,8 @@
                 scene.add(cameras);
                 scene.add(viewCamera);
                 var textureLoader = new THREE.TextureLoader();
-                const uvTexture = textureLoader.load('data/uv.jpg');
+                uvTexture = textureLoader.load('data/uv.jpg');
+                uvTexture.name = 'uvTexture';
 
                 // materials
                 wireMaterial = new THREE.MeshBasicMaterial( {color: 0x00ffff, wireframe: true} );
@@ -141,6 +144,12 @@
                 viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
 
 
+                pointsMaterial = new NewMaterial({
+                  map: uvTexture,
+                });
+
+				shadowMapMaterial = new ShadowMapMaterial();
+               
                 sphere = new THREE.Mesh(new THREE.SphereGeometry(-1, 32, 32), textureMaterial);
                 plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 100, 100), textureMaterial);
                 sphere.scale.set(sphereRadius, sphereRadius, sphereRadius);
@@ -214,8 +223,8 @@
                     showHelp(false);
                     return function(geometry) {
                         console.log(name);
-                        var points = new THREE.Points( geometry, textureMaterial );
-                        plyGroup.add( points );
+                        var points = new THREE.Points( geometry, pointsMaterial );
+												plyGroup.add( points );
                         geometry.computeBoundingBox();
                         var center = new THREE.Vector3();
                         geometry.boundingBox.getCenter(center);
@@ -239,19 +248,24 @@
                 function handleOrientation(camera) {
                     showHelp(false);
                     if (!camera) return;
-					if (camera instanceof Array) {
-						const res = camera.map(handleOrientation);
-						res.points = camera.points;
-						res.colors = camera.colors;
-						return res;
-					}
-                    if (cameras.children.find(cam => cam.name == camera.name)) {
+          					if (camera instanceof Array) {
+          						const res = camera.map(handleOrientation);
+          						res.points = camera.points;
+          						res.colors = camera.colors;
+          						return res;
+          					}
+										if (cameras.children.find(cam => cam.name == camera.name)) {
                         console.warn(`Camera "${camera.name}" was already loaded, skipping`);
                         return;
                     }
                     var check = '[?]';
                     if (camera.check) check = camera.check() ? '[Y]' : '[N]';
-                    console.log(check, camera.name);
+                    console.log(check, name);
+
+					camera.depthTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { format: THREE.RedFormat } );
+
+					camera.near = 1;
+					camera.far = 100;
                     camera.far = sphereRadius+epsilonRadius;
                     camera.updateProjectionMatrix();
                     if (useCustomCameraHelper) {
@@ -259,14 +273,12 @@
                         camera.add(cameraHelper(camera));
                     } else {
                         // use THREE.CameraHelper
-                        camera.near = 0.5;
-                        camera.far = 1;
                         scene.add(new THREE.CameraHelper(camera));
                     }
                     cameras.add(camera);
                     cameras.children.sort((a, b) => a.name.localeCompare(b.name));
                     setCamera(camera);
-                    if(textureMaterial.map == null) setCamera(camera);
+
                     return camera;
                 };
 
@@ -388,6 +400,10 @@
                     material.setCamera(camera, viewCamera);
                 }
 
+                function setDepthMap(material, camera) {
+                    material.depthMap = camera.depthTarget ? camera.depthTarget.texture : undefined;
+                }
+
                 /* Keyboard events */
                 function setView(camera) {
                     if (!camera) return;
@@ -406,6 +422,8 @@
                     console.log('Texture:', camera.name);
                     textureCamera = camera;
                     setMaterial(textureMaterial, camera);
+                    setMaterial(pointsMaterial, camera);
+                    setDepthMap(pointsMaterial, camera);
                 }
 
                 function setCamera(camera) {
@@ -515,25 +533,24 @@
                         loadJSON('http://mathieu.bredif.free.fr/cors.php?url=data/viabon/');
                     },
                     NotreDame: function() {
-					
-						var source = new FetchSource('data/NotreDame/');
-						const list = source.open('list2.txt', 'text');
-						const out  = source.open('notredame_cameras.out', 'text');
-						const orientations = Promise.all([list, out]).then(BundlerOrientationParser.parse).then(handleOrientation);
-						//orientations.then(cameras => cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name)));
-						orientations.then(cameras => cameras.map(cam => loadImage('images/'+cam.name + '.jpg', source, cam.name)));
-						orientations.then(cameras => {
-						console.log(cameras);
-							const geometry = new THREE.BufferGeometry();
-							geometry.addAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
-							geometry.addAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
-							geometry.computeBoundingSphere();
-							const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-							const gcp = new THREE.Points(geometry, material);
-							scene.add(gcp);
-						})
-						plane.visible = false;
-						sphere.visible = false;
+            						var source = new FetchSource('data/NotreDame/');
+            						const list = source.open('list2.txt', 'text');
+            						const out  = source.open('notredame_cameras.out', 'text');
+            						const orientations = Promise.all([list, out]).then(BundlerOrientationParser.parse).then(handleOrientation);
+            						//orientations.then(cameras => cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name)));
+            						orientations.then(cameras => cameras.map(cam => loadImage('images/'+cam.name + '.jpg', source, cam.name)));
+            						orientations.then(cameras => {
+            						console.log(cameras);
+            							const geometry = new THREE.BufferGeometry();
+            							geometry.addAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
+            							geometry.addAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
+            							geometry.computeBoundingSphere();
+            							const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+            							const gcp = new THREE.Points(geometry, material);
+            							scene.add(gcp);
+            						})
+            						plane.visible = false;
+            						sphere.visible = false;
                     },
 										Alex: function() {
 											var source = new FetchSource('data/alex/');
@@ -651,7 +668,23 @@
             }
 
             function render() {
-                renderer.render(scene, viewCamera);
+							  if (textureCamera.depthTarget) {// Create the depthMaps for shadowMapping later
+	                plane.material = shadowMapMaterial;
+	                sphere.material = shadowMapMaterial;
+	                plyGroup.children.forEach(points => points.material = shadowMapMaterial);
+
+									renderer.setRenderTarget(textureCamera.depthTarget);
+	                renderer.render(scene, textureCamera);
+									pointsMaterial.depthMap = textureCamera.depthTarget.texture;
+									// pointsMaterial.depthMap = uvTexture;
+
+	                plane.material = pointsMaterial;
+	                sphere.material = pointsMaterial;
+	                plyGroup.children.forEach(points => points.material = pointsMaterial);
+								}
+
+								renderer.setRenderTarget(null);
+								renderer.render(scene, viewCamera);
             }
 
             var todoTimestamp = 0;

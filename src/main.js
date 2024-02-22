@@ -17,6 +17,8 @@ export { default as FilesSource } from './sources/FilesSource';
 export { default as FetchSource } from './sources/FetchSource';
 export { default as OrientedImageMaterial } from './materials/OrientedImageMaterial';
 export { default as MultipleOrientedImageMaterial } from './materials/MultipleOrientedImageMaterial';
+export { default as NewMaterial } from './materials/NewMaterial';
+export { default as ShadowMapMaterial } from './materials/ShadowMapMaterial';
 
 import { OrbitControls, MapControls } from './controls/OrbitControls';
 import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls';

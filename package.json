@@ -25,7 +25,8 @@
     "gh-pages-deploy": "^0.5.1",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.2"
+    "webpack-dev-server": "^5.0.2",
+    "webpack-glsl-loader": "^1.0.1"
   },
   "peerDependencies": {
     "three": "^0.159.0",

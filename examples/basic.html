@@ -39,6 +39,8 @@
 
             // Materials
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
+            var NewMaterial = photogrammetricCamera.NewMaterial;
+            var ShadowMapMaterial = photogrammetricCamera.ShadowMapMaterial;
             var imageVS = photogrammetricCamera.imageVS;
             var imageFS = photogrammetricCamera.imageFS;
             var viewFS = photogrammetricCamera.viewFS;
@@ -84,6 +86,14 @@
                 wireMaterial = initWireMaterial();
                 [textureMaterialUniforms, textureMaterial] = initTextureMaterial(imageVS, imageFS, uvTexture);
                 viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
+
+                // newMaterial
+
+                const pointsMaterial = new NewMaterial({
+                    map: uvTexture,
+                });
+
+                const shadowMapMaterial = new ShadowMapMaterial();
 
                 // Environment
                 environment = new THREE.Group();
