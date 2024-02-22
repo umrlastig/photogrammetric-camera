@@ -299,7 +299,7 @@ function loadJSON(material, path, file) {
 
 /* Parsing ------------------------------------------- */
 function parseOrientation(source, name) {
-    var parsers = [MicmacOrientationParser, MatisOrientationParser];
+    var parsers = [MicmacOrientationParser, MatisOrientationParser, OPKOrientationParser];
     return (data) => {
         for(const parser of parsers) {
             var parsed = parser.parse(data, source, name);
@@ -326,6 +326,7 @@ var parsePly = (source) => (data => plyLoader.parse(data));
 function handleOrientation(name) {
     return function(camera) {
         if (!camera) return;
+        if (camera instanceof Array) return camera.map(c => handleOrientation(c.name)(c));
         handleCamera(camera, name);
         if(cameras.children.length < 2) setCamera(camera);
         return camera;
