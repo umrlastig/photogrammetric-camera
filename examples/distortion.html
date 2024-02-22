@@ -149,7 +149,11 @@
                         clean();
                         collection = 'collections/saint_martin/';
                         loadJSON(textureMaterial, server + collection);
-                    }
+                    },
+                    Ramses: function() {
+                        clean();
+                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
+                    },
                 };
 
                 /* Clean --------------------------------------------- */

@@ -135,7 +135,26 @@
                         clean();
                         collection = 'collections/saint_martin/';
                         loadJSON(textureMaterial, server + collection);
-                    }
+                    },
+                    Ramses: function() {
+                        clean();
+                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
+                    },
+                    Abbey: function() {
+                        clean();
+                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/NEW-DATA/CompensOnLine/';
+                        var source = new FetchSource(path);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
+                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
+                        // plane.position.z = -16.56;
+                        // orbitControls.target.set(0, 0, plane.position.z);
+                    },
+                    Cuxa: function() {
+                        clean();
+                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/cuxa/');
+                    },
                 };
 
                 /* Clean --------------------------------------------- */

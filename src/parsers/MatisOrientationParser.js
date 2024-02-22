@@ -32,7 +32,7 @@ function parseSpheric(xml, size) {
 }
 
 function parseConic(xml, size) {
-    var focal = getNumbers(xml, 'focale');
+    var focal = getNumber(xml, 'focale');
     var point = getNumbers(xml, 'ppa', ['c', 'l']);
     var skew = 0;
     var disto = new RadialDistortion(
@@ -98,7 +98,7 @@ export default {
      * @return {Camera} - a camera.
      *
      */
-    parse: function parse(xml) {
+    parse: function parse(xml, source, name) {
         if (!(xml instanceof Node)) {
             xml = new window.DOMParser().parseFromString(xml, 'text/xml');
         }
@@ -110,7 +110,7 @@ export default {
         camera.matrix = parseExtrinsics(xml);
         camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
         camera.updateMatrixWorld(true);
-
+				camera.name = name;
         return camera;
     },
     format: 'matis/orientation',

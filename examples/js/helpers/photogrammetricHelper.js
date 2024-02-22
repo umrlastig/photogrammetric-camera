@@ -232,7 +232,7 @@ function loadOrientation(url, source, name) {
         name = match ? match[1] : url;
     }
     return source.open(url, 'text')
-        .then(parseOrientation(source))
+        .then(parseOrientation(source, name))
         .then(handleOrientation(name));
 }
 
@@ -242,7 +242,7 @@ function loadImage(url, source, name) {
         name = match ? match[1] : url;
     }
     return source.open(url, 'dataURL')
-    .then(parseImage(source))
+    .then(parseImage(source)).catch(err => console.log(url, name))
     .then(handleImage(name));
 }
 
@@ -292,17 +292,17 @@ function loadJSON(material, path, file) {
         if(json.pc) json.pc.forEach((url) => loadPlyPC(url, source, material));
         if(json.mesh) json.mesh.forEach((url) => loadPlyMesh(url, source, material));
 
-        if(json.ori && json.img) json.ori.forEach((orientationUrl, i) => 
+        if(json.ori && json.img) json.ori.forEach((orientationUrl, i) =>
             loadOrientedImage(orientationUrl, json.img[i], source));
     });
 }
 
 /* Parsing ------------------------------------------- */
-function parseOrientation(source) {
+function parseOrientation(source, name) {
     var parsers = [MicmacOrientationParser, MatisOrientationParser];
     return (data) => {
         for(const parser of parsers) {
-            var parsed = parser.parse(data, source);
+            var parsed = parser.parse(data, source, name);
             if (parsed) return parsed;
         }
         return undefined;
@@ -312,7 +312,9 @@ function parseOrientation(source) {
 function parseImage(source){
     return (data) => {
         return new Promise((resolve, reject) => {
-            textureLoader.load(data, resolve, undefined, reject)
+            textureLoader.load(data, resolve, undefined, (err) => {
+                return reject();
+            })
         }).finally(() => source.close(data, 'dataURL'));
     }
 }
