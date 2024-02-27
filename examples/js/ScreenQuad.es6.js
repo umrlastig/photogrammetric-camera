@@ -2,7 +2,7 @@
 
 //avoid creating geometry per intance?
 
-const defaultQuad = new THREE.PlaneBufferGeometry(2,2,1,1);
+const defaultQuad = new THREE.PlaneGeometry(2,2,1,1);
 
 const defaultVertexShader = `
 precision lowp float;
@@ -28,7 +28,7 @@ uniform sampler2D uTexture;
 void main(){
 
 	gl_FragColor = texture2D( uTexture , vUv );
-
+	gl_FragColor.a = 1.0;
 }	
 `;
 
@@ -42,7 +42,7 @@ export default class ScreenQuad extends THREE.Mesh{
 		top = 0,			
 		left = 0,
 		aspect = 1,         // unconstrained (overrides width=0 or height=0)
-		texture = null,
+		texture = new THREE.Texture(),
 		fragmentShader = false
 	
 	} = {}) {
