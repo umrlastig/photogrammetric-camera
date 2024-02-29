@@ -1,4 +1,4 @@
-import { Uniform, Vector3, Matrix4 } from 'three';
+import { Uniform, Vector2, Vector3, Vector4, Matrix4 } from 'three';
 import { default as RadialDistortion } from '../distortions/RadialDistortion';
 import { default as FraserDistortion } from '../distortions/FraserDistortion';
 import { default as FishEyeDistortion } from '../distortions/FishEyeDistortion';
@@ -11,7 +11,10 @@ export const textureMatrix = new Matrix4().set(
     0, 0, 0, 2);
 
 export function pop(options, property, defaultValue) {
-    if (options[property] === undefined) return defaultValue;
+    if (options[property] === undefined) {
+        delete options[property];
+        return defaultValue
+    };
     const value = options[property];
     delete options[property];
     return value;
@@ -38,8 +41,8 @@ export function definePropertyUniform(object, property, defaultValue) {
 }
 
 export function setDistortion(camera) {
-    var distortion = { type: 0, F: 0., C: new THREE.Vector2(), R: new THREE.Vector4(),
-        P: new THREE.Vector2(), b: new THREE.Vector2() };
+    var distortion = { type: 0, F: 0., C: new Vector2(), R: new Vector4(),
+        P: new Vector2(), b: new Vector2() };
     distortion.R.w = Infinity;
     // TODO: handle other distorsion types and arrays of distortions
     if (camera.distos && camera.distos.length == 1) {

@@ -15,8 +15,8 @@ class OrientedImageMaterial extends ShaderMaterial {
         const distortion = pop(options, 'distortion', {method: 1, type: 1, texture: true, view: false,
             r2img: 0., r2max: 0.});
         const extrapolation = pop(options, 'extrapolation', {texture: true, view: true});
-        const uvDistortion = pop(options, 'uvDistortion', {type: 0, F: 0., C: new THREE.Vector2(), 
-            R: new THREE.Vector4(), P: new THREE.Vector2(), b: new THREE.Vector2()});
+        const uvDistortion = pop(options, 'uvDistortion', {type: 0, F: 0., C: new Vector2(),
+            R: new Vector4(), P: new Vector2(), b: new Vector2()});
         const homography = pop(options, 'homography', {H: new Matrix3(), invH: new Matrix3});
         const map = pop(options, 'map', null);
         const depthMap = pop(options, 'depthMap', null);
