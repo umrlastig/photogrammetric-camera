@@ -48,8 +48,39 @@
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
 
-        <script src="js/helpers/photogrammetricHelper.js"></script>
-        <script>
+        <script type='module'>
+            import photogrammetricHelper from './js/helpers/photogrammetricHelper.js';
+
+            // import * as THREE from 'three';
+
+            const { size, context, materials, uniforms,
+                initBasicMaterial,
+                initWireMaterial,
+                initTextureMaterial,
+                initCameraMaterialUniforms,
+                initBackgroundSphere,
+                initWorldPlane,
+                initSceneMaterialUniforms,
+                initMultipleTextureMaterial,
+                onWindowResize,
+                onDocumentKeyDown,
+                interpolateCamera,
+                updateMaterial,
+                pCamera,
+                basicClean,
+                loadOrientation,
+                loadImage,
+                loadOrientedImage,
+                loadJSON,
+                loadPlyPC,
+                loadPlyMesh,
+                updateEnvironment,
+                server,
+                params,
+                textures } = photogrammetricHelper;
+
+            var collections;
+            var collection;
             /* ------------------------- Main ------------------------ */
             init();
             var gui = initGUI();
@@ -62,48 +93,47 @@
                 document.body.appendChild(container);
 
                 // Sizes
-                width = window.innerWidth;
-                height = window.innerHeight;
+                size.width = window.innerWidth;
+                size.height = window.innerHeight;
 
                 // Renderer
-                renderer = new THREE.WebGLRenderer({antialias: true});
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(width, height);
-                container.appendChild(renderer.domElement);
-
+                context.renderer = new THREE.WebGLRenderer({antialias: true});
+                context.renderer.setPixelRatio(window.devicePixelRatio);
+                context.renderer.setSize(size.width, size.height);
+                container.appendChild(context.renderer.domElement);
                 // Scene
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf0f0f0);
+                context.scene = new THREE.Scene();
+                context.scene.background = new THREE.Color(0xf0f0f0);
 
-                // Cameras 
-                cameras = new THREE.Group();
-                cameras.visible = false;
-                scene.add(viewCamera);
-                scene.add(cameras);
+                // Cameras
+                context.cameras = new THREE.Group();
+                context.cameras.visible = false;
+                context.scene.add(pCamera.view);
+                context.scene.add(context.cameras);
 
                 // Materials
-                basicMaterial = initBasicMaterial();
-                wireMaterial = initWireMaterial();
-                [multipleTextureMaterialUniforms, multipleTextureMaterial] = initMultipleTextureMaterial(
-                    multipleVS, footprintFS, uvTexture, renderer);
-                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, imageFS, uvTexture);
+                materials.basic = initBasicMaterial();
+                materials.wire = initWireMaterial();
+                [uniforms.multipleTextureMaterial, materials.multipleTexture] = initMultipleTextureMaterial(
+                    multipleVS, footprintFS, context.renderer);
+                uniforms.viewMaterial = initCameraMaterialUniforms(imageVS, imageFS);
 
                 // Environment
-                environment = new THREE.Group();
-                backgroundSphere = initBackgroundSphere(multipleTextureMaterial);
-                worldPlane = initWorldPlane(multipleTextureMaterial);
+                context.environment = new THREE.Group();
+                context.backgroundSphere = initBackgroundSphere(materials.multipleTexture);
+                context.worldPlane = initWorldPlane(materials.multipleTexture);
 
-                environment.add(backgroundSphere);
-                environment.add(worldPlane);
-                environment.visible = false;
-                scene.add(environment);
+                context.environment.add(context.backgroundSphere);
+                context.environment.add(context.worldPlane);
+                context.environment.visible = false;
+                context.scene.add(context.environment);
 
                 // Controls
-                controls = new MapControls( viewCamera, renderer.domElement );
-				controls.enableDamping = false;
-				controls.screenSpacePanning = false;
-                controls.maxPolarAngle = 0.75*Math.PI;
-                controls.enableKeys = false;
+                context.controls = new MapControls(pCamera.view, context.renderer.domElement);
+                context.controls.enableDamping = false;
+                context.controls.screenSpacePanning = false;
+                context.controls.maxPolarAngle = 0.75*Math.PI;
+                context.controls.enableKeys = false;
 
                 // Event listeners
                 window.addEventListener('resize', onWindowResize, false);
@@ -113,7 +143,7 @@
                 collections = {
                     Sample: function(){
                         clean();
-                        worldPlane.visible = false;
+                        context.worldPlane.visible = false;
                         var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
@@ -123,28 +153,28 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(multipleTextureMaterial, server + collection);
+                        loadJSON(materials.multipleTexture, server + collection);
                     },
                     Frejus: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/frejus_original/';
-                        loadJSON(multipleTextureMaterial, server + collection);
+                        loadJSON(materials.multipleTexture, server + collection);
                     },
                     Viabon: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
-                        loadJSON(multipleTextureMaterial, server + collection);
+                        loadJSON(materials.multipleTexture, server + collection);
                     },
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(multipleTextureMaterial, server + collection);
+                        loadJSON(materials.multipleTexture, server + collection);
                     },
                     Ramses: function() {
                         clean();
-                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
+                        loadJSON(materials.texture, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
                     },
                 };
 
@@ -168,51 +198,51 @@
 
                 // View Camera
                 function updateViewCameraFromGUI() {
-                    viewCamera.updateProjectionMatrix();
+                    pCamera.view.updateProjectionMatrix();
                 };
 
                 var viewGUI = gui.addFolder('View Camera'); // View
-                viewGUI.visible = viewGUI.add(cameras, 'visible');
-                viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
+                viewGUI.visible = viewGUI.add(context.cameras, 'visible').name('viewpoints');
+                viewGUI.zoom = viewGUI.add(pCamera.view, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
 
                 // Texture Camera
                 var textureGUI = gui.addFolder('Historical Camera');
-                textureGUI.opacity = textureGUI.add(multipleTextureMaterial, 'opacity', 0, 1);
+                textureGUI.opacity = textureGUI.add(materials.multipleTexture, 'opacity', 0, 1);
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
-                backgroundGUI.wireframe = backgroundGUI.add(multipleTextureMaterial, 'wireframe');
-                backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
-                backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
+                backgroundGUI.wireframe = backgroundGUI.add(materials.multipleTexture, 'wireframe');
+                backgroundGUI.sphere = backgroundGUI.add(context.backgroundSphere, 'visible').name('sphere visible');
+                backgroundGUI.plane = backgroundGUI.add(context.worldPlane, 'visible').name('plane visible');
 
                 // Debug
                 var debugGUI = gui.addFolder('Debug');
-                debugGUI.borderSharpness = debugGUI.add(multipleTextureMaterial.debug, 'borderSharpness', 2, 500).name("border sharpness");
-                debugGUI.diffuseColorGrey = debugGUI.add(multipleTextureMaterial.debug, 'diffuseColorGrey');
+                debugGUI.borderSharpness = debugGUI.add(materials.multipleTexture.debug, 'borderSharpness', 2, 500).name("border sharpness");
+                debugGUI.diffuseColorGrey = debugGUI.add(materials.multipleTexture.debug, 'diffuseColorGrey');
 
                 // Update controls functions
                 gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, cameras, environment) {
                     viewGUI.zoom.setValue(viewCamera.zoom);
                     backgroundGUI.sphere.setValue(environment.children[0].visible);
                     backgroundGUI.plane.setValue(environment.children[1].visible);
-                    var name = textureCamera.name;
+                    var name = pCamera.texture.name;
                     if (name.length > 0) {
                         if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
                         textureGUI.name = 'Hist: ' + name;
-                    }     
+                    }
                 }
                 return gui;
             };
 
             function render() {
-                renderer.render(scene, viewCamera);
+                context.renderer.render(context.scene, pCamera.view);
             }
 
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-                multipleTextureMaterial.updateCamera(textureCamera, textures);
-                gui.updateFromCameras(viewCamera, textureCamera, cameras, environment);
+                materials.multipleTexture.updateCamera(pCamera.texture, textures);
+                gui.updateFromCameras(pCamera.view, pCamera.texture, context.cameras,  context.environment);
                 render();
             }
         </script>

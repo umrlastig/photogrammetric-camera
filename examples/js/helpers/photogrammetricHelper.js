@@ -1,26 +1,54 @@
+// import * as THREE from 'three';
+
 /* ---------------------- Variables ---------------------- */
 var server = 'https://histovis.s3.eu-west-3.amazonaws.com/';
-var width, height;
+const size = {
+    width: 0,
+    height: 0,
+}
 
-var prevCamera = new PhotogrammetricCamera();
-var viewCamera = new PhotogrammetricCamera();
-var nextCamera = new PhotogrammetricCamera();
-var textureCamera = new PhotogrammetricCamera();
+const pCamera = {
+    prev: new PhotogrammetricCamera(),
+    view: new PhotogrammetricCamera(),
+    next: new PhotogrammetricCamera(),
+    texture: new PhotogrammetricCamera(),
+}
 
-var renderer, scene, cameras, controls;
-var environment, backgroundSphere, worldPlane;
+const context ={
+    renderer: null,
+    scene: null,
+    cameras: null,
+    controls: null,
+    environment: null,
+    backgroundSphere: null,
+    worldPlane: null,
+    composer: null,
+    scenePass: null,
+    clock: new THREE.Clock(),
+}
 
-var composer, scenePass;
+const materials = {
+    basic: null,
+    wire: null,
+    texture: null,
+    multipleTexture: null
+};
 
-var basicMaterial, wireMaterial, textureMaterial, multipleTextureMaterial, viewMaterials = {};
-var textureMaterialUniforms, multipleTextureMaterialUniforms, viewMaterialUniforms, sceneMaterialUniforms;
+var viewMaterials = {};
+
+const uniforms = {
+    textureMaterials: null,
+    multipleTextureMaterial: null,
+    viewMaterial: null,
+    sceneMaterial: null,
+}
 
 var textureLoader = new THREE.TextureLoader();
 const uvTexture = textureLoader.load('data/uv.jpg');
 
 const whiteData = new Uint8Array(4);
 whiteData.set([255, 255, 255, 255]);
-whiteTexture = new THREE.DataTexture(whiteData, 1, 1, THREE.RGBAFormat);
+const whiteTexture = new THREE.DataTexture(whiteData, 1, 1, THREE.RGBAFormat);
 whiteTexture.name = 'white';
 
 var textures = {};
@@ -32,7 +60,6 @@ var params = {
     interpolation: {duration: 3.}
 };
 
-var clock = new THREE.Clock();
 
 /* ----------------------- Functions --------------------- */
 
@@ -51,7 +78,7 @@ function initWireMaterial() {
     });
 }
 
-function initTextureMaterial(vs, fs, map) {
+function initTextureMaterial(vs, fs, map = uvTexture) {
     var uniforms = {
         map: map,
         depthMap: whiteTexture,
@@ -71,7 +98,7 @@ function initTextureMaterial(vs, fs, map) {
     return [uniforms, material];
 }
 
-function initMultipleTextureMaterial(vs, fs, map, renderer) {
+function initMultipleTextureMaterial(vs, fs, renderer, map = uvTexture) {
     // Maximum number of textures
     const maxTextures = getMaxTextureUnitsCount(renderer);
 
@@ -90,7 +117,7 @@ function initMultipleTextureMaterial(vs, fs, map, renderer) {
         fragmentShader: fs
     };
 
-   var material =  new MultipleOrientedImageMaterial(cameras, textures, uniforms);
+   var material =  new MultipleOrientedImageMaterial(context.cameras, textures, uniforms);
 
    return [uniforms, material];
 };
@@ -153,7 +180,7 @@ function cameraAspect(camera) {
 
 function cameraHelper(camera) {
     var group = new THREE.Group();
-    m = camera.projectionMatrix.clone().invert();
+    const m = camera.projectionMatrix.clone().invert();
     var v = new Float32Array(15);
     // get the 4 corners on the near plane (neglecting distortion)
     new THREE.Vector3( -1, -1, -1 ).applyMatrix4(m).toArray(v,  3);
@@ -168,13 +195,13 @@ function cameraHelper(camera) {
         var geometry = new THREE.BufferGeometry();
         geometry.setIndex(indices);
         geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        var mesh = new THREE.Mesh(geometry, wireMaterial);
+        var mesh = new THREE.Mesh(geometry, materials.wire);
         mesh.scale.set(params.cameras.size, params.cameras.size, params.cameras.size);
         group.add(mesh);
     }
     // place the image plane
     {
-        viewMaterials[camera.name] = new OrientedImageMaterial(viewMaterialUniforms);
+        viewMaterials[camera.name] = new OrientedImageMaterial(uniforms.viewMaterial);
         setMaterial(viewMaterials[camera.name], camera);
         viewMaterials[camera.name].debug.showImage = true;
 
@@ -204,23 +231,23 @@ function onWindowResize() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const aspect = width / height;
-    renderer.setSize(width, height);
-    viewCamera.aspect = aspect;
-    viewCamera.updateProjectionMatrix();
+    context.renderer.setSize(width, height);
+    pCamera.view.aspect = aspect;
+    pCamera.view.updateProjectionMatrix();
 } 
 
 function onDocumentKeyDown(event) {
     switch(event.key){
-        case 's': setView(getCamera(nextCamera, -1));  break;
-        case 'z': setView(getCamera(nextCamera, +1));  break;
-        case 'q': setTexture(getCamera(textureCamera, -1));  break;
-        case 'd': setTexture(getCamera(textureCamera, +1));  break;
-        case 'a': setCamera(getCamera(nextCamera, -1));  break;
-        case 'e': setCamera(getCamera(nextCamera, +1));  break;
-        case 't': setTexture(getCamera(nextCamera));  break;
-        case 'v': setView(getCamera(textureCamera));  break;
-        case 'c': console.log(nextCamera); break;
-        case 'p': console.log(viewCamera.position); break;
+        case 's': setView(getCamera(pCamera.next, -1));  break;
+        case 'z': setView(getCamera(pCamera.next, +1));  break;
+        case 'q': setTexture(getCamera(pCamera.texture, -1));  break;
+        case 'd': setTexture(getCamera(pCamera.texture, +1));  break;
+        case 'a': setCamera(getCamera(pCamera.next, -1));  break;
+        case 'e': setCamera(getCamera(pCamera.next, +1));  break;
+        case 't': setTexture(getCamera(pCamera.next));  break;
+        case 'v': setView(getCamera(pCamera.texture));  break;
+        case 'c': console.log(pCamera.next); break;
+        case 'p': console.log(pCamera.view.position); break;
         default : console.log(event.key, 'is not supported');
     }
 }
@@ -270,12 +297,12 @@ function loadJSON(material, path, file) {
 
         if(json.target) {
             params.environment.center.copy(json.target);
-            if(controls) controls.target.copy(json.target);
+            if(context.controls) context.controls.target.copy(json.target);
         } 
 
         if(json.camera) {
             if(json.camera.scale) params.cameras.size = json.camera.scale;
-            if(json.camera.zoom) viewCamera.zoom = json.camera.zoom;
+            if(json.camera.zoom) pCamera.view.zoom = json.camera.zoom;
         }
 
         if(json.environment) {
@@ -284,7 +311,7 @@ function loadJSON(material, path, file) {
             if(json.environment.elevation) params.environment.elevation = json.environment.elevation;
         }
         
-        if(json.up) viewCamera.up.copy(json.up);
+        if(json.up) pCamera.view.up.copy(json.up);
         if(json.pointSize) material.size = json.pointSize;
 
         updateEnvironment();
@@ -328,7 +355,7 @@ function handleOrientation(name) {
         if (!camera) return;
         if (camera instanceof Array) return camera.map(c => handleOrientation(c.name)(c));
         handleCamera(camera, name);
-        if(cameras.children.length < 2) setCamera(camera);
+        if(context.cameras.children.length < 2) setCamera(camera);
         return camera;
     };
 }
@@ -336,7 +363,7 @@ function handleOrientation(name) {
 function handleCamera(camera, name){
     if (!camera) return;
     camera.name = name;
-    if (cameras.children.find(cam => cam.name == camera.name)) {
+    if (context.cameras.children.find(cam => cam.name == camera.name)) {
         console.warn(`Camera "${camera.name}" was already loaded, skipping`);
         return;
     }
@@ -359,12 +386,12 @@ function handleCamera(camera, name){
     var target = getRenderTarget();
     camera.renderTarget = target;
 
-    renderer.setRenderTarget(target);
-    renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
+    context.renderer.setRenderTarget(target);
+    context.renderer.render(context.scene, camera);
+    context.renderer.setRenderTarget(null);
     
-    cameras.add(camera);
-    cameras.children.sort((a, b) => a.name.localeCompare(b.name));
+    context.cameras.add(camera);
+    context.cameras.children.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function handleImage(name) {
@@ -380,7 +407,7 @@ function handlePointCloud(name, material){
     return function(geometry){
         console.log(name);
         var points = new THREE.Points(geometry, material);
-        environment.add(points);
+        context.environment.add(points);
         // Find center of the geometry
         geometry.computeBoundingBox();
         var center = new THREE.Vector3();
@@ -397,7 +424,7 @@ function handleMesh(name, material){
         console.log(name);
         geometry.computeVertexNormals();
         var mesh = new THREE.Mesh(geometry, material);
-        environment.add(mesh);
+        context.environment.add(mesh);
         // Find center of the geometry
         geometry.computeBoundingBox();
         var center = new THREE.Vector3();
@@ -411,13 +438,13 @@ function handleMesh(name, material){
 
 /* Gets ---------------------------------------------- */
 function getCamera(camera, delta = 0){
-    const array = cameras.children;
+    const array = context.cameras.children;
     const index = array.findIndex(cam => cam.name == camera.name);
     return array[(index + delta + array.length) % array.length];
 }
 
 function getMaxTextureUnitsCount(renderer) {
-    const gl = renderer.getContext();
+    const gl = context.renderer.getContext();
     return gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 }
 
@@ -440,27 +467,27 @@ function getRenderTarget() {
 function setView(camera) {
     if (!camera) return;
     console.log('View:', camera.name);
-    prevCamera.set(viewCamera);
-    nextCamera.set(camera);
-    cameraAspect(nextCamera);
-    cameraAspect(prevCamera);
-    prevCamera.timestamp = 0; // timestamp will be set in the update callback
-    nextCamera.zoom = viewCamera.zoom; // keep the current zoom
-    nextCamera.near = 0.1;
-    nextCamera.far = params.environment.radius+params.environment.epsilon;
-    nextCamera.updateProjectionMatrix();
+    pCamera.prev.set(pCamera.view);
+    pCamera.next.set(camera);
+    cameraAspect(pCamera.next);
+    cameraAspect(pCamera.prev);
+    pCamera.prev.timestamp = 0; // timestamp will be set in the update callback
+    pCamera.next.zoom = pCamera.view.zoom; // keep the current zoom
+    pCamera.next.near = 0.1;
+    pCamera.next.far = params.environment.radius+params.environment.epsilon;
+    pCamera.next.updateProjectionMatrix();
 }
 
 function setTexture(camera) {
     if (!camera) return;
     console.log('Texture:', camera.name);
-    textureCamera.copy(camera);
-    if(textureMaterial) {
-        setMaterial(textureMaterial, camera);
-        setRadius(textureMaterial, camera);
-        textureMaterial.setHomography(camera);
+    pCamera.texture.copy(camera);
+    if(materials.texture) {
+        setMaterial(materials.texture, camera);
+        setRadius(materials.texture, camera);
+        materials.texture.setHomography(camera);
     }
-    if(multipleTextureMaterial) multipleTextureMaterial.setCamera(camera);
+    if(materials.multipleTexture) materials.multipleTexture.setCamera(camera);
 }
 
 function setCamera(camera) {
@@ -471,7 +498,7 @@ function setCamera(camera) {
 function setMaterial(material, camera) {
     material.map =  textures[camera.name] || uvTexture;
     if(camera.renderTarget) material.depthMap = camera.renderTarget.depthTexture || whiteTexture;
-    material.setCamera(camera, viewCamera);
+    material.setCamera(camera, pCamera.view);
 }
 
 function setRadius(material, camera){
@@ -482,64 +509,64 @@ function setRadius(material, camera){
 
 /* Update -------------------------------------------- */
 function updateEnvironment() {
-    backgroundSphere.scale.set(params.environment.radius, params.environment.radius, params.environment.radius);
-    backgroundSphere.position.copy(params.environment.center);
-    backgroundSphere.updateWorldMatrix();
+    context.backgroundSphere.scale.set(params.environment.radius, params.environment.radius, params.environment.radius);
+    context.backgroundSphere.position.copy(params.environment.center);
+    context.backgroundSphere.updateWorldMatrix();
 
     var position = params.environment.center.clone().add(
-        viewCamera.up.clone().multiplyScalar(params.environment.elevation));
-    var normal = viewCamera.up.clone().multiplyScalar(-1.);
-    worldPlane.position.copy(position);
-    worldPlane.scale.set(params.environment.radius, params.environment.radius, 1);
-    worldPlane.lookAt(position.clone().add(normal));
-    worldPlane.updateWorldMatrix();
+        pCamera.view.up.clone().multiplyScalar(params.environment.elevation));
+    var normal = pCamera.view.up.clone().multiplyScalar(-1.);
+    context.worldPlane.position.copy(position);
+    context.worldPlane.scale.set(params.environment.radius, params.environment.radius, 1);
+    context.worldPlane.lookAt(position.clone().add(normal));
+    context.worldPlane.updateWorldMatrix();
 
-    controls.maxDistance = params.environment.radius;
-    environment.visible = true;
+    context.controls.maxDistance = params.environment.radius;
+    context.environment.visible = true;
 }
 
 function updateMaterial(material) {
-    material.setCamera(textureCamera, viewCamera);
-    setRadius(material, viewCamera);
+    material.setCamera(pCamera.texture, pCamera.view);
+    setRadius(material, pCamera.view);
 }
 
 function updateControls() {
-    var distance = new THREE.Vector3().subVectors(viewCamera.position, controls.target).length();
+    var distance = new THREE.Vector3().subVectors(pCamera.view.position, context.controls.target).length();
     // apply transformation - matrix, euler rotation, or quaternion?
-    var normal = new THREE.Vector3(0,0,-1).applyQuaternion(viewCamera.quaternion);
+    var normal = new THREE.Vector3(0,0,-1).applyQuaternion(pCamera.view.quaternion);
     // instead of quaternion, you could also use .applyEuler(camera.rotation);
     // or if you used matrix, extract quaternion from matrix
-    controls.target = new THREE.Vector3().add(viewCamera.position).add(normal.setLength(distance));
-    //var vector = (new THREE.Vector3( 0, 0, -environmentRadius )).applyQuaternion( viewCamera.quaternion ).add( viewCamera.position );
-    //controls.target.copy(vector);
-    controls.saveState();
+    context.controls.target = new THREE.Vector3().add(pCamera.view.position).add(normal.setLength(distance));
+    //var vector = (new THREE.Vector3( 0, 0, -environmentRadius )).applyQuaternion( pCamera.view.quaternion ).add( pCamera.view.position );
+    //context.controls.target.copy(vector);
+    context.controls.saveState();
 }
 
 function showMaterials(state) {
-    if (textureMaterial) textureMaterial.debug.showImage = state;
-    if (multipleTextureMaterial) multipleTextureMaterial.debug.showImage = state;
+    if (materials.texture) materials.texture.debug.showImage = state;
+    if (materials.multipleTexture) materials.multipleTexture.debug.showImage = state;
 }
 
 /* Movement ------------------------------------------ */
 function interpolateCamera(timestamp) {
-    if (prevCamera.timestamp !== undefined) {
-        if (prevCamera.timestamp == 0) {
-            prevCamera.timestamp = timestamp;
-            nextCamera.timestamp = prevCamera.timestamp + 1000 * params.interpolation.duration;
+    if (pCamera.prev.timestamp !== undefined) {
+        if (pCamera.prev.timestamp == 0) {
+            pCamera.prev.timestamp = timestamp;
+            pCamera.next.timestamp = pCamera.prev.timestamp + 1000 * params.interpolation.duration;
         }
-        if (timestamp < nextCamera.timestamp) {
-            const t = 0.001 * (timestamp - prevCamera.timestamp) / params.interpolation.duration;
-            viewCamera.set(prevCamera).lerp(nextCamera, t);
+        if (timestamp < pCamera.next.timestamp) {
+            const t = 0.001 * (timestamp - pCamera.prev.timestamp) / params.interpolation.duration;
+            pCamera.view.set(pCamera.prev).lerp(pCamera.next, t);
             showMaterials(false);
         } else {
-            viewCamera.setDefinetly(nextCamera);
-            prevCamera.timestamp = undefined;
-            nextCamera.timestamp = undefined;
+            pCamera.view.setDefinetly(pCamera.next);
+            pCamera.prev.timestamp = undefined;
+            pCamera.next.timestamp = undefined;
 
-            controls.saveState();
+            context.controls.saveState();
             showMaterials(true);
         }
-        viewCamera.updateProjectionMatrix(); 
+        pCamera.view.updateProjectionMatrix();
     }
 };
 
@@ -553,26 +580,60 @@ function basicClean() {
     };
 
     const camera = new PhotogrammetricCamera();
-    prevCamera.set(camera);
-    nextCamera.set(camera);
-    prevCamera.timestamp = undefined;
-    nextCamera.timestamp = undefined;
-    textureCamera.copy(viewCamera);
+    pCamera.prev.set(camera);
+    pCamera.next.set(camera);
+    pCamera.prev.timestamp = undefined;
+    pCamera.next.timestamp = undefined;
+    pCamera.texture.copy(pCamera.view);
 
-    viewCamera.zoom = 0.5;
-    viewCamera.up.set(0, 0, 1);
+    pCamera.view.zoom = 0.5;
+    pCamera.view.up.set(0, 0, 1);
     
-    if(textureMaterial) textureMaterial.map = null;
+    if(materials.texture) materials.texture.map = null;
 
-    controls.target.set(0, 0, 0);
+    context.controls.target.set(0, 0, 0);
 
-    while(environment.children.length > 2) environment.remove(environment.children[environment.children.length - 1]);
+    while(context.environment.children.length > 2) context.environment.remove(context.environment.children[context.environment.children.length - 1]);
 
-    backgroundSphere.visible = true;
-    worldPlane.visible = true;
+    context.backgroundSphere.visible = true;
+    context.worldPlane.visible = true;
 
     Object.keys(textures).forEach(key => textures[key].dispose());
-    while(cameras.children.length) cameras.remove(cameras.children[0]);
+    while(context.cameras.children.length) context.cameras.remove(context.cameras.children[0]);
 
-    if(multipleTextureMaterial) multipleTextureMaterial.clean();
+    if(materials.multipleTexture) materials.multipleTexture.clean();
 }
+
+const photogrammetricHelper = {
+    initBasicMaterial,
+    initWireMaterial,
+    initTextureMaterial,
+    initCameraMaterialUniforms,
+    initSceneMaterialUniforms,
+    initMultipleTextureMaterial,
+    initBackgroundSphere,
+    initWorldPlane,
+    interpolateCamera,
+    updateMaterial,
+    onWindowResize,
+    onDocumentKeyDown,
+    uvTexture,
+    uniforms,
+    materials,
+    context,
+    size,
+    pCamera,
+    basicClean,
+    loadOrientation,
+    loadImage,
+    loadOrientedImage,
+    loadJSON,
+    loadPlyPC,
+    loadPlyMesh,
+    updateEnvironment,
+    server,
+    params,
+    textures,
+};
+
+export default photogrammetricHelper;

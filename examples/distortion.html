@@ -30,7 +30,6 @@
             var FetchSource = photogrammetricCamera.FetchSource;
             var FilesSource = photogrammetricCamera.FilesSource;
             // Parsers
-
             var Parsers = photogrammetricCamera.Parsers;
 
             var MatisOrientationParser = Parsers.MatisParser;
@@ -48,10 +47,40 @@
             var sceneFS = photogrammetricCamera.sceneFS;
             // Photogrammetric camera
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
+            var MapControls = photogrammetricCamera.MapControls;
         </script>
 
-        <script src="js/helpers/photogrammetricHelper.js"></script>
-        <script>
+        <script type='module'>
+            import photogrammetricHelper from './js/helpers/photogrammetricHelper.js';
+
+            // import * as THREE from 'three';
+
+            const { size, context, materials, uniforms,
+                initBasicMaterial,
+                initWireMaterial,
+                initTextureMaterial,
+                initCameraMaterialUniforms,
+                initBackgroundSphere,
+                initWorldPlane,
+                initSceneMaterialUniforms,
+                onWindowResize,
+                onDocumentKeyDown,
+                interpolateCamera,
+                updateMaterial,
+                pCamera,
+                basicClean,
+                loadOrientation,
+                loadImage,
+                loadOrientedImage,
+                loadJSON,
+                loadPlyPC,
+                loadPlyMesh,
+                updateEnvironment,
+                server,
+                params, } = photogrammetricHelper;
+
+            var collections;
+            var collection;
             /* ------------------------- Main ------------------------ */
             init();
             var gui = initGUI();
@@ -64,59 +93,60 @@
                 document.body.appendChild(container);
 
                 // Sizes
-                width = window.innerWidth;
-                height = window.innerHeight;
+                size.width = window.innerWidth;
+                size.height = window.innerHeight;
 
                 // Renderer
-                renderer = new THREE.WebGLRenderer({antialias: true});
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(width, height);
-                container.appendChild(renderer.domElement);
+                context.renderer = new THREE.WebGLRenderer({antialias: true});
+                context.renderer.setPixelRatio(window.devicePixelRatio);
+                context.renderer.setSize(size.width, size.height);
+                container.appendChild(context.renderer.domElement);
 
                 // Post-processing
 
-                composer = new photogrammetricCamera.EffectComposer(renderer);
+                context.composer = new photogrammetricCamera.EffectComposer(context.renderer);
 
                 // Scene
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf0f0f0);
+                context.scene = new THREE.Scene();
+                context.scene.background = new THREE.Color(0xf0f0f0);
 
-                // Cameras 
-                cameras = new THREE.Group();
-                cameras.visible = false;
-                scene.add(viewCamera);
-                scene.add(cameras);
+                // Cameras
+                context.cameras = new THREE.Group();
+                context.cameras.visible = false;
+                context.scene.add(pCamera.view);
+                context.scene.add(context.cameras);
+
 
                 // Materials
-                basicMaterial = initBasicMaterial();
-                wireMaterial = initWireMaterial();
-                [textureMaterialUniforms, textureMaterial] = initTextureMaterial(distortVS, distortFS, uvTexture);
-                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
-                sceneMaterialUniforms = initSceneMaterialUniforms(sceneVS, sceneFS, textureMaterial);
+                materials.basic = initBasicMaterial();
+                materials.wire = initWireMaterial();
+                [uniforms.textureMaterialUniform, materials.texture] = initTextureMaterial(distortVS, distortFS);
+                uniforms.viewMaterial = initCameraMaterialUniforms(imageVS, viewFS);
+                uniforms.sceneMaterial = initSceneMaterialUniforms(sceneVS, sceneFS, materials.texture);
 
                 // Environment
-                environment = new THREE.Group();
-                backgroundSphere = initBackgroundSphere(textureMaterial);
-                worldPlane = initWorldPlane(textureMaterial);
+                context.environment = new THREE.Group();
+                context.backgroundSphere = initBackgroundSphere(materials.texture);
+                context.worldPlane = initWorldPlane(materials.texture);
 
-                environment.add(backgroundSphere);
-                environment.add(worldPlane);
-                environment.visible = false;
-                scene.add(environment);
+                context.environment.add(context.backgroundSphere);
+                context.environment.add(context.worldPlane);
+                context.environment.visible = false;
+                context.scene.add(context.environment);
 
                 // Controls
-                controls = new OrbitControls( viewCamera, renderer.domElement );
-				controls.enableDamping = false;
-				controls.screenSpacePanning = false;
-                controls.maxPolarAngle = 0.75*Math.PI;
-                controls.enableKeys = false;
+                context.controls = new MapControls(pCamera.view, context.renderer.domElement);
+                context.controls.enableDamping = false;
+                context.controls.screenSpacePanning = false;
+                context.controls.maxPolarAngle = 0.75*Math.PI;
+                context.controls.enableKeys = false;
 
                 // Compose rendering passes
-                composer.addPass(new photogrammetricCamera.RenderPass(scene, viewCamera));
+                context.composer.addPass(new photogrammetricCamera.RenderPass(context.scene, pCamera.view));
 
-                scenePass = new photogrammetricCamera.ShaderPass(sceneMaterialUniforms);
-                scenePass.renderToScreen = true;
-                composer.addPass(scenePass);
+                context.scenePass = new photogrammetricCamera.ShaderPass(uniforms.sceneMaterial);
+                context.scenePass.renderToScreen = true;
+                context.composer.addPass(context.scenePass);
 
                 // Event listeners
                 window.addEventListener('resize', onWindowResize, false);
@@ -126,7 +156,7 @@
                 collections = {
                     Sample: function(){
                         clean();
-                        worldPlane.visible = false;
+                        context.worldPlane.visible = false;
                         var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
@@ -136,28 +166,28 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     Frejus: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/frejus_original/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     Viabon: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     Ramses: function() {
                         clean();
-                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
+                        loadJSON(materials.texture, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
                     },
                 };
 
@@ -181,77 +211,77 @@
 
                 // View Camera
                 function updateViewCameraFromGUI() {
-                    viewCamera.updateProjectionMatrix();
+                    pCamera.view.updateProjectionMatrix();
                 };
 
                 var viewGUI = gui.addFolder('View Camera'); // View
-                viewGUI.visible = viewGUI.add(cameras, 'visible').name('viewpoints');
-                viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
-                viewGUI.distort = viewGUI.add(textureMaterial.distortion, 'view').name('distort');
-                viewGUI.extrapol = viewGUI.add(textureMaterial.extrapolation, 'view').name('extrapolate');
+                viewGUI.visible = viewGUI.add(context.cameras, 'visible').name('viewpoints');
+                viewGUI.zoom = viewGUI.add(pCamera.view, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
+                viewGUI.distort = viewGUI.add(materials.texture.distortion, 'view').name('distort');
+                viewGUI.extrapol = viewGUI.add(materials.texture.extrapolation, 'view').name('extrapolate');
 
                 // Texture Camera
                 function updateRmaxFromGUI(value) {
                     params.distortion.rmax = value;
-                    textureMaterial.uvDistortion.R.w = value*value*textureMaterial.distortion.r2img;
-                    textureMaterial.setHomography(textureCamera);
+                    materials.texture.uvDistortion.R.w = value*value*materials.texture.distortion.r2img;
+                    materials.texture.setHomography(pCamera.texture);
                 };
 
                 var textureGUI = gui.addFolder('Historical Camera');
-                textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
-                textureGUI.borderSharpness = textureGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("sharpness");
-                textureGUI.distort = textureGUI.add(textureMaterial.distortion, 'texture').name('distort');
-                textureGUI.extrapol = textureGUI.add(textureMaterial.extrapolation, 'texture').name('extrapolate');
+                textureGUI.opacity = textureGUI.add(materials.texture, 'opacity', 0, 1);
+                textureGUI.borderSharpness = textureGUI.add(materials.texture.debug, 'borderSharpness', 2, 1000).name("sharpness");
+                textureGUI.distort = textureGUI.add(materials.texture.distortion, 'texture').name('distort');
+                textureGUI.extrapol = textureGUI.add(materials.texture.extrapolation, 'texture').name('extrapolate');
                 textureGUI.add(params.distortion, 'rmax', 0, 10).name('rmax ratio').onChange(updateRmaxFromGUI);
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
-                backgroundGUI.diffuseColorGrey = backgroundGUI.add(textureMaterial.debug, 'diffuseColorGrey');
-                backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
-                backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
-                backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
+                backgroundGUI.diffuseColorGrey = backgroundGUI.add(materials.texture.debug, 'diffuseColorGrey');
+                backgroundGUI.wireframe = backgroundGUI.add(materials.texture, 'wireframe');
+                backgroundGUI.sphere = backgroundGUI.add(context.backgroundSphere, 'visible').name('sphere visible');
+                backgroundGUI.plane = backgroundGUI.add(context.worldPlane, 'visible').name('plane visible');
 
                 // Debug
                 function radialDistortionWarn() {
-                    if(textureMaterial.distortion.type == 2 && textureMaterial.distortion.method == 2)
+                    if(materials.texture.distortion.type == 2 && materials.texture.distortion.method == 2)
                         console.warn('Double pass rendering only supports the radial part of the distortion model');
                 }
 
                 var debugGUI = gui.addFolder('Debug Distortion');
-                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'showRadius');
-                debugGUI.diffuseColorGrey = debugGUI.add(textureMaterial.debug, 'showGrid');
-                debugGUI.debugOpacity = debugGUI.add(textureMaterial.debug, 'debugOpacity', 0., 1.);
-                debugGUI.rendering = debugGUI.add(textureMaterial.distortion, 'method', {single: 1, double: 2})
+                debugGUI.diffuseColorGrey = debugGUI.add(materials.texture.debug, 'showRadius');
+                debugGUI.diffuseColorGrey = debugGUI.add(materials.texture.debug, 'showGrid');
+                debugGUI.debugOpacity = debugGUI.add(materials.texture.debug, 'debugOpacity', 0., 1.);
+                debugGUI.rendering = debugGUI.add(materials.texture.distortion, 'method', {single: 1, double: 2})
                     .name('rendering').onChange(radialDistortionWarn);
-                debugGUI.distortion = debugGUI.add(textureMaterial.distortion, 'type', {radial: 1, complete: 2})
+                debugGUI.distortion = debugGUI.add(materials.texture.distortion, 'type', {radial: 1, complete: 2})
                     .name('distortion mode').onChange(radialDistortionWarn);
 
                 // Update controls functions
                 gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {
-                    viewGUI.zoom.setValue(viewCamera.zoom);
+                    viewGUI.zoom.setValue(pCamera.view.zoom);
                     backgroundGUI.sphere.setValue(environment.children[0].visible);
                     backgroundGUI.plane.setValue(environment.children[1].visible);
                     var name = textureCamera.name;
                     if (name.length > 0) {
                         if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
                         textureGUI.name = 'Hist: ' + name;
-                    }     
+                    }
                 }
                 return gui;
             };
 
             function render() {
-                if(textureMaterial.distortion.method == 2){
-                    composer.render(clock.getDelta());
-                }else renderer.render(scene, viewCamera);
+                if(materials.texture.distortion.method == 2){
+                    context.composer.render(context.clock.getDelta());
+                }else context.renderer.render(context.scene, pCamera.view);
             }
 
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-                updateMaterial(textureMaterial);
-                textureMaterial.setUniforms(scenePass.uniforms);
-                gui.updateFromCameras(viewCamera, textureCamera, environment);
+                updateMaterial(materials.texture);
+                materials.texture.setUniforms(context.scenePass.uniforms);
+                gui.updateFromCameras(pCamera.view, pCamera.texture, context.environment);
                 render();
             }
         </script>

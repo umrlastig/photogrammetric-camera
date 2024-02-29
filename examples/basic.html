@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
+<!--         <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+                    "OrbitControls": "https://unpkg.com/three@0.159.0/examples/jsm/controls/OrbitControls.js"
+                }
+            }
+        </script> -->
         <meta charset="utf-8">
         <title>Photogrammetric Camera</title>
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -41,8 +49,6 @@
 
             // Materials
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
-            var NewMaterial = photogrammetricCamera.NewMaterial;
-            var ShadowMapMaterial = photogrammetricCamera.ShadowMapMaterial;
             var imageVS = photogrammetricCamera.imageVS;
             var imageFS = photogrammetricCamera.imageFS;
             var viewFS = photogrammetricCamera.viewFS;
@@ -50,13 +56,40 @@
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
 
-        <script src="js/helpers/photogrammetricHelper.js"></script>
-        <script>
+        <script type='module'>
+            import photogrammetricHelper from './js/helpers/photogrammetricHelper.js';
+
+            // import * as THREE from 'three';
+
+            const { size, context, materials, uniforms,
+                initBasicMaterial,
+                initWireMaterial,
+                initTextureMaterial,
+                initCameraMaterialUniforms,
+                initBackgroundSphere,
+                initWorldPlane,
+                onWindowResize,
+                onDocumentKeyDown,
+                interpolateCamera,
+                updateMaterial,
+                pCamera,
+                basicClean,
+                loadOrientation,
+                loadImage,
+                loadOrientedImage,
+                loadJSON,
+                loadPlyPC,
+                loadPlyMesh,
+                updateEnvironment,
+                server, } = photogrammetricHelper;
+
             /* ------------------------- Main ------------------------ */
             init();
             var gui = initGUI();
             animate();
 
+            var collections;
+            var collection;
             /* ----------------------- Functions --------------------- */
             function init() {
                 // HTML container for the rendering scene
@@ -64,55 +97,47 @@
                 document.body.appendChild(container);
 
                 // Sizes
-                width = window.innerWidth;
-                height = window.innerHeight;
+                size.width = window.innerWidth;
+                size.height = window.innerHeight;
 
                 // Renderer
-                renderer = new THREE.WebGLRenderer({antialias: true});
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(width, height);
-                container.appendChild(renderer.domElement);
+                context.renderer = new THREE.WebGLRenderer({antialias: true});
+                context.renderer.setPixelRatio(window.devicePixelRatio);
+                context.renderer.setSize(size.width, size.height);
+                container.appendChild(context.renderer.domElement);
 
                 // Scene
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf0f0f0);
+                context.scene = new THREE.Scene();
+                context.scene.background = new THREE.Color(0xf0f0f0);
 
-                // Cameras 
-                cameras = new THREE.Group();
-                cameras.visible = false;
-                scene.add(viewCamera);
-                scene.add(cameras);
+                // Cameras
+                context.cameras = new THREE.Group();
+                context.cameras.visible = false;
+                context.scene.add(pCamera.view);
+                context.scene.add(context.cameras);
 
                 // Materials
-                basicMaterial = initBasicMaterial();
-                wireMaterial = initWireMaterial();
-                [textureMaterialUniforms, textureMaterial] = initTextureMaterial(imageVS, imageFS, uvTexture);
-                viewMaterialUniforms = initCameraMaterialUniforms(imageVS, viewFS, uvTexture);
-
-                // newMaterial
-
-                const pointsMaterial = new NewMaterial({
-                    map: uvTexture,
-                });
-
-                const shadowMapMaterial = new ShadowMapMaterial();
+                materials.basic = initBasicMaterial();
+                materials.wire = initWireMaterial();
+                [uniforms.textureMaterialUniform, materials.texture] = initTextureMaterial(imageVS, imageFS);
+                uniforms.viewMaterial = initCameraMaterialUniforms(imageVS, viewFS);
 
                 // Environment
-                environment = new THREE.Group();
-                backgroundSphere = initBackgroundSphere(textureMaterial);
-                worldPlane = initWorldPlane(textureMaterial);
+                context.environment = new THREE.Group();
+                context.backgroundSphere = initBackgroundSphere(materials.texture);
+                context.worldPlane = initWorldPlane(materials.texture);
 
-                environment.add(backgroundSphere);
-                environment.add(worldPlane);
-                environment.visible = false;
-                scene.add(environment);
+                context.environment.add(context.backgroundSphere);
+                context.environment.add(context.worldPlane);
+                context.environment.visible = false;
+                context.scene.add(context.environment);
 
                 // Controls
-                controls = new MapControls(viewCamera, renderer.domElement);
-				controls.enableDamping = false;
-				controls.screenSpacePanning = false;
-                controls.maxPolarAngle = 0.75*Math.PI;
-                controls.enableKeys = false;
+                context.controls = new MapControls(pCamera.view, context.renderer.domElement);
+				context.controls.enableDamping = false;
+				context.controls.screenSpacePanning = false;
+                context.controls.maxPolarAngle = 0.75*Math.PI;
+                context.controls.enableKeys = false;
 
                 // Event listeners
                 window.addEventListener('resize', onWindowResize, false);
@@ -122,7 +147,7 @@
                 collections = {
                     Sample: function(){
                         clean();
-                        worldPlane.visible = false;
+                        context.worldPlane.visible = false;
                         var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/FilesSamples/';
                         var source = new FetchSource(path);
                         loadOrientation('Orientation-00.xml', source);
@@ -132,139 +157,24 @@
                     Maurepas: function() {
                         clean();
                         collection = 'collections/maurepas/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     Frejus: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/frejus_original/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     Viabon: function() {
                         clean();
-                        backgroundSphere.visible = false;
+                        context.backgroundSphere.visible = false;
                         collection = 'collections/viabon/';
-                        loadJSON(textureMaterial, server + collection);
+                        loadJSON(materials.texture, server + collection);
                     },
                     SaintMartin: function() {
                         clean();
                         collection = 'collections/saint_martin/';
-                        loadJSON(textureMaterial, server + collection);
-                    },
-                    Ramses: function() {
-                        clean();
-                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/ramses/');
-                    },
-                    Abbey: function() {
-                        clean();
-                        var path = 'https://raw.githubusercontent.com/micmacIGN/Documentation/master/Data/CompensOnLine/';
-                        var source = new FetchSource(path);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0204.jpg.xml', 'Abbey-IMG_0204.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0205.jpg.xml', 'Abbey-IMG_0205.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0206.jpg.xml', 'Abbey-IMG_0206.jpg', source);
-                        loadOrientedImage('Ori-Rel/Orientation-Abbey-IMG_0207.jpg.xml', 'Abbey-IMG_0207.jpg', source);
-                        // plane.position.z = -16.56;
-                        // orbitControls.target.set(0, 0, plane.position.z);
-                    },
-                    Cuxa: function() {
-                        clean();
-                        loadJSON(textureMaterial, 'http://mathieu.bredif.free.fr/cors.php?url=data/cuxa/');
-                    },
-                    Alex: function() {
-                        var source = new FetchSource('data/alex/');
-                        var sphere = new THREE.Mesh(new THREE.SphereGeometry(-1, 32, 32), textureMaterial);
-                        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 100, 100), textureMaterial);
-
-
-                        const pixel = 0.004; // mm
-                        const focal = 123.9/pixel; // mm
-                        const size = [26460, 17004];
-                        source.cameras = { "UCE-M3-f120" : new PhotogrammetricCamera(focal, size) };
-
-                        const orientations = loadOrientation('20FUALPMAR_alt.OPK', source);
-                        sphere.visible = false;
-
-                        orientations.then(cameras => {
-                            cameras.map(cam => loadImage(cam.name + '.jpg', source))
-                        });
-                        orientations.then(cameras => {
-                            plane.position.x = cameras[0].position.x;
-                            plane.position.y = cameras[0].position.y;
-                            plane.position.z = 0;
-                            plane.updateMatrixWorld();
-                            // orbitControls.target.copy(plane.position);
-                        });
-                        const scale = 30000;
-                        plane.scale.set(scale,scale,scale);
-
-                        const mes = source.open('sample.MES', 'text').then(text => OPKOrientationParser.parseMES(text, 'sample.MES'));
-                        const xyz = source.open('sample.XYZ', 'text').then(text => OPKOrientationParser.parseXYZ(text, 'sample.XYZ'));
-
-                        xyz.then(data => {
-                            const geometry = new THREE.BufferGeometry();
-                            geometry.setAttribute('position', new THREE.BufferAttribute( data.position, 3 ));
-                            const material = new THREE.PointsMaterial( { color: 0xff0000, size: 10} );
-                            const gcp = new THREE.Points(geometry, material);
-                             scene.add(gcp);
-                        });
-
-                        Promise.all([xyz, orientations, mes]).then(res => {
-                            var [x, o, m] = res;
-                            const geometry = new THREE.BufferGeometry();
-                            const position = new Float32Array( 3*o.length + x.position.length);
-                            position.set(x.position, 3*o.length);
-                            const cameraDict = {};
-                            for(var c = 0; c < o.length; ++c) {
-                                o[c].position.toArray(position, 3*c);
-                                cameraDict[o[c].name] = c;
-                            }
-                            geometry.setAttribute('position', new THREE.BufferAttribute( position, 3 ));
-
-                            const measureDict = {};
-                            for(var i = 0; i< x.size; ++i)
-                            {
-                                measureDict[x.name[i]] = i + o.length;
-                            }
-
-                            const indices = [];
-                            for(var i = 0; i< m.size; ++i)
-                            {
-                                const camera = cameraDict[m.image[i]];
-                                const measure = measureDict[m.name[i]];
-                                indices.push(camera, measure);
-                            }
-                            geometry.setIndex( indices );
-                            geometry.computeBoundingSphere();
-
-                            const material = new THREE.LineBasicMaterial( { color: 0xffff00, linewidth: 1} );
-                            const lines = new THREE.LineSegments(geometry, material);
-                            scene.add(lines);
-                            lines.visible = false;
-                        });
-                    },
-                    NotreDame: function() {
-                        var sphere = new THREE.Mesh(new THREE.SphereGeometry(-1, 32, 32), textureMaterial);
-                        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 100, 100), textureMaterial);
-
-                        var source = new FetchSource('data/NotreDame/');
-                        const list = source.open('list2.txt', 'text');
-                        const out  = source.open('notredame_cameras.out', 'text');
-                        const orientations = Promise.all([list, out]).then(BundlerOrientationParser.parse).then(cameras => {
-                                handleOrientation(cameras);
-                                // cameras.map(cam => loadImage('images/rd/'+cam.name + '.rd.jpg', source, cam.name));
-                                cameras.map(cam => loadImage('images/'+cam.name + '.jpg', source, cam.name))
-                                console.log('cameras', cameras);
-                                const geometry = new THREE.BufferGeometry();
-                                geometry.setAttribute('position', new THREE.BufferAttribute( cameras.points, 3 ));
-                                geometry.setAttribute('color', new THREE.BufferAttribute( cameras.colors, 3, true ));
-                                geometry.computeBoundingSphere();
-                                const material = textureMaterial; // new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-                                const gcp = new THREE.Points(geometry, material);
-                                scene.add(gcp);
-                            }
-                        );
-                        plane.visible = false;
-                        sphere.visible = false;
+                        loadJSON(materials.texture, server + collection);
                     },
                 };
 
@@ -288,24 +198,24 @@
 
                 // View Camera
                 function updateViewCameraFromGUI() {
-                    viewCamera.updateProjectionMatrix();
+                    pCamera.view.updateProjectionMatrix();
                 };
 
                 var viewGUI = gui.addFolder('View Camera'); // View
-                viewGUI.visible = viewGUI.add(cameras, 'visible').name('viewpoints');
-                viewGUI.zoom = viewGUI.add(viewCamera, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
+                viewGUI.visible = viewGUI.add(context.cameras, 'visible').name('viewpoints');
+                viewGUI.zoom = viewGUI.add(pCamera.view, 'zoom', 0, 2).onChange(updateViewCameraFromGUI);
 
                 // Texture Camera
                 var textureGUI = gui.addFolder('Historical Camera');
-                textureGUI.opacity = textureGUI.add(textureMaterial, 'opacity', 0, 1);
-                textureGUI.borderSharpness = textureGUI.add(textureMaterial.debug, 'borderSharpness', 2, 1000).name("sharpness");
+                textureGUI.opacity = textureGUI.add(materials.texture, 'opacity', 0, 1);
+                textureGUI.borderSharpness = textureGUI.add(materials.texture.debug, 'borderSharpness', 2, 1000).name("sharpness");
 
                 // Background 
                 var backgroundGUI = gui.addFolder('Background');
-                backgroundGUI.diffuseColorGrey = backgroundGUI.add(textureMaterial.debug, 'diffuseColorGrey');
-                backgroundGUI.wireframe = backgroundGUI.add(textureMaterial, 'wireframe');
-                backgroundGUI.sphere = backgroundGUI.add(backgroundSphere, 'visible').name('sphere visible');
-                backgroundGUI.plane = backgroundGUI.add(worldPlane, 'visible').name('plane visible');
+                backgroundGUI.diffuseColorGrey = backgroundGUI.add(materials.texture.debug, 'diffuseColorGrey');
+                backgroundGUI.wireframe = backgroundGUI.add(materials.texture, 'wireframe');
+                backgroundGUI.sphere = backgroundGUI.add(context.backgroundSphere, 'visible').name('sphere visible');
+                backgroundGUI.plane = backgroundGUI.add(context.worldPlane, 'visible').name('plane visible');
 
                 // Update controls functions
                 gui.updateFromCameras = function updateFromCameras(viewCamera, textureCamera, environment) {
@@ -316,20 +226,20 @@
                     if (name.length > 0) {
                         if(name.length > 20) name = name.substr(0,8)+'[..]'+name.substr(-8,8);
                         textureGUI.name = 'Hist: ' + name;
-                    }     
+                    }
                 }
                 return gui;
             };
 
             function render() {
-                renderer.render(scene, viewCamera);
+                context.renderer.render(context.scene, pCamera.view);
             }
 
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 interpolateCamera(timestamp);
-                updateMaterial(textureMaterial);
-                gui.updateFromCameras(viewCamera, textureCamera, environment);
+                updateMaterial(materials.texture);
+                gui.updateFromCameras(pCamera.view, pCamera.texture, context.environment);
                 render();
             }
         </script>
