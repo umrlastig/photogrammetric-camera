@@ -2,7 +2,8 @@
   "name": "photogrammetric-camera",
   "version": "0.1.5",
   "description": "PhotogrammetricCamera for THREE",
-  "main": "src/main.js",
+  "main": "./src/main.js",
+  "exports": "./src/main.js",
   "gh-pages-deploy": {
     "commit": "deploy",
     "post": [
@@ -13,6 +14,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "watch": "webpack watch",
     "start": "webpack serve --open",
     "deploy": "gh-pages-deploy -- 'gh-pages-deploy'",
     "clean-source": "rimraf webpack.config.js src package.json package-lock.json"
