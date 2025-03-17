@@ -198,7 +198,7 @@
                     }
                     var check = '[?]';
                     if (camera.check) check = camera.check() ? '[Y]' : '[N]';
-                    console.log(check, camera.name);
+                    // console.log(check, camera.name);
 
                     camera.near = 1;
                     camera.far = 100;
@@ -313,7 +313,7 @@
                     json.img = json.img || [];
                         json.ply.forEach(url => todos.push(() => loadPly(url, source)));
                     json.ori.forEach((orientationUrl, i) => todos.push(() => loadOrientedImage(orientationUrl, json.img[i], source, json.img[i])));
-                    if(json.out && json.list) {
+                    if(json.out && json.list) {q
                         const list = source.open(json.list, 'text');
                         const out  = source.open(json.out, 'text');
                         const orientations = Promise.all([list, out]).then(Parsers.BundlerParser.parse).then(handleOrientation);
@@ -346,7 +346,7 @@
 
                 // update view camera name
                 var name = camera.name;
-                console.log('View:', name);
+                // console.log('View:', name);
                 if (name.length > 30)
                   name = name.substr(0,13)+'[..]'+name.substr(-13,13)
                 viewCameraGUI.name = 'View: ' + name;
@@ -364,7 +364,7 @@
 
                 // update texture camera name
                 var name = camera.name;
-                console.log('Texture:', name);
+                // console.log('Texture:', name);
                 if (name.length > 30)
                   name = name.substr(0,13)+'[..]'+name.substr(-13,13)
                 textureCameraGUI.name = 'Tex: ' + name;
