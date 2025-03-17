@@ -1,7 +1,7 @@
 import { ShaderMaterial, Matrix4, Vector3, Vector4 } from 'three';
 import { pop, definePropertyUniform, textureMatrix } from './materialUtils.js';
-import NewMaterialVS from './shaders/NewMaterialVS.glsl';
-import NewMaterialFS from './shaders/NewMaterialFS.glsl';
+import NewMaterialVS from './shaders/NewMaterialVS.glsl.js';
+import NewMaterialFS from './shaders/NewMaterialFS.glsl.js';
 
 class NewMaterial extends ShaderMaterial {
   constructor(options = {}) {

@@ -1,3 +1,5 @@
+export default /* glsl */`
+
 uniform float size;
 #ifdef USE_PROJECTIVE_TEXTURING
 uniform vec3 textureCameraPosition;
@@ -17,4 +19,6 @@ void main() {
     vPosition = textureCameraPreTransform * m * vec4(position, 1.0);
 #endif
     vColor = vec4(color, 1.);
-}
+}`;
+
+

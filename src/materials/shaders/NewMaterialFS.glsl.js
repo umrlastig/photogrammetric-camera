@@ -1,3 +1,5 @@
+export default /* glsl */`
+
 #include <distortions/radial_pars_fragment>
 uniform bool diffuseColorGrey;
 
@@ -67,3 +69,4 @@ void main() {
 
   gl_FragColor =  finalColor;
 }
+`;
