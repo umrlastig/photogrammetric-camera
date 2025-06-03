@@ -1,3 +1,5 @@
+export default /* glsl */`
+
 uniform float size;
 uniform float scale;
 #include <common>
@@ -39,3 +41,5 @@ void main() {
 
   #include <fog_vertex>
 }
+
+`;

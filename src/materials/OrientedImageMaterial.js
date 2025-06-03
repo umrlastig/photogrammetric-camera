@@ -1,8 +1,8 @@
 import { Uniform, ShaderMaterial, ShaderLib, Matrix3, Matrix4, Vector2, Vector3, Vector4, Color } from 'three';
 import {pop, definePropertyUniform, setUvwCamera, setDistortion} from './materialUtils';
 import numeric from 'numeric';
-import OrientedImageMaterialVS from './shaders/OrientedImageMaterialVS.glsl';
-import OrientedImageMaterialFS from './shaders/OrientedImageMaterialFS.glsl';
+import OrientedImageMaterialVS from './shaders/OrientedImageMaterialVS.glsl.js';
+import OrientedImageMaterialFS from './shaders/OrientedImageMaterialFS.glsl.js';
 
 class OrientedImageMaterial extends ShaderMaterial {
     constructor(options = {}) {
@@ -123,50 +123,50 @@ class OrientedImageMaterial extends ShaderMaterial {
         return H;
     }
 
-    calculateHomography3D(srcPts, dstPts) {
-        var r1 = [srcPts[0], srcPts[1], 1, 0, 0, 0, -1*dstPts[0]*srcPts[0], -1*dstPts[0]*srcPts[1]];
-        var r2 = [0, 0, 0, srcPts[0], srcPts[1], 1, -1*dstPts[1]*srcPts[0], -1*dstPts[1]*srcPts[1]];
-        var r3 = [srcPts[2], srcPts[3], 1, 0, 0, 0, -1*dstPts[2]*srcPts[2], -1*dstPts[2]*srcPts[3]];
-        var r4 = [0, 0, 0, srcPts[2], srcPts[3], 1, -1*dstPts[3]*srcPts[2], -1*dstPts[3]*srcPts[3]];
-        var r5 = [srcPts[4], srcPts[5], 1, 0, 0, 0, -1*dstPts[4]*srcPts[4], -1*dstPts[4]*srcPts[5]];
-        var r6 = [0, 0, 0, srcPts[4], srcPts[5], 1, -1*dstPts[5]*srcPts[4], -1*dstPts[5]*srcPts[5]];
-        var r7 = [srcPts[6], srcPts[7], 1, 0, 0, 0, -1*dstPts[6]*srcPts[6], -1*dstPts[6]*srcPts[7]];
-        var r8 = [0, 0, 0, srcPts[6], srcPts[7], 1, -1*dstPts[7]*srcPts[6], -1*dstPts[7]*srcPts[7]];
+    // calculateHomography3D(srcPts, dstPts) {
+    //     var r1 = [srcPts[0], srcPts[1], 1, 0, 0, 0, -1*dstPts[0]*srcPts[0], -1*dstPts[0]*srcPts[1]];
+    //     var r2 = [0, 0, 0, srcPts[0], srcPts[1], 1, -1*dstPts[1]*srcPts[0], -1*dstPts[1]*srcPts[1]];
+    //     var r3 = [srcPts[2], srcPts[3], 1, 0, 0, 0, -1*dstPts[2]*srcPts[2], -1*dstPts[2]*srcPts[3]];
+    //     var r4 = [0, 0, 0, srcPts[2], srcPts[3], 1, -1*dstPts[3]*srcPts[2], -1*dstPts[3]*srcPts[3]];
+    //     var r5 = [srcPts[4], srcPts[5], 1, 0, 0, 0, -1*dstPts[4]*srcPts[4], -1*dstPts[4]*srcPts[5]];
+    //     var r6 = [0, 0, 0, srcPts[4], srcPts[5], 1, -1*dstPts[5]*srcPts[4], -1*dstPts[5]*srcPts[5]];
+    //     var r7 = [srcPts[6], srcPts[7], 1, 0, 0, 0, -1*dstPts[6]*srcPts[6], -1*dstPts[6]*srcPts[7]];
+    //     var r8 = [0, 0, 0, srcPts[6], srcPts[7], 1, -1*dstPts[7]*srcPts[6], -1*dstPts[7]*srcPts[7]];
 
-        P0,P1,P2,P3 :
-        x0,y0,z0,1,  0, 0, 0, 0,   0, 0, 0, 0,  -X0*x0, -X0*y0, -X0*z0//, -X0
-        0, 0, 0, 0,  x0,y0,z0,1,   0, 0, 0, 0,  -Y0*x0, -Y0*y0, -Y0*z0//, -Y0
-        0, 0, 0, 0,  0, 0, 0, 0,   x0,y0,z0,1,  -Z0*x0, -Z0*y0, -Z0*z0//, -Z0
-
-
-        0, 0, 1, 0,  0, 0, 0, 0,   0, 0, 0, 0,  0, 0, -X4//, 0
-        0, 0, 0, 0,  0,0,1,0,   0, 0, 0, 0,  0, 0, -Y4//, 0
-        0, 0, 0, 0,  0, 0, 0, 0,   0,0,1,0,  0, 0, -Z4//, 0
+    //     P0,P1,P2,P3 :
+    //     x0,y0,z0,1,  0, 0, 0, 0,   0, 0, 0, 0,  -X0*x0, -X0*y0, -X0*z0//, -X0
+    //     0, 0, 0, 0,  x0,y0,z0,1,   0, 0, 0, 0,  -Y0*x0, -Y0*y0, -Y0*z0//, -Y0
+    //     0, 0, 0, 0,  0, 0, 0, 0,   x0,y0,z0,1,  -Z0*x0, -Z0*y0, -Z0*z0//, -Z0
 
 
+    //     0, 0, 1, 0,  0, 0, 0, 0,   0, 0, 0, 0,  0, 0, -X4//, 0
+    //     0, 0, 0, 0,  0,0,1,0,   0, 0, 0, 0,  0, 0, -Y4//, 0
+    //     0, 0, 0, 0,  0, 0, 0, 0,   0,0,1,0,  0, 0, -Z4//, 0
 
-        x0,y0,z0,w0,  0, 0, 0, 0,   0, 0, 0, 0,  -X0*x0, -X0*y0, -X0*z0//, -X0*w0
-        0, 0, 0, 0,  x0,y0,z0,w0,   0, 0, 0, 0,  -Y0*x0, -Y0*y0, -Y0*z0//, -Y0*w0
-        0, 0, 0, 0,  0, 0, 0, 0,   x0,y0,z0,w0,  -Z0*x0, -Z0*y0, -Z0*z0//, -Z0*w0
 
 
-        var matA = [r1, r2, r3, r4, r5, r6, r7, r8];
-        var matB = dstPts; // X0,Y0,Z0, X1,Y1,Z1, X2,Y2,Z2, X3,Y3,Z3, 0,0,0
-        var matC;
-        try{
-            matC = numeric.inv(numeric.dotMMsmall(numeric.transpose(matA), matA));
-        }catch(e){
-            console.log(e);
-            return new Matrix4().fromArray([1,0,0,0, 0,1,0,0, 0,1,0,0, 0,0,0,1]);
-        }
-        var matD = numeric.dotMMsmall(matC, numeric.transpose(matA));
-        var matX = numeric.dotMV(matD, matB);
-        //var res = numeric.dotMV(matA, matX);
-        matX[15] = 1;
+    //     x0,y0,z0,w0,  0, 0, 0, 0,   0, 0, 0, 0,  -X0*x0, -X0*y0, -X0*z0//, -X0*w0
+    //     0, 0, 0, 0,  x0,y0,z0,w0,   0, 0, 0, 0,  -Y0*x0, -Y0*y0, -Y0*z0//, -Y0*w0
+    //     0, 0, 0, 0,  0, 0, 0, 0,   x0,y0,z0,w0,  -Z0*x0, -Z0*y0, -Z0*z0//, -Z0*w0
 
-        var H = new Matrix4().fromArray(matX).transpose();
-        return H;
-    }
+
+    //     var matA = [r1, r2, r3, r4, r5, r6, r7, r8];
+    //     var matB = dstPts; // X0,Y0,Z0, X1,Y1,Z1, X2,Y2,Z2, X3,Y3,Z3, 0,0,0
+    //     var matC;
+    //     try{
+    //         matC = numeric.inv(numeric.dotMMsmall(numeric.transpose(matA), matA));
+    //     }catch(e){
+    //         console.log(e);
+    //         return new Matrix4().fromArray([1,0,0,0, 0,1,0,0, 0,1,0,0, 0,0,0,1]);
+    //     }
+    //     var matD = numeric.dotMMsmall(matC, numeric.transpose(matA));
+    //     var matX = numeric.dotMV(matD, matB);
+    //     //var res = numeric.dotMV(matA, matX);
+    //     matX[15] = 1;
+
+    //     var H = new Matrix4().fromArray(matX).transpose();
+    //     return H;
+    // }
 
     setUniforms(pass){
         pass.debug.value = this.debug;

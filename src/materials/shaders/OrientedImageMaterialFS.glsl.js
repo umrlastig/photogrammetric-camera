@@ -1,3 +1,5 @@
+export default /* glsl */`
+
 uniform vec3 diffuse;
 uniform float opacity;
 #include <common>
@@ -58,3 +60,5 @@ void main() {
   #include <fog_fragment>
   #include <premultiplied_alpha_fragment>
 }
+
+`;

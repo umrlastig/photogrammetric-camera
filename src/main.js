@@ -17,7 +17,7 @@ export { Serializers };
 export { default as PhotogrammetricCamera } from './cameras/PhotogrammetricCamera';
 export { default as FilesSource } from './sources/FilesSource';
 export { default as FetchSource } from './sources/FetchSource';
-// export { default as OrientedImageMaterial } from './materials/OrientedImageMaterial';
+export { default as OrientedImageMaterial } from './materials/OrientedImageMaterial';
 // export { default as MultipleOrientedImageMaterial } from './materials/MultipleOrientedImageMaterial';
 export { default as NewMaterial } from './materials/NewMaterial';
 // export { default as ShadowMapMaterial } from './materials/ShadowMapMaterial';
