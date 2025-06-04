@@ -69,7 +69,7 @@
             var FilesSource = photogrammetricCamera.FilesSource;
             var OrientedImageMaterial = photogrammetricCamera.OrientedImageMaterial;
             console.log('photogrammetricCamera', photogrammetricCamera);
-            var NewMaterial = photogrammetricCamera.NewMaterial;
+            var ProjectingMaterial = photogrammetricCamera.ProjectingMaterial;
             var ShadowMapMaterial = photogrammetricCamera.ShadowMapMaterial;
             var PhotogrammetricCamera = photogrammetricCamera.PhotogrammetricCamera;
         </script>
@@ -468,7 +468,7 @@
                     transparent: true,
                 });
                 */
-                textureMaterial = new NewMaterial({
+                textureMaterial = new ProjectingMaterial({
                   map: uvTexture,
                   size: 3,
                 });

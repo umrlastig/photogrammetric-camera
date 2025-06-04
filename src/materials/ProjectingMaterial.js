@@ -1,9 +1,9 @@
 import { ShaderMaterial, Matrix4, Vector3, Vector4 } from 'three';
 import { pop, definePropertyUniform, textureMatrix } from './materialUtils.js';
-import NewMaterialVS from './shaders/NewMaterialVS.glsl.js';
-import NewMaterialFS from './shaders/NewMaterialFS.glsl.js';
+import ProjectingMaterialVS from './shaders/ProjectingMaterialVS.glsl.js';
+import ProjectingMaterialFS from './shaders/ProjectingMaterialFS.glsl.js';
 
-class NewMaterial extends ShaderMaterial {
+class ProjectingMaterial extends ShaderMaterial {
   constructor(options = {}) {
     const size = pop(options, 'size', 1);
     const textureCameraPosition = pop(options, 'textureCameraPosition', new Vector3());
@@ -32,8 +32,8 @@ class NewMaterial extends ShaderMaterial {
     definePropertyUniform(this, 'depthMap', depthMap);
     definePropertyUniform(this, 'diffuseColorGrey', diffuseColorGrey);
 
-    this.vertexShader = NewMaterialVS;
-    this.fragmentShader = NewMaterialFS;
+    this.vertexShader = ProjectingMaterialVS;
+    this.fragmentShader = ProjectingMaterialFS;
   }
 
   setCamera(camera) {
@@ -53,4 +53,4 @@ class NewMaterial extends ShaderMaterial {
   }
 }
 
-export default NewMaterial;
+export default ProjectingMaterial;

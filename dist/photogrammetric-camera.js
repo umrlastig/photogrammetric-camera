@@ -9373,9 +9373,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./src/materials/NewMaterial.js":
+/***/ "./src/materials/ProjectingMaterial.js":
 /*!**************************************!*\
-  !*** ./src/materials/NewMaterial.js ***!
+  !*** ./src/materials/ProjectingMaterial.js ***!
   \**************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -9392,7 +9392,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class NewMaterial extends three__WEBPACK_IMPORTED_MODULE_3__.ShaderMaterial {
+class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_3__.ShaderMaterial {
   constructor(options = {}) {
     const size = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'size', 1);
     const textureCameraPosition = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPosition', new three__WEBPACK_IMPORTED_MODULE_3__.Vector3());
@@ -9442,7 +9442,7 @@ class NewMaterial extends three__WEBPACK_IMPORTED_MODULE_3__.ShaderMaterial {
   }
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NewMaterial);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProjectingMaterial);
 
 
 /***/ }),
@@ -80175,7 +80175,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   FirstPersonControls: () => (/* reexport safe */ three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__.FirstPersonControls),
 /* harmony export */   GUI: () => (/* binding */ GUI),
 /* harmony export */   MapControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.MapControls),
-/* harmony export */   NewMaterial: () => (/* reexport safe */ _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   ProjectingMaterial: () => (/* reexport safe */ _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__["default"]),
 /* harmony export */   OrbitControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.OrbitControls),
 /* harmony export */   OrientedImageMaterial: () => (/* reexport safe */ _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__["default"]),
 /* harmony export */   PLYLoader: () => (/* reexport safe */ three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__.PLYLoader),
@@ -80195,7 +80195,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sources_FilesSource__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./sources/FilesSource */ "./src/sources/FilesSource.js");
 /* harmony import */ var _sources_FetchSource__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./sources/FetchSource */ "./src/sources/FetchSource.js");
 /* harmony import */ var _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./materials/OrientedImageMaterial */ "./src/materials/OrientedImageMaterial.js");
-/* harmony import */ var _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./materials/NewMaterial */ "./src/materials/NewMaterial.js");
+/* harmony import */ var _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./materials/ProjectingMaterial */ "./src/materials/ProjectingMaterial.js");
 /* harmony import */ var _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./controls/OrbitControls */ "./src/controls/OrbitControls.js");
 /* harmony import */ var three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! three/examples/jsm/controls/FirstPersonControls */ "./node_modules/three/examples/jsm/controls/FirstPersonControls.js");
 /* harmony import */ var three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! three/examples/jsm/loaders/PLYLoader */ "./node_modules/three/examples/jsm/loaders/PLYLoader.js");
