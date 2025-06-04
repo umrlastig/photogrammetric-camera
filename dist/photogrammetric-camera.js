@@ -9373,80 +9373,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./src/materials/ProjectingMaterial.js":
-/*!**************************************!*\
-  !*** ./src/materials/ProjectingMaterial.js ***!
-  \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
-/* harmony import */ var _materialUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materialUtils.js */ "./src/materials/materialUtils.js");
-/* harmony import */ var _shaders_NewMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./shaders/NewMaterialVS.glsl.js */ "./src/materials/shaders/NewMaterialVS.glsl.js");
-/* harmony import */ var _shaders_NewMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./shaders/NewMaterialFS.glsl.js */ "./src/materials/shaders/NewMaterialFS.glsl.js");
-
-
-
-
-
-class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_3__.ShaderMaterial {
-  constructor(options = {}) {
-    const size = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'size', 1);
-    const textureCameraPosition = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPosition', new three__WEBPACK_IMPORTED_MODULE_3__.Vector3());
-    const textureCameraPreTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPreTransform', new three__WEBPACK_IMPORTED_MODULE_3__.Matrix4());
-    const textureCameraPostTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvwPostTransform', new three__WEBPACK_IMPORTED_MODULE_3__.Matrix4());
-    const uvDistortion = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvDistortion', {R: new three__WEBPACK_IMPORTED_MODULE_3__.Vector4(), C: new three__WEBPACK_IMPORTED_MODULE_3__.Vector3()});
-    const map = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'map', null);
-    const depthMap = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'depthMap', null);
-    const diffuseColorGrey = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'diffuseColorGrey', true);
-
-    options.defines = options.defines || {};
-    options.defines.USE_COLOR = '';
-    if (map) {
-        options.defines.USE_PROJECTIVE_TEXTURING = '';
-        options.defines.EPSILON = 1e-3;
-    }
-
-    super(options);
-
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'size', size);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPosition', textureCameraPosition);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPreTransform', textureCameraPreTransform);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPostTransform', textureCameraPostTransform);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'uvDistortion', uvDistortion);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'map', map);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'depthMap', depthMap);
-    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'diffuseColorGrey', diffuseColorGrey);
-
-    this.vertexShader = _shaders_NewMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_1__["default"];
-    this.fragmentShader = _shaders_NewMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_2__["default"];
-  }
-
-  setCamera(camera) {
-      camera.getWorldPosition(this.textureCameraPosition);
-      this.textureCameraPreTransform.copy(camera.matrixWorldInverse);
-      this.textureCameraPreTransform.setPosition(0, 0, 0);
-      this.textureCameraPreTransform.premultiply(camera.preProjectionMatrix);
-      this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
-      this.textureCameraPostTransform.premultiply(_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.textureMatrix);
-
-      if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
-          this.uvDistortion = camera.distos[0];
-      } else {
-          this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
-          this.uvDistortion.R.w = Infinity;
-      }
-  }
-}
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProjectingMaterial);
-
-
-/***/ }),
-
 /***/ "./src/materials/OrientedImageMaterial.js":
 /*!************************************************!*\
   !*** ./src/materials/OrientedImageMaterial.js ***!
@@ -9669,6 +9595,224 @@ const chunks = {
 
 /***/ }),
 
+/***/ "./src/materials/ProjectingMaterial.js":
+/*!*********************************************!*\
+  !*** ./src/materials/ProjectingMaterial.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
+/* harmony import */ var _materialUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materialUtils.js */ "./src/materials/materialUtils.js");
+/* harmony import */ var _chunks_proj_texture_pars_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chunks/proj_texture_pars_vertex.glsl.js */ "./src/materials/chunks/proj_texture_pars_vertex.glsl.js");
+/* harmony import */ var _chunks_proj_texture_pars_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./chunks/proj_texture_pars_fragment.glsl.js */ "./src/materials/chunks/proj_texture_pars_fragment.glsl.js");
+/* harmony import */ var _chunks_proj_texture_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./chunks/proj_texture_fragment.glsl.js */ "./src/materials/chunks/proj_texture_fragment.glsl.js");
+/* harmony import */ var _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./chunks/proj_texture_vertex.glsl.js */ "./src/materials/chunks/proj_texture_vertex.glsl.js");
+/* harmony import */ var _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./shaders/ProjectingMaterialVS.glsl.js */ "./src/materials/shaders/ProjectingMaterialVS.glsl.js");
+/* harmony import */ var _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shaders/ProjectingMaterialFS.glsl.js */ "./src/materials/shaders/ProjectingMaterialFS.glsl.js");
+
+
+
+
+
+
+
+
+
+three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_pars_vertex = _chunks_proj_texture_pars_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_1__["default"];
+three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_vertex = _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_pars_fragment = _chunks_proj_texture_pars_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_2__["default"];
+three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_fragment = _chunks_proj_texture_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_3__["default"];
+
+class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_8__.ShaderMaterial {
+  constructor(options = {}) {
+    const size = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'size', 1);
+    const textureCameraPosition = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPosition', new three__WEBPACK_IMPORTED_MODULE_8__.Vector3());
+    const textureCameraPreTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPreTransform', new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4());
+    const textureCameraPostTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvwPostTransform', new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4());
+    const uvDistortion = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvDistortion', {R: new three__WEBPACK_IMPORTED_MODULE_8__.Vector4(), C: new three__WEBPACK_IMPORTED_MODULE_8__.Vector3()});
+    const map = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'map', null);
+    const depthMap = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'depthMap', null);
+    const diffuseColorGrey = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'diffuseColorGrey', true);
+
+    options.defines = options.defines || {};
+    options.defines.USE_COLOR = '';
+    if (map) {
+        options.defines.USE_PROJECTIVE_TEXTURING = '';
+        options.defines.EPSILON = 1e-3;
+    }
+
+    super(options);
+
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'size', size);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPosition', textureCameraPosition);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPreTransform', textureCameraPreTransform);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'textureCameraPostTransform', textureCameraPostTransform);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'uvDistortion', uvDistortion);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'map', map);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'depthMap', depthMap);
+    (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'diffuseColorGrey', diffuseColorGrey);
+
+    this.vertexShader = _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_5__["default"];
+    this.fragmentShader = _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_6__["default"];
+  }
+
+  setCamera(camera) {
+      camera.getWorldPosition(this.textureCameraPosition);
+      this.textureCameraPreTransform.copy(camera.matrixWorldInverse);
+      this.textureCameraPreTransform.setPosition(0, 0, 0);
+      this.textureCameraPreTransform.premultiply(camera.preProjectionMatrix);
+      this.textureCameraPostTransform.copy(camera.postProjectionMatrix);
+      this.textureCameraPostTransform.premultiply(_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.textureMatrix);
+
+      if (camera.distos && camera.distos.length == 1 && camera.distos[0].isRadialDistortion) {
+          this.uvDistortion = camera.distos[0];
+      } else {
+          this.uvDistortion = { C: new THREE.Vector2(), R: new THREE.Vector4() };
+          this.uvDistortion.R.w = Infinity;
+      }
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProjectingMaterial);
+
+
+/***/ }),
+
+/***/ "./src/materials/chunks/proj_texture_fragment.glsl.js":
+/*!************************************************************!*\
+  !*** ./src/materials/chunks/proj_texture_fragment.glsl.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+
+#ifdef USE_PROJECTIVE_TEXTURING
+  // Project the point in the texture image
+  // p' = M' * (P - C')
+  // p': uvw
+  // M': textureCameraPreTransform
+  // P : vPositionWorld
+  // C': textureCameraPosition
+
+  vec4 uvw = vPosition;
+
+  // For the shadowMapping, which is not distorted
+  vec4 uvwNotDistorted = textureCameraPostTransform * uvw;
+  uvwNotDistorted.xyz /= uvwNotDistorted.w;
+
+  float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
+  float distanceCamera = uvwNotDistorted.z;
+
+  vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
+
+  // ShadowMapping
+  if ( all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON ) {
+
+  // Don't texture if uvw.w < 0
+    if (uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
+
+      uvw = textureCameraPostTransform * uvw;
+      uvw.xyz /= uvw.w;
+
+      // If coordinates are valid, they will be between 0 and 1 after normalization
+      // Test if coordinates are valid, so we can texture
+      vec3 testBorder = min(uvw.xyz, 1. - uvw.xyz);
+
+      if (all(greaterThan(testBorder,vec3(0.))))
+      {
+        vec4 color = texture2D(map, uvw.xy);
+        finalColor.rgb = mix(finalColor.rgb, color.rgb, color.a);
+      }
+    }
+  } else {
+    finalColor.rgb = vec3(0.2); // shadow color
+  }
+
+#endif
+`);
+
+
+/***/ }),
+
+/***/ "./src/materials/chunks/proj_texture_pars_fragment.glsl.js":
+/*!*****************************************************************!*\
+  !*** ./src/materials/chunks/proj_texture_pars_fragment.glsl.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+#ifdef USE_PROJECTIVE_TEXTURING
+#include <distortions/radial_pars_fragment>
+uniform vec3 textureCameraPosition;
+uniform mat4 textureCameraPreTransform; // Contains the rotation and the intrinsics of the camera, but not the translation
+uniform mat4 textureCameraPostTransform;
+uniform RadialDistortion uvDistortion;
+uniform mat4 modelMatrix;
+varying vec4 vPosition;
+uniform sampler2D map;
+uniform sampler2D depthMap;
+#endif
+`);
+
+
+/***/ }),
+
+/***/ "./src/materials/chunks/proj_texture_pars_vertex.glsl.js":
+/*!***************************************************************!*\
+  !*** ./src/materials/chunks/proj_texture_pars_vertex.glsl.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+#ifdef USE_PROJECTIVE_TEXTURING
+uniform vec3 textureCameraPosition;
+uniform mat4 textureCameraPreTransform; // Contains the rotation and the intrinsics of the camera, but not the translation
+varying vec4 vPosition;
+varying float vDistanceCamera;
+#endif
+`);
+
+
+/***/ }),
+
+/***/ "./src/materials/chunks/proj_texture_vertex.glsl.js":
+/*!**********************************************************!*\
+  !*** ./src/materials/chunks/proj_texture_vertex.glsl.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+#ifdef USE_PROJECTIVE_TEXTURING
+    mat4 m = modelMatrix;
+    m[3].xyz -= textureCameraPosition;
+    vPosition = textureCameraPreTransform * m * vec4(position, 1.0);
+#endif
+`);
+
+
+/***/ }),
+
 /***/ "./src/materials/materialUtils.js":
 /*!****************************************!*\
   !*** ./src/materials/materialUtils.js ***!
@@ -9776,130 +9920,6 @@ function setUvwCamera(camera) {
     uvw.postTransInv = camera.postProjectionMatrix.clone().invert();
     return uvw;
 }
-
-/***/ }),
-
-/***/ "./src/materials/shaders/NewMaterialFS.glsl.js":
-/*!*****************************************************!*\
-  !*** ./src/materials/shaders/NewMaterialFS.glsl.js ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
-
-#include <distortions/radial_pars_fragment>
-uniform bool diffuseColorGrey;
-
-#ifdef USE_PROJECTIVE_TEXTURING
-uniform vec3 textureCameraPosition;
-uniform mat4 textureCameraPreTransform; // Contains the rotation and the intrinsics of the camera, but not the translation
-uniform mat4 textureCameraPostTransform;
-uniform RadialDistortion uvDistortion;
-uniform mat4 modelMatrix;
-varying vec4 vPosition;
-uniform sampler2D map;
-uniform sampler2D depthMap;
-#endif
-
-varying vec4 vColor;
-
-void main() {
-  vec4 finalColor = vColor;
-
-  if (diffuseColorGrey) {
-    finalColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
-  }
-
-#ifdef USE_PROJECTIVE_TEXTURING
-  // Project the point in the texture image
-  // p' = M' * (P - C')
-  // p': uvw
-  // M': textureCameraPreTransform
-  // P : vPositionWorld
-  // C': textureCameraPosition
-
-  vec4 uvw = vPosition;
-
-  // For the shadowMapping, which is not distorted
-  vec4 uvwNotDistorted = textureCameraPostTransform * uvw;
-  uvwNotDistorted.xyz /= uvwNotDistorted.w;
-
-  float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
-  float distanceCamera = uvwNotDistorted.z;
-
-  vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
-
-  // ShadowMapping
-  if ( all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON ) {
-
-  // Don't texture if uvw.w < 0
-    if (uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
-
-      uvw = textureCameraPostTransform * uvw;
-      uvw.xyz /= uvw.w;
-
-      // If coordinates are valid, they will be between 0 and 1 after normalization
-      // Test if coordinates are valid, so we can texture
-      vec3 testBorder = min(uvw.xyz, 1. - uvw.xyz);
-
-      if (all(greaterThan(testBorder,vec3(0.))))
-      {
-        vec4 color = texture2D(map, uvw.xy);
-        finalColor.rgb = mix(finalColor.rgb, color.rgb, color.a);
-      }
-    }
-  } else {
-    finalColor.rgb = vec3(0.2); // shadow color
-  }
-
-#endif
-
-  gl_FragColor =  finalColor;
-}
-`);
-
-
-/***/ }),
-
-/***/ "./src/materials/shaders/NewMaterialVS.glsl.js":
-/*!*****************************************************!*\
-  !*** ./src/materials/shaders/NewMaterialVS.glsl.js ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
-
-uniform float size;
-#ifdef USE_PROJECTIVE_TEXTURING
-uniform vec3 textureCameraPosition;
-uniform mat4 textureCameraPreTransform; // Contains the rotation and the intrinsics of the camera, but not the translation
-varying vec4 vPosition;
-varying float vDistanceCamera;
-#endif
-varying vec4 vColor;
-
-void main() {
-    gl_PointSize = size;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-#ifdef USE_PROJECTIVE_TEXTURING
-    mat4 m = modelMatrix;
-    m[3].xyz -= textureCameraPosition;
-    vPosition = textureCameraPreTransform * m * vec4(position, 1.0);
-#endif
-    vColor = vec4(color, 1.);
-}`);
-
-
-
 
 /***/ }),
 
@@ -10036,6 +10056,70 @@ void main() {
 }
 
 `);
+
+
+/***/ }),
+
+/***/ "./src/materials/shaders/ProjectingMaterialFS.glsl.js":
+/*!************************************************************!*\
+  !*** ./src/materials/shaders/ProjectingMaterialFS.glsl.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+
+uniform bool diffuseColorGrey;
+
+#include <proj_texture_pars_fragment>
+
+varying vec4 vColor;
+
+void main() {
+  vec4 finalColor = vColor;
+
+  if (diffuseColorGrey) {
+    finalColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
+  }
+
+  #include <proj_texture_fragment>
+
+  gl_FragColor =  finalColor;
+}
+`);
+
+
+/***/ }),
+
+/***/ "./src/materials/shaders/ProjectingMaterialVS.glsl.js":
+/*!************************************************************!*\
+  !*** ./src/materials/shaders/ProjectingMaterialVS.glsl.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
+
+uniform float size;
+#include <proj_texture_pars_vertex>
+varying vec4 vColor;
+
+void main() {
+    gl_PointSize = size;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+    #include <proj_texture_vertex>
+
+    vColor = vec4(color, 1.);
+}`);
+
+
 
 
 /***/ }),
@@ -80175,12 +80259,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   FirstPersonControls: () => (/* reexport safe */ three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__.FirstPersonControls),
 /* harmony export */   GUI: () => (/* binding */ GUI),
 /* harmony export */   MapControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.MapControls),
-/* harmony export */   ProjectingMaterial: () => (/* reexport safe */ _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__["default"]),
 /* harmony export */   OrbitControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.OrbitControls),
 /* harmony export */   OrientedImageMaterial: () => (/* reexport safe */ _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__["default"]),
 /* harmony export */   PLYLoader: () => (/* reexport safe */ three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__.PLYLoader),
 /* harmony export */   Parsers: () => (/* reexport module object */ _parsers_parsers__WEBPACK_IMPORTED_MODULE_1__),
 /* harmony export */   PhotogrammetricCamera: () => (/* reexport safe */ _cameras_PhotogrammetricCamera__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   ProjectingMaterial: () => (/* reexport safe */ _materials_ProjectingMaterial__WEBPACK_IMPORTED_MODULE_9__["default"]),
 /* harmony export */   RenderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_RenderPass__WEBPACK_IMPORTED_MODULE_15__.RenderPass),
 /* harmony export */   Serializers: () => (/* reexport module object */ _serializers_serializers__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   ShaderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_ShaderPass__WEBPACK_IMPORTED_MODULE_16__.ShaderPass),
@@ -80195,7 +80279,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sources_FilesSource__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./sources/FilesSource */ "./src/sources/FilesSource.js");
 /* harmony import */ var _sources_FetchSource__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./sources/FetchSource */ "./src/sources/FetchSource.js");
 /* harmony import */ var _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./materials/OrientedImageMaterial */ "./src/materials/OrientedImageMaterial.js");
-/* harmony import */ var _materials_NewMaterial__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./materials/ProjectingMaterial */ "./src/materials/ProjectingMaterial.js");
+/* harmony import */ var _materials_ProjectingMaterial__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./materials/ProjectingMaterial */ "./src/materials/ProjectingMaterial.js");
 /* harmony import */ var _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./controls/OrbitControls */ "./src/controls/OrbitControls.js");
 /* harmony import */ var three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! three/examples/jsm/controls/FirstPersonControls */ "./node_modules/three/examples/jsm/controls/FirstPersonControls.js");
 /* harmony import */ var three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! three/examples/jsm/loaders/PLYLoader */ "./node_modules/three/examples/jsm/loaders/PLYLoader.js");
