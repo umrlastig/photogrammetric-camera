@@ -80251,24 +80251,25 @@ var __webpack_exports__ = {};
   \*********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CopyShader: () => (/* reexport safe */ three_examples_jsm_shaders_CopyShader__WEBPACK_IMPORTED_MODULE_13__.CopyShader),
+/* harmony export */   CopyShader: () => (/* reexport safe */ three_examples_jsm_shaders_CopyShader__WEBPACK_IMPORTED_MODULE_14__.CopyShader),
 /* harmony export */   Distortions: () => (/* reexport module object */ _distortions_distortions__WEBPACK_IMPORTED_MODULE_0__),
-/* harmony export */   EffectComposer: () => (/* reexport safe */ three_examples_jsm_postprocessing_EffectComposer__WEBPACK_IMPORTED_MODULE_14__.EffectComposer),
+/* harmony export */   EffectComposer: () => (/* reexport safe */ three_examples_jsm_postprocessing_EffectComposer__WEBPACK_IMPORTED_MODULE_15__.EffectComposer),
 /* harmony export */   FetchSource: () => (/* reexport safe */ _sources_FetchSource__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   FilesSource: () => (/* reexport safe */ _sources_FilesSource__WEBPACK_IMPORTED_MODULE_6__["default"]),
-/* harmony export */   FirstPersonControls: () => (/* reexport safe */ three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__.FirstPersonControls),
+/* harmony export */   FirstPersonControls: () => (/* reexport safe */ three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_12__.FirstPersonControls),
 /* harmony export */   GUI: () => (/* binding */ GUI),
-/* harmony export */   MapControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.MapControls),
-/* harmony export */   OrbitControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__.OrbitControls),
+/* harmony export */   MapControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_11__.MapControls),
+/* harmony export */   OrbitControls: () => (/* reexport safe */ _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_11__.OrbitControls),
 /* harmony export */   OrientedImageMaterial: () => (/* reexport safe */ _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__["default"]),
-/* harmony export */   PLYLoader: () => (/* reexport safe */ three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__.PLYLoader),
+/* harmony export */   PLYLoader: () => (/* reexport safe */ three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_13__.PLYLoader),
 /* harmony export */   Parsers: () => (/* reexport module object */ _parsers_parsers__WEBPACK_IMPORTED_MODULE_1__),
 /* harmony export */   PhotogrammetricCamera: () => (/* reexport safe */ _cameras_PhotogrammetricCamera__WEBPACK_IMPORTED_MODULE_5__["default"]),
 /* harmony export */   ProjectingMaterial: () => (/* reexport safe */ _materials_ProjectingMaterial__WEBPACK_IMPORTED_MODULE_9__["default"]),
-/* harmony export */   RenderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_RenderPass__WEBPACK_IMPORTED_MODULE_15__.RenderPass),
+/* harmony export */   RenderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_RenderPass__WEBPACK_IMPORTED_MODULE_16__.RenderPass),
 /* harmony export */   Serializers: () => (/* reexport module object */ _serializers_serializers__WEBPACK_IMPORTED_MODULE_2__),
-/* harmony export */   ShaderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_ShaderPass__WEBPACK_IMPORTED_MODULE_16__.ShaderPass),
-/* harmony export */   THREE: () => (/* reexport module object */ three__WEBPACK_IMPORTED_MODULE_4__)
+/* harmony export */   ShaderPass: () => (/* reexport safe */ three_examples_jsm_postprocessing_ShaderPass__WEBPACK_IMPORTED_MODULE_17__.ShaderPass),
+/* harmony export */   THREE: () => (/* reexport module object */ three__WEBPACK_IMPORTED_MODULE_4__),
+/* harmony export */   textureMatrix: () => (/* reexport safe */ _materials_materialUtils_js__WEBPACK_IMPORTED_MODULE_10__.textureMatrix)
 /* harmony export */ });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var _distortions_distortions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./distortions/distortions */ "./src/distortions/distortions.js");
@@ -80280,13 +80281,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sources_FetchSource__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./sources/FetchSource */ "./src/sources/FetchSource.js");
 /* harmony import */ var _materials_OrientedImageMaterial__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./materials/OrientedImageMaterial */ "./src/materials/OrientedImageMaterial.js");
 /* harmony import */ var _materials_ProjectingMaterial__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./materials/ProjectingMaterial */ "./src/materials/ProjectingMaterial.js");
-/* harmony import */ var _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./controls/OrbitControls */ "./src/controls/OrbitControls.js");
-/* harmony import */ var three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! three/examples/jsm/controls/FirstPersonControls */ "./node_modules/three/examples/jsm/controls/FirstPersonControls.js");
-/* harmony import */ var three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! three/examples/jsm/loaders/PLYLoader */ "./node_modules/three/examples/jsm/loaders/PLYLoader.js");
-/* harmony import */ var three_examples_jsm_shaders_CopyShader__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! three/examples/jsm/shaders/CopyShader */ "./node_modules/three/examples/jsm/shaders/CopyShader.js");
-/* harmony import */ var three_examples_jsm_postprocessing_EffectComposer__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! three/examples/jsm/postprocessing/EffectComposer */ "./node_modules/three/examples/jsm/postprocessing/EffectComposer.js");
-/* harmony import */ var three_examples_jsm_postprocessing_RenderPass__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! three/examples/jsm/postprocessing/RenderPass */ "./node_modules/three/examples/jsm/postprocessing/RenderPass.js");
-/* harmony import */ var three_examples_jsm_postprocessing_ShaderPass__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! three/examples/jsm/postprocessing/ShaderPass */ "./node_modules/three/examples/jsm/postprocessing/ShaderPass.js");
+/* harmony import */ var _materials_materialUtils_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./materials/materialUtils.js */ "./src/materials/materialUtils.js");
+/* harmony import */ var _controls_OrbitControls__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./controls/OrbitControls */ "./src/controls/OrbitControls.js");
+/* harmony import */ var three_examples_jsm_controls_FirstPersonControls__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! three/examples/jsm/controls/FirstPersonControls */ "./node_modules/three/examples/jsm/controls/FirstPersonControls.js");
+/* harmony import */ var three_examples_jsm_loaders_PLYLoader__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! three/examples/jsm/loaders/PLYLoader */ "./node_modules/three/examples/jsm/loaders/PLYLoader.js");
+/* harmony import */ var three_examples_jsm_shaders_CopyShader__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! three/examples/jsm/shaders/CopyShader */ "./node_modules/three/examples/jsm/shaders/CopyShader.js");
+/* harmony import */ var three_examples_jsm_postprocessing_EffectComposer__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! three/examples/jsm/postprocessing/EffectComposer */ "./node_modules/three/examples/jsm/postprocessing/EffectComposer.js");
+/* harmony import */ var three_examples_jsm_postprocessing_RenderPass__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! three/examples/jsm/postprocessing/RenderPass */ "./node_modules/three/examples/jsm/postprocessing/RenderPass.js");
+/* harmony import */ var three_examples_jsm_postprocessing_ShaderPass__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! three/examples/jsm/postprocessing/ShaderPass */ "./node_modules/three/examples/jsm/postprocessing/ShaderPass.js");
 
 
 
@@ -80316,6 +80318,8 @@ const GUI = dat_gui__WEBPACK_IMPORTED_MODULE_3__.GUI;
 // export { RadialBlurShader } from './postprocessing/RadialBlurShader';
 // export { SumShader } from './postprocessing/SumShader';
 // export { RawShaderPass } from './postprocessing/RawShaderPass';
+
+
 
 
 

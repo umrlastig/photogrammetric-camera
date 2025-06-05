@@ -28,6 +28,8 @@ export { default as ProjectingMaterial } from './materials/ProjectingMaterial';
 // export { SumShader } from './postprocessing/SumShader';
 // export { RawShaderPass } from './postprocessing/RawShaderPass';
 
+export { textureMatrix } from './materials/materialUtils.js';
+
 import { OrbitControls, MapControls } from './controls/OrbitControls';
 import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls';
 
