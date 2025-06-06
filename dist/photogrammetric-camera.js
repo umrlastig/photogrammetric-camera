@@ -9730,13 +9730,12 @@ __webpack_require__.r(__webpack_exports__);
       if (all(greaterThan(testBorder,vec3(0.))))
       {
         vec4 color = texture2D(map, uvw.xy);
-        finalColor.rgb = mix(finalColor.rgb, color.rgb, color.a);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, color.rgb, color.a);
       }
     }
   } else {
-    finalColor.rgb = vec3(0.2); // shadow color
+    gl_FragColor.rgb = vec3(0.2); // shadow color
   }
-
 #endif
 `);
 
@@ -9762,8 +9761,8 @@ uniform mat4 textureCameraPostTransform;
 uniform RadialDistortion uvDistortion;
 uniform mat4 modelMatrix;
 varying vec4 vPosition;
-uniform sampler2D map;
 uniform sampler2D depthMap;
+vec4 finalColor;
 #endif
 `);
 
@@ -10073,21 +10072,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
 
 uniform bool diffuseColorGrey;
+uniform sampler2D map;
 
 #include <proj_texture_pars_fragment>
 
 varying vec4 vColor;
 
 void main() {
-  vec4 finalColor = vColor;
-
+  gl_FragColor.a = 1.0;
   if (diffuseColorGrey) {
-    finalColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
+    gl_FragColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
   }
 
   #include <proj_texture_fragment>
-
-  gl_FragColor =  finalColor;
 }
 `);
 
@@ -10107,6 +10104,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
 
 uniform float size;
+#ifdef USE_PROJECTIVE_TEXTURING
+uniform sampler2D map;
+#endif
 #include <proj_texture_pars_vertex>
 varying vec4 vColor;
 

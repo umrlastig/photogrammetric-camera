@@ -35,12 +35,11 @@ export default /* glsl */`
       if (all(greaterThan(testBorder,vec3(0.))))
       {
         vec4 color = texture2D(map, uvw.xy);
-        finalColor.rgb = mix(finalColor.rgb, color.rgb, color.a);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, color.rgb, color.a);
       }
     }
   } else {
-    finalColor.rgb = vec3(0.2); // shadow color
+    gl_FragColor.rgb = vec3(0.2); // shadow color
   }
-
 #endif
 `;
