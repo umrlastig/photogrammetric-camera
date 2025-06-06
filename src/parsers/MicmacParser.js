@@ -1,5 +1,8 @@
 import { Vector2, Vector3, Vector4, Matrix4, Euler } from 'three';
 import PhotogrammetricCamera from '../cameras/PhotogrammetricCamera';
+import FetchSource from '../sources/FetchSource';
+
+const _source = new FetchSource();
 
 import { default as BrownDistortion } from '../distortions/BrownDistortion';
 import { default as EbnerDistortion } from '../distortions/EbnerDistortion';
@@ -241,6 +244,32 @@ function parseOrientation(xml, name, intrinsics) {
 }
 
 
+function parse(xml, source, name) {
+    if (!(xml instanceof Node)) {
+        xml = new window.DOMParser().parseFromString(xml, 'text/xml');
+    }
+    const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
+    if (match) name = match[1];
+
+    // sanity check for format
+    xml = xml.getElementsByTagName('OrientationConique')[0];
+    if (!xml) return undefined;
+
+    var file = parseText(xml, 'FileInterne');
+    var TypeProj = parseText(xml, 'TypeProj');
+    if (TypeProj !== 'eProjStenope') {
+        var error = new Error(`Error parsing micmac orientation : unknown projection type ${TypeProj}`);
+        return Promise.reject(error);
+    }
+
+    if (file) {
+        return source.open(file, 'text').then(intrinsics => parseOrientation(xml, name, intrinsics));
+    } else {
+        var intrinsics = xml.getElementsByTagName('Interne')[0];
+        return Promise.resolve(parseOrientation(xml, name, intrinsics));
+    }
+};
+
 export default {
     /** @module MicmacParser */
     /** Parse an Orientation*.xml from Micmac (see {@link https://github.com/micmacIGN})
@@ -250,30 +279,10 @@ export default {
      * @return {Promise} - a promise that resolves with a camera.
      *
      */
-    parse: function parse(xml, source, name) {
-        if (!(xml instanceof Node)) {
-            xml = new window.DOMParser().parseFromString(xml, 'text/xml');
-        }
-        const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
-        if (match) name = match[1];
-
-        // sanity check for format
-        xml = xml.getElementsByTagName('OrientationConique')[0];
-        if (!xml) return undefined;
-
-        var file = parseText(xml, 'FileInterne');
-        var TypeProj = parseText(xml, 'TypeProj');
-        if (TypeProj !== 'eProjStenope') {
-            var error = new Error(`Error parsing micmac orientation : unknown projection type ${TypeProj}`);
-            return Promise.reject(error);
-        }
-
-        if (file) {
-            return source.open(file, 'text').then(intrinsics => parseOrientation(xml, name, intrinsics));
-        } else {
-            var intrinsics = xml.getElementsByTagName('Interne')[0];
-            return Promise.resolve(parseOrientation(xml, name, intrinsics));
-        }
+    parse,
+    load: (xml, path, name) => {
+        _source.path = path;
+        return parse(xml, _source, name);
     },
     format: 'micmac/orientation',
     extensions: ['xml'],
