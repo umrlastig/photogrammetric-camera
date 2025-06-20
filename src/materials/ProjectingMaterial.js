@@ -2,7 +2,7 @@ import { ShaderMaterial, Matrix4, Vector3, Vector4, ShaderChunk } from 'three';
 import { pop, definePropertyUniform, textureMatrix } from './materialUtils.js';
 import proj_texture_pars_vertex from './chunks/proj_texture_pars_vertex.glsl.js';
 import proj_texture_pars_fragment from './chunks/proj_texture_pars_fragment.glsl.js';
-import proj_texture_fragment from './chunks/proj_texture_fragment.glsl.js';
+// import proj_texture_fragment from './chunks/proj_texture_fragment.glsl.js';
 import proj_texture_vertex from './chunks/proj_texture_vertex.glsl.js';
 import ProjectingMaterialVS from './shaders/ProjectingMaterialVS.glsl.js';
 import ProjectingMaterialFS from './shaders/ProjectingMaterialFS.glsl.js';
@@ -10,7 +10,7 @@ import ProjectingMaterialFS from './shaders/ProjectingMaterialFS.glsl.js';
 ShaderChunk.proj_texture_pars_vertex = proj_texture_pars_vertex;
 ShaderChunk.proj_texture_vertex = proj_texture_vertex;
 ShaderChunk.proj_texture_pars_fragment = proj_texture_pars_fragment;
-ShaderChunk.proj_texture_fragment = proj_texture_fragment;
+// ShaderChunk.proj_texture_fragment = proj_texture_fragment;
 
 class ProjectingMaterial extends ShaderMaterial {
   constructor(options = {}) {

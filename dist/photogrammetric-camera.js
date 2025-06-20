@@ -9605,36 +9605,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
 /* harmony import */ var _materialUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materialUtils.js */ "./src/materials/materialUtils.js");
 /* harmony import */ var _chunks_proj_texture_pars_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chunks/proj_texture_pars_vertex.glsl.js */ "./src/materials/chunks/proj_texture_pars_vertex.glsl.js");
 /* harmony import */ var _chunks_proj_texture_pars_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./chunks/proj_texture_pars_fragment.glsl.js */ "./src/materials/chunks/proj_texture_pars_fragment.glsl.js");
-/* harmony import */ var _chunks_proj_texture_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./chunks/proj_texture_fragment.glsl.js */ "./src/materials/chunks/proj_texture_fragment.glsl.js");
-/* harmony import */ var _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./chunks/proj_texture_vertex.glsl.js */ "./src/materials/chunks/proj_texture_vertex.glsl.js");
-/* harmony import */ var _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./shaders/ProjectingMaterialVS.glsl.js */ "./src/materials/shaders/ProjectingMaterialVS.glsl.js");
-/* harmony import */ var _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shaders/ProjectingMaterialFS.glsl.js */ "./src/materials/shaders/ProjectingMaterialFS.glsl.js");
+/* harmony import */ var _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./chunks/proj_texture_vertex.glsl.js */ "./src/materials/chunks/proj_texture_vertex.glsl.js");
+/* harmony import */ var _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./shaders/ProjectingMaterialVS.glsl.js */ "./src/materials/shaders/ProjectingMaterialVS.glsl.js");
+/* harmony import */ var _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./shaders/ProjectingMaterialFS.glsl.js */ "./src/materials/shaders/ProjectingMaterialFS.glsl.js");
 
 
 
 
+// import proj_texture_fragment from './chunks/proj_texture_fragment.glsl.js';
 
 
 
 
+three__WEBPACK_IMPORTED_MODULE_6__.ShaderChunk.proj_texture_pars_vertex = _chunks_proj_texture_pars_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_1__["default"];
+three__WEBPACK_IMPORTED_MODULE_6__.ShaderChunk.proj_texture_vertex = _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_3__["default"];
+three__WEBPACK_IMPORTED_MODULE_6__.ShaderChunk.proj_texture_pars_fragment = _chunks_proj_texture_pars_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_2__["default"];
+// ShaderChunk.proj_texture_fragment = proj_texture_fragment;
 
-three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_pars_vertex = _chunks_proj_texture_pars_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_1__["default"];
-three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_vertex = _chunks_proj_texture_vertex_glsl_js__WEBPACK_IMPORTED_MODULE_4__["default"];
-three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_pars_fragment = _chunks_proj_texture_pars_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_2__["default"];
-three__WEBPACK_IMPORTED_MODULE_7__.ShaderChunk.proj_texture_fragment = _chunks_proj_texture_fragment_glsl_js__WEBPACK_IMPORTED_MODULE_3__["default"];
-
-class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_8__.ShaderMaterial {
+class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_7__.ShaderMaterial {
   constructor(options = {}) {
     const size = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'size', 1);
-    const textureCameraPosition = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPosition', new three__WEBPACK_IMPORTED_MODULE_8__.Vector3());
-    const textureCameraPreTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPreTransform', new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4());
-    const textureCameraPostTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvwPostTransform', new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4());
-    const uvDistortion = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvDistortion', {R: new three__WEBPACK_IMPORTED_MODULE_8__.Vector4(), C: new three__WEBPACK_IMPORTED_MODULE_8__.Vector3()});
+    const textureCameraPosition = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPosition', new three__WEBPACK_IMPORTED_MODULE_7__.Vector3());
+    const textureCameraPreTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'textureCameraPreTransform', new three__WEBPACK_IMPORTED_MODULE_7__.Matrix4());
+    const textureCameraPostTransform = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvwPostTransform', new three__WEBPACK_IMPORTED_MODULE_7__.Matrix4());
+    const uvDistortion = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'uvDistortion', {R: new three__WEBPACK_IMPORTED_MODULE_7__.Vector4(), C: new three__WEBPACK_IMPORTED_MODULE_7__.Vector3()});
     const map = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'map', null);
     const depthMap = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'depthMap', null);
     const diffuseColorGrey = (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.pop)(options, 'diffuseColorGrey', true);
@@ -9657,8 +9656,8 @@ class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_8__.ShaderMateri
     (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'depthMap', depthMap);
     (0,_materialUtils_js__WEBPACK_IMPORTED_MODULE_0__.definePropertyUniform)(this, 'diffuseColorGrey', diffuseColorGrey);
 
-    this.vertexShader = _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_5__["default"];
-    this.fragmentShader = _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_6__["default"];
+    this.vertexShader = _shaders_ProjectingMaterialVS_glsl_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+    this.fragmentShader = _shaders_ProjectingMaterialFS_glsl_js__WEBPACK_IMPORTED_MODULE_5__["default"];
   }
 
   setCamera(camera) {
@@ -9683,65 +9682,6 @@ class ProjectingMaterial extends three__WEBPACK_IMPORTED_MODULE_8__.ShaderMateri
 
 /***/ }),
 
-/***/ "./src/materials/chunks/proj_texture_fragment.glsl.js":
-/*!************************************************************!*\
-  !*** ./src/materials/chunks/proj_texture_fragment.glsl.js ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/* glsl */`
-
-#ifdef USE_PROJECTIVE_TEXTURING
-  // Project the point in the texture image
-  // p' = M' * (P - C')
-  // p': uvw
-  // M': textureCameraPreTransform
-  // P : vPositionWorld
-  // C': textureCameraPosition
-
-  vec4 uvw = vPosition;
-
-  // For the shadowMapping, which is not distorted
-  vec4 uvwNotDistorted = textureCameraPostTransform * uvw;
-  uvwNotDistorted.xyz /= uvwNotDistorted.w;
-
-  float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
-  float distanceCamera = uvwNotDistorted.z;
-
-  vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
-
-  // ShadowMapping
-  if ( all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON ) {
-
-  // Don't texture if uvw.w < 0
-    if (uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
-
-      uvw = textureCameraPostTransform * uvw;
-      uvw.xyz /= uvw.w;
-
-      // If coordinates are valid, they will be between 0 and 1 after normalization
-      // Test if coordinates are valid, so we can texture
-      vec3 testBorder = min(uvw.xyz, 1. - uvw.xyz);
-
-      if (all(greaterThan(testBorder,vec3(0.))))
-      {
-        vec4 color = texture2D(map, uvw.xy);
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, color.rgb, color.a);
-      }
-    }
-  } else {
-    gl_FragColor.rgb = vec3(0.2); // shadow color
-  }
-#endif
-`);
-
-
-/***/ }),
-
 /***/ "./src/materials/chunks/proj_texture_pars_fragment.glsl.js":
 /*!*****************************************************************!*\
   !*** ./src/materials/chunks/proj_texture_pars_fragment.glsl.js ***!
@@ -9761,8 +9701,56 @@ uniform mat4 textureCameraPostTransform;
 uniform RadialDistortion uvDistortion;
 uniform mat4 modelMatrix;
 varying vec4 vPosition;
-uniform sampler2D depthMap;
 vec4 finalColor;
+
+vec4 projectTexture(sampler2D map, sampler2D depthMap, mat4 textureCameraPostTransform, vec4 uvw) {
+
+	vec4 projectedColor = vec4(.0);
+
+	// Project the point in the texture image
+	// p' = M' * (P - C')
+	// p': uvw
+	// M': textureCameraPreTransform
+	// P : vPositionWorld
+	// C': textureCameraPosition
+
+	// move
+	// vec4 uvw = vPosition;
+
+	// For the shadowMapping, which is not distorted
+	vec4 uvwNotDistorted = textureCameraPostTransform * uvw;
+	uvwNotDistorted.xyz /= uvwNotDistorted.w;
+
+	float minDist = texture2D(depthMap, uvwNotDistorted.xy).r;
+	float distanceCamera = uvwNotDistorted.z;
+
+	vec3 testBorderNotDistorted = min(uvwNotDistorted.xyz, 1. - uvwNotDistorted.xyz);
+
+	// ShadowMapping
+	if ( all(greaterThan(testBorderNotDistorted,vec3(0.))) && distanceCamera <= minDist + EPSILON ) {
+
+	// Don't texture if uvw.w < 0
+	if (uvw.w > 0. && distort_radial(uvw, uvDistortion)) {
+			uvw = textureCameraPostTransform * uvw;
+			uvw.xyz /= uvw.w;
+
+			// If coordinates are valid, they will be between 0 and 1 after normalization
+			// Test if coordinates are valid, so we can texture
+			vec3 testBorder = min(uvw.xyz, 1. - uvw.xyz);
+
+			if (all(greaterThan(testBorder,vec3(0.))))
+			{
+			vec4 color = texture2D(map, uvw.xy);
+			projectedColor.rgb = mix(projectedColor.rgb, color.rgb, color.a);
+			}
+		}
+	} else {
+		projectedColor.rgb = vec3(0.2); // shadow color
+	}
+
+	return projectedColor;
+
+}
 #endif
 `);
 
@@ -10073,6 +10061,7 @@ __webpack_require__.r(__webpack_exports__);
 
 uniform bool diffuseColorGrey;
 uniform sampler2D map;
+uniform sampler2D depthMap;
 
 #include <proj_texture_pars_fragment>
 
@@ -10084,7 +10073,8 @@ void main() {
     gl_FragColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
   }
 
-  #include <proj_texture_fragment>
+  gl_FragColor.rgb = projectTexture(map, depthMap, textureCameraPostTransform, vPosition).rgb;
+
 }
 `);
 
@@ -10540,16 +10530,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.core.js");
 /* harmony import */ var _cameras_PhotogrammetricCamera__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cameras/PhotogrammetricCamera */ "./src/cameras/PhotogrammetricCamera.js");
-/* harmony import */ var _distortions_BrownDistortion__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../distortions/BrownDistortion */ "./src/distortions/BrownDistortion.js");
-/* harmony import */ var _distortions_EbnerDistortion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../distortions/EbnerDistortion */ "./src/distortions/EbnerDistortion.js");
-/* harmony import */ var _distortions_FishEyeDistortion__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../distortions/FishEyeDistortion */ "./src/distortions/FishEyeDistortion.js");
-/* harmony import */ var _distortions_FraserDistortion__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../distortions/FraserDistortion */ "./src/distortions/FraserDistortion.js");
-/* harmony import */ var _distortions_PolynomDistortion__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../distortions/PolynomDistortion */ "./src/distortions/PolynomDistortion.js");
-/* harmony import */ var _distortions_RadialDistortion__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../distortions/RadialDistortion */ "./src/distortions/RadialDistortion.js");
+/* harmony import */ var _sources_FetchSource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../sources/FetchSource */ "./src/sources/FetchSource.js");
+/* harmony import */ var _distortions_BrownDistortion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../distortions/BrownDistortion */ "./src/distortions/BrownDistortion.js");
+/* harmony import */ var _distortions_EbnerDistortion__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../distortions/EbnerDistortion */ "./src/distortions/EbnerDistortion.js");
+/* harmony import */ var _distortions_FishEyeDistortion__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../distortions/FishEyeDistortion */ "./src/distortions/FishEyeDistortion.js");
+/* harmony import */ var _distortions_FraserDistortion__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../distortions/FraserDistortion */ "./src/distortions/FraserDistortion.js");
+/* harmony import */ var _distortions_PolynomDistortion__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../distortions/PolynomDistortion */ "./src/distortions/PolynomDistortion.js");
+/* harmony import */ var _distortions_RadialDistortion__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../distortions/RadialDistortion */ "./src/distortions/RadialDistortion.js");
 
 
+
+
+const _source = new _sources_FetchSource__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 
 
@@ -10569,11 +10563,11 @@ function parseNumbers(xml, tagName, value) {
 }
 
 function parseVector2(xml, tagName, value) {
-    return new three__WEBPACK_IMPORTED_MODULE_7__.Vector2().fromArray(parseNumbers(xml, tagName, value));
+    return new three__WEBPACK_IMPORTED_MODULE_8__.Vector2().fromArray(parseNumbers(xml, tagName, value));
 }
 
 function parseVector3(xml, tagName, value) {
-    return new three__WEBPACK_IMPORTED_MODULE_7__.Vector3().fromArray(parseNumbers(xml, tagName, value));
+    return new three__WEBPACK_IMPORTED_MODULE_8__.Vector3().fromArray(parseNumbers(xml, tagName, value));
 }
 
 function parseChildNumbers(xml, tagName) {
@@ -10594,12 +10588,12 @@ function parseDistortion(xml) {
     switch (type) {
         case 'ModNoDist'     : return undefined;
         case 'eModeleEbner'  : return new Ebner(states[0], params);
-        case 'eModeleDCBrown': return new _distortions_BrownDistortion__WEBPACK_IMPORTED_MODULE_1__["default"](states[0], params);
+        case 'eModeleDCBrown': return new _distortions_BrownDistortion__WEBPACK_IMPORTED_MODULE_2__["default"](states[0], params);
         case 'ModRad': {
             const R = parseChildNumbers(xml, 'CoeffDist', []); // radial distortion coefficients
             if(R.length == 0) return undefined;
             const C = parseVector2(xml, 'CDist'); // distortion center in pixels
-            return new _distortions_RadialDistortion__WEBPACK_IMPORTED_MODULE_6__["default"](C, R);
+            return new _distortions_RadialDistortion__WEBPACK_IMPORTED_MODULE_7__["default"](C, R);
         }
         case 'eModelePolyDeg2':
         case 'eModelePolyDeg3':
@@ -10612,14 +10606,14 @@ function parseDistortion(xml) {
             const C = states.slice(1, 3);
             const degree = Number(type.substr('eModelePolyDeg'.length));
             const R = params;
-            return new _distortions_PolynomDistortion__WEBPACK_IMPORTED_MODULE_5__["default"](C, S, R, degree);
+            return new _distortions_PolynomDistortion__WEBPACK_IMPORTED_MODULE_6__["default"](C, S, R, degree);
         }
         case 'ModPhgrStd': {
             const C = parseNumbers(xml, 'CDist'); // distortion center in pixels
             const R = parseChildNumbers(xml, 'CoeffDist'); // radial distortion coefficients
             const P = parseNumbers(xml, 'P1', [0]).concat(parseNumbers(xml, 'P2', [0]));
             const b = parseNumbers(xml, 'b1', [0]).concat(parseNumbers(xml, 'b2', [0]));
-            return new _distortions_FraserDistortion__WEBPACK_IMPORTED_MODULE_4__["default"](C, P, R, b);
+            return new _distortions_FraserDistortion__WEBPACK_IMPORTED_MODULE_5__["default"](C, P, R, b);
         }
         case 'eModele_FishEye_10_5_5':
         case 'eModele_EquiSolid_FishEye_10_5_5': {
@@ -10629,7 +10623,7 @@ function parseDistortion(xml) {
             const R = params.slice(2, 12);
             const P = params.slice(12, 22);
             const l = params.slice(22);
-            return new _distortions_FishEyeDistortion__WEBPACK_IMPORTED_MODULE_3__["default"](P, C, F, l, R, equisolid);
+            return new _distortions_FishEyeDistortion__WEBPACK_IMPORTED_MODULE_4__["default"](P, C, F, l, R, equisolid);
         }
         default:
             throw new Error(`Error parsing micmac orientation : unknown distortion ${xml.tagName}`);
@@ -10698,7 +10692,7 @@ function parseExtrinsics(xml) {
 
     var rotation = xml.getElementsByTagName('ParamRotation')[0];
     var encoding = rotation && rotation.children[0] ? rotation.children[0].tagName : 'No or empty ParamRotation tag';
-    var M = new three__WEBPACK_IMPORTED_MODULE_7__.Matrix4();
+    var M = new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4();
     switch (encoding) {
         case 'CodageMatr':
             var L1 = parseNumbers(rotation, 'L1');
@@ -10714,7 +10708,7 @@ function parseExtrinsics(xml) {
         case 'CodageAngulaire':
             console.warn('CodageAngulaire has never been tested');
             var A = parseNumbers(rotation, 'CodageAngulaire').map(x => x * conv.scale);
-            var E = new three__WEBPACK_IMPORTED_MODULE_7__.Euler(A[0], A[1], A[2], conv.order);
+            var E = new three__WEBPACK_IMPORTED_MODULE_8__.Euler(A[0], A[1], A[2], conv.order);
             M.makeRotationFromEuler(E);
             break;
 
@@ -10733,7 +10727,7 @@ function parseExtrinsics(xml) {
     M.setPosition(parseVector3(xml, 'Centre'));
 
     // go from photogrammetric convention (X right, Y down, Z front) to js conventions (X right, Y up, Z back)
-    M.scale(new three__WEBPACK_IMPORTED_MODULE_7__.Vector3(1, -1, -1));
+    M.scale(new three__WEBPACK_IMPORTED_MODULE_8__.Vector3(1, -1, -1));
 
     return M;
 }
@@ -10747,7 +10741,7 @@ function parseOrIntImaM2C(xml) {
     if (C.x === 0 && C.y === 0 && X.x === 1 && X.y === 0 && Y.x === 0 && Y.y === 1) {
         return undefined;
     }
-    return new three__WEBPACK_IMPORTED_MODULE_7__.Matrix4().set(
+    return new three__WEBPACK_IMPORTED_MODULE_8__.Matrix4().set(
         X.x, Y.x, 0, C.x,
         X.y, Y.y, 0, C.y,
         0, 0, 1, 0,
@@ -10791,6 +10785,32 @@ function parseOrientation(xml, name, intrinsics) {
 }
 
 
+function parse(xml, source, name) {
+    if (!(xml instanceof Node)) {
+        xml = new window.DOMParser().parseFromString(xml, 'text/xml');
+    }
+    const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
+    if (match) name = match[1];
+
+    // sanity check for format
+    xml = xml.getElementsByTagName('OrientationConique')[0];
+    if (!xml) return undefined;
+
+    var file = parseText(xml, 'FileInterne');
+    var TypeProj = parseText(xml, 'TypeProj');
+    if (TypeProj !== 'eProjStenope') {
+        var error = new Error(`Error parsing micmac orientation : unknown projection type ${TypeProj}`);
+        return Promise.reject(error);
+    }
+
+    if (file) {
+        return source.open(file, 'text').then(intrinsics => parseOrientation(xml, name, intrinsics));
+    } else {
+        var intrinsics = xml.getElementsByTagName('Interne')[0];
+        return Promise.resolve(parseOrientation(xml, name, intrinsics));
+    }
+};
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
     /** @module MicmacParser */
     /** Parse an Orientation*.xml from Micmac (see {@link https://github.com/micmacIGN})
@@ -10800,30 +10820,10 @@ function parseOrientation(xml, name, intrinsics) {
      * @return {Promise} - a promise that resolves with a camera.
      *
      */
-    parse: function parse(xml, source, name) {
-        if (!(xml instanceof Node)) {
-            xml = new window.DOMParser().parseFromString(xml, 'text/xml');
-        }
-        const match = name.match(/Orientation-(.*)\.[\w\d]*\.xml/i);
-        if (match) name = match[1];
-
-        // sanity check for format
-        xml = xml.getElementsByTagName('OrientationConique')[0];
-        if (!xml) return undefined;
-
-        var file = parseText(xml, 'FileInterne');
-        var TypeProj = parseText(xml, 'TypeProj');
-        if (TypeProj !== 'eProjStenope') {
-            var error = new Error(`Error parsing micmac orientation : unknown projection type ${TypeProj}`);
-            return Promise.reject(error);
-        }
-
-        if (file) {
-            return source.open(file, 'text').then(intrinsics => parseOrientation(xml, name, intrinsics));
-        } else {
-            var intrinsics = xml.getElementsByTagName('Interne')[0];
-            return Promise.resolve(parseOrientation(xml, name, intrinsics));
-        }
+    parse,
+    load: (xml, path, name) => {
+        _source.path = path;
+        return parse(xml, _source, name);
     },
     format: 'micmac/orientation',
     extensions: ['xml'],

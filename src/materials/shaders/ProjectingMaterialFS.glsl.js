@@ -2,6 +2,7 @@ export default /* glsl */`
 
 uniform bool diffuseColorGrey;
 uniform sampler2D map;
+uniform sampler2D depthMap;
 
 #include <proj_texture_pars_fragment>
 
@@ -13,6 +14,7 @@ void main() {
     gl_FragColor.rgb = vec3(dot(vColor.rgb, vec3(0.333333)));
   }
 
-  #include <proj_texture_fragment>
+  gl_FragColor.rgb = projectTexture(map, depthMap, textureCameraPostTransform, vPosition).rgb;
+
 }
 `;
