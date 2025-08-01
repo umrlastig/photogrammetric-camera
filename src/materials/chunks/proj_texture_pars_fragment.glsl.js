@@ -46,12 +46,14 @@ vec4 projectTexture(sampler2D map, sampler2D depthMap, mat4 textureCameraPostTra
 
 			if (all(greaterThan(testBorder,vec3(0.))))
 			{
-			vec4 color = texture2D(map, uvw.xy);
-			projectedColor.rgb = mix(projectedColor.rgb, color.rgb, color.a);
+				vec4 color = texture2D(map, uvw.xy);
+				projectedColor.rgb = mix(projectedColor.rgb, color.rgb, color.a);
+				projectedColor.a = 1.0;
 			}
 		}
 	} else {
 		projectedColor.rgb = vec3(0.2); // shadow color
+		projectedColor.a = 0.0;
 	}
 
 	return projectedColor;
